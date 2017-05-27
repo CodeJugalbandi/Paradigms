@@ -13,4 +13,4 @@
  data[;3]←2⊃⎕VFI(' '@(=∘'$'))∊data[;3]   ⍝ Make numeric
  data[;3]×←¯1*'m'=data[;5]               ⍝ Make all mirror values negitiv
 
- r←data[;1 2]{(⍺,+/⍵[;1])⍵}⌸0 2↓data     ⍝ keys, OK flag, corresponding records
+ r←data[;1 2]{⍺,(+/⍵[;1])⍵}⌸0 2↓data    ⍝ keys, OK flag, corresponding records
