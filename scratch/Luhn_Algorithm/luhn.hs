@@ -1,10 +1,12 @@
 import Data.List
 import Data.Char
 
-sumDigits :: Int -> Int
-sumDigits n 
-  | n > 9 = sum $ map digitToInt $ show n
-  | otherwise = n
+doubledSum :: Int -> Int
+doubledSum n = if doubled > 9
+  then (doubled `mod` 10) + 1
+  else doubled
+  where
+    doubled = 2 * n
 
 luhn :: String -> Bool
 luhn creditCard = 
@@ -13,11 +15,9 @@ luhn creditCard =
     (odds, evens) = partition (\(ch,n) -> n `mod` 2 /= 0) (zip (reverse creditCard) [1..])
     toInt = map (\(ch, n) -> (digitToInt ch))
     s1 = sum $ toInt odds
-    s2 = sum $ map sumDigits $ map (*2) $ toInt evens
+    s2 = sum $ map doubledSum $ toInt evens
   
 main :: IO ()
 main = do
-  let validNumbers = ["2621195162335", "49927398716", "1234567812345670", "4485284720134093"]
-  let invalidNumbers = ["49927398717", "1234567812345678"]
-  let creditCards = validNumbers ++ invalidNumbers
+  let creditCards = ["2621195162335", "49927398716", "1234567812345670", "4485284720134093"] ++ ["49927398717", "1234567812345678"]
   print $ filter luhn creditCards
