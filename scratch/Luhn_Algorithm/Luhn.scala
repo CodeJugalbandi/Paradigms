@@ -8,9 +8,7 @@ def luhn(creditCard: String): Boolean = {
   (s1 + s2) toString() endsWith("0")  
 }
 
-val (validNumbers, invalidNumbers) =
-    (List("2621195162335", "49927398716", "1234567812345670", "4485284720134093"),
-      List("49927398717", "1234567812345678"))
+val creditCards = List("2621195162335", "49927398716", "1234567812345670", "4485284720134093") ++ 
+                  List("49927398717", "1234567812345678")
 
-val creditCards = validNumbers ++ invalidNumbers
 println(creditCards filter luhn)
