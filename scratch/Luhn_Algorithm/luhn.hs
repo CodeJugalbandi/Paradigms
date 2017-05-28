@@ -1,21 +1,16 @@
 import Data.List
 import Data.Char
 
-doubledSum :: Int -> Int
-doubledSum n = if doubled > 9
-  then (doubled `mod` 10) + 1
-  else doubled
-  where
-    doubled = 2 * n
+mod10 n = if n > 9 then (n `mod` 10) + 1 else n
+toIntPair ch n = (digitToInt ch, n)
 
 luhn :: String -> Bool
 luhn creditCard = 
   "0" `isSuffixOf` show (s1 + s2)
   where
-    (odds, evens) = partition (\(ch,n) -> n `mod` 2 /= 0) (zip (reverse creditCard) [1..])
-    toInt = map (\(ch, n) -> (digitToInt ch))
-    s1 = sum $ toInt odds
-    s2 = sum $ map doubledSum $ toInt evens
+    (odds, evens) = partition (\(ch,n) -> n `mod` 2 /= 0) $ zipWith toIntPair (reverse creditCard) [1..]
+    s1 = sum $ fst $ unzip odds
+    s2 = sum $ map mod10 $ map (*2) $ fst $ unzip evens
   
 main :: IO ()
 main = do
