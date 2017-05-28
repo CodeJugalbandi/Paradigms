@@ -1,16 +1,29 @@
-﻿ r←Match folder;source;mirror;data
-⍝ Perform transaction matching (but with exact name matches)
-⍝ As described in https://www.slideshare.net/DhavalDalal/data-reconciliation
+﻿:Namespace Match
 
- folder,←(0=≢folder)/'C:\Devt\Paradigms\scratch\Data_Reconciliation\'
- source←⎕CSV folder,'source.csv'
- mirror←⎕CSV folder,'mirror.csv'
+    writeout←{
+      data←⊃⍪/(⍳≢⍺),¨⍺[;1],⍤1¨⍺[;2]
+      data(⎕CSV⍠'Overwrite' 1) ⍵
+     } ⍝ join id, keys with data for outfile
 
- data←(source,⊂''),'s'
- data⍪←mirror[;1 3 2 4],'m'
-⍝ data[;1] zip, [;2] name, [;3] amount, [;4] mirror code, [;5] s/m
+      Run←{
+          folder←⍵,(0=≢⍵)/'C:\Devt\Paradigms\scratch\Data_Reconciliation\' ⍝ Default folder
+          (source mirror)←{⎕CSV folder,⍵,'.csv'}¨'source' 'mirror'         ⍝ read CSV files
+          (matched recs)←source Compare mirror                             ⍝ Do comparison
+          z←((,matched)⌿recs)writeout folder,'matched.csv'                 ⍝ Write file with matched recs
+          z←((~,matched)⌿recs)writeout folder,'mismatched.csv'             ⍝ File with mispatched recs
+      }
 
- data[;3]←2⊃⎕VFI(' '@(=∘'$'))∊data[;3]   ⍝ Make numeric
- data[;3]×←¯1*'m'=data[;5]               ⍝ Make all mirror values negitiv
+      Compare←{
+          ⍝ ⍺ is source and ⍵ is mirrored records
+          ⍝ data[;1] zip, [;2] name, [;3] amount, [;4] mirror code, [;5] s/m  
 
- r←data[;1 2]{⍺,(+/⍵[;1])⍵}⌸0 2↓data    ⍝ keys, OK flag, corresponding records
+          data←⍺(,⍤1)⊂''          ⍝ Add empty key
+          data⍪←⍵[;1 3 2 4]       ⍝ Reorder columns and add 'm'
+     
+          data[;3]←2⊃⎕VFI(' '@(=∘'$'))∊data[;3]  ⍝ Make amounts numeric ignoring '$'
+          data[;3]×←¯1*(⍳≢data)>≢⍺               ⍝ Multiply all mirror values by ¯1
+     
+          1 1 0⊂data[;1 2]{(0=+/⍵[;1]),⍺ ⍵}⌸0 2↓data ⍝ match flag, unique zip/name pairs, corresponding records
+      }
+
+:EndNamespace
