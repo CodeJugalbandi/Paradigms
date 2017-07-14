@@ -2,14 +2,18 @@ def toInt(pair:(Char, Int)) :Int = pair match {
   case (ch, n) => ch.asDigit
 }
 def luhn(creditCard: String): Boolean = {
-  val (odds, evens) = 
-    creditCard.reverse.zipWithIndex.partition { 
-      case ((ch, n)) => n % 2 == 0 
-    }
+  val (odds, evens) = creditCard.reverse.zip(Stream from 1).partition { 
+    case ((ch, idx)) => idx % 2 == 1 
+  }
+
+  def toInt(pair:(Char, Int)) :Int = pair match {
+    case (ch, n) => ch.asDigit
+  }
+
   val s1 = odds.map(toInt).sum
   val s2 = evens.map(toInt).map(_*2)
-            .map(x => if (x < 10) x else (x%10) + 1)
-            .sum
+                .map(x => if (x < 10) x else (x%10) + 1)
+                .sum
   (s1 + s2) toString() endsWith("0")  
 }
 

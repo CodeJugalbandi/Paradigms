@@ -1,16 +1,15 @@
 import Data.List
 import Data.Char
 
-mod10 n = if n > 9 then (n `mod` 10) + 1 else n
-toIntPair ch n = (digitToInt ch, n)
+sumOfDigits n = if n > 9 then (n `mod` 10) + 1 else n
 
 luhn :: String -> Bool
 luhn creditCard = 
   "0" `isSuffixOf` show (s1 + s2)
   where
-    (odds, evens) = partition (\(ch,n) -> n `mod` 2 /= 0) $ zipWith toIntPair (reverse creditCard) [1..]
+    (odds, evens) = partition (\(ch,n) -> n `mod` 2 == 1) $ zip (reverse $ map digitToInt creditCard) [1..]
     s1 = sum $ fst $ unzip odds
-    s2 = sum $ map mod10 $ map (*2) $ fst $ unzip evens
+    s2 = sum $ map sumOfDigits $ map (*2) $ fst $ unzip evens
   
 main :: IO ()
 main = do
