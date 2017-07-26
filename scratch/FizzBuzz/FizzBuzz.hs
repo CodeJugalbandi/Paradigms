@@ -1,4 +1,4 @@
-import Data.List
+import Data.List (isInfixOf)
 
 -- Part 0
 fizzBuzz :: Int -> String
