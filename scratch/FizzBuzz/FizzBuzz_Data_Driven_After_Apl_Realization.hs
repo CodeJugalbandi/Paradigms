@@ -1,10 +1,5 @@
-<<<<<<< HEAD
-import Data.Digits
-=======
 import Data.List (isInfixOf)
 import Data.Digits (unDigits)
-
->>>>>>> Removed unused imports
 
 fizzBuzz :: Int -> [String]
 fizzBuzz n = take n result
