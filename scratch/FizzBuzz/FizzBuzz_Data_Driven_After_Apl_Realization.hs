@@ -1,5 +1,3 @@
-import Data.List
-import Data.List.Split
 import Data.Digits
 
 fizzBuzz :: Int -> [String]
