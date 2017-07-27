@@ -6,8 +6,11 @@ def toFizzBuzz(n: Int) = {
     else if (n % 5 == 0) "buzz"
     else n
 }                                             
-  
-val fizzBuzzed = (1 to 20) map toFizzBuzz     
-       
+
+val start = System.currentTimeMillis  
+val fizzBuzzed = (1 to 20) map toFizzBuzz
 println(fizzBuzzed)
+val stop = System.currentTimeMillis
+val time = stop - start
+println(s"Time Taken (ms) = $time")
 

@@ -1,6 +1,6 @@
 import Data.List (isInfixOf)
+import Data.Time (getCurrentTime, diffUTCTime)
 
--- Part 0
 fizzBuzz :: Int -> String
 fizzBuzz n
   | n `mod` 15 == 0 = "FizzBuzz"
@@ -26,6 +26,9 @@ fizzBuzz n
 --   | otherwise = show n
 
 main :: IO ()
-main = do
-  print $ map fizzBuzz [1..20]
-  
+main = do  
+  start <- getCurrentTime
+  print $ map fizzBuzz [1..2000]
+  stop <- getCurrentTime  
+  print $ diffUTCTime stop start  
+  print "DONE"

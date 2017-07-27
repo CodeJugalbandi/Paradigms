@@ -1,4 +1,5 @@
 import Data.List (isInfixOf)
+import Data.Time (getCurrentTime, diffUTCTime)
 
 fizzBuzz :: Int -> [String]
 fizzBuzz n = take n result
@@ -12,7 +13,7 @@ fizzBuzz n = take n result
     -- threes = cycle ["", "", "Fizz"]
     -- fives  = cycle ["", "", "", "", "Buzz"]
     -- indices = map show [1..n]
-    -- -- result = zipWith3 (\i t f -> max i $ t ++ f) indices threes fives
+    -- result = zipWith3 (\i t f -> max i $ t ++ f) indices threes fives
     -- result = zipWith3 (\i t f -> if (t == "" && f == "") then i else t ++ f) indices threes fives
     
     -- Part 2
@@ -24,6 +25,8 @@ fizzBuzz n = take n result
 
 main :: IO ()
 main = do
-  print $ fizzBuzz 20
-  
-  
+  start <- getCurrentTime
+  print $ fizzBuzz 2000
+  stop <- getCurrentTime  
+  print $ diffUTCTime stop start  
+  print "DONE"
