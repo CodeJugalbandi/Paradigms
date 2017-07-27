@@ -9,6 +9,9 @@ number ← 564
 vector ← (digits⍴10)⊤number ⍝ encode number by re-shaping the digits using base 10. 
 ⍝ 5 6 4 
 
+⍝ Generating up to 20
+N ← 20
+
 ⍝ Below implementation uses each operator with anonymous function inside it
 ⍝ to calculate indicesFor3 
 
