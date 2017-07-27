@@ -25,7 +25,6 @@ input[indicesFor3] ← 'Lucky' '' [1]
 
 
 ⍝ Below implementation is 100% data-driven and calculates indicesFor3 
-
 input ← ⍳N
 fivesAndThrees ← 0=5 3∘.|input
 select ← 2⊥fivesAndThrees
@@ -34,3 +33,16 @@ vector ← ((⌊1+10⍟input)[N]⍴10)⊤input
 indicesFor3 ← ⍸0≠2⊥(3∘.=vector)
 input[indices] ← 'Fizz' 'Buzz' 'FizzBuzz'[select[indices]]
 input[indicesFor3] ← 'Lucky' '' [1]
+
+
+⍝ Refactored version of the above data-driven 
+input ← ⍳N
+fivesAndThrees ← 0=5 3∘.|input
+digitsWith3 ← 3=((⌊1+10⍟input)[N]⍴10)⊤input
+select ← 2⊥fivesAndThrees
+select3 ← 4×0≠2⊥digitsWith3
+indices ← ⍸select≠0
+indices3 ← ⍸select3≠0
+messages ← 'Fizz' 'Buzz' 'FizzBuzz' 'Lucky'
+input[indices,indices3] ← messages[select[indices],select3[indices3]]
+
