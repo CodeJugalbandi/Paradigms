@@ -2,6 +2,7 @@ import Data.List (isInfixOf)
 import Data.Digits (unDigits)
 import Data.Time (getCurrentTime, diffUTCTime)
 
+
 fizzBuzz :: Int -> [String]
 fizzBuzz n = take n result
   where
@@ -12,21 +13,19 @@ fizzBuzz n = take n result
     -- result = map (fizzBuzz!!) $ zipWith (\x y -> unDigits 2 [x,y]) fives threes
     
     -- Part 1
-    -- threes = cycle [0, 0, 1]
-    -- fives  = cycle [0, 0, 0, 0, 1]
-    -- fizzBuzz = ["", "Fizz", "Buzz", "FizzBuzz"]
-    -- select = map (fizzBuzz!!) $ zipWith (\x y -> unDigits 2 [x,y]) fives threes
-    -- allIndices = map show [1..n]
-    -- result = zipWith (\i d -> if (d == "") then i else d) allIndices select
-    
-    -- Part 2
     threes = cycle [0, 0, 1]
     fives  = cycle [0, 0, 0, 0, 1]
     fizzBuzz = ["", "Fizz", "Buzz", "FizzBuzz"]
-    select = map (fizzBuzz!!) $ zipWith (\x y -> unDigits 2 [x,y]) fives threes
-    allIndices = map (\i -> if (isInfixOf "3" i) then "Lucky" else i) $ map show [1..n]
-    result = zipWith (\i d -> if (d == "" || i == "Lucky") then i else d) allIndices select
-    
+    base2 = unDigits 2
+    result = zipWith3 (\f t i -> if(base2 [f,t] == 0) then show i else fizzBuzz !! (base2 [f,t])) fives threes [1..]
+
+    -- Part 2
+    -- threes = cycle [0, 0, 1]
+    -- fives  = cycle [0, 0, 0, 0, 1]
+    -- fizzBuzz = ["", "Fizz", "Buzz", "FizzBuzz", "Lucky"]
+    -- indexContains3 n = isInfixOf "3" $ show n
+    -- indices = zipWith3 (\f t i -> if (indexContains3 i) then 4 else (unDigits 2 [f,t])) fives threes [1..]
+    -- result = zipWith (\idx n -> if (idx == 0) then show n else fizzBuzz!!idx) indices [1..]
 
 main :: IO ()
 main = do
