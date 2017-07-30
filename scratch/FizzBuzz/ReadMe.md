@@ -320,9 +320,9 @@ fizzBuzz n = take n result
         threes = cycle [0, 0, 1]
         fives  = cycle [0, 0, 0, 0, 1]
         fizzBuzz = ["", "Fizz", "Buzz", "FizzBuzz"]
-        select = map (fizzBuzz!!) $ zipWith (\x y -> unDigits 2 [x,y]) fives threes
-        allIndices = map show [1..n]
-        result = zipWith (\i d -> if (d == "") then i else d) allIndices select
+        base2 = unDigits 2
+        select = \f t i -> if(base2 [f,t] == 0) then show i else fizzBuzz !! (base2 [f,t])
+        result = zipWith3 select fives threes [1..]
     
 main :: IO ()
 main = do
