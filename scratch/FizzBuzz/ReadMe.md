@@ -4,7 +4,7 @@ Real FizzBuzz
 Part 0
 ------
 Write code that for a contiguous range of numbers prints out the following:
-====
+
 * 'Fizz' for numbers that are multiples of 3
 * 'Buzz' for numbers that are multiples of 5
 * 'FizzBuzz' for numbers that are multiples of 15
@@ -18,6 +18,7 @@ e.g. Running over a range from 1-20 should give the following output
 Part 1
 ------
 Write some code that for a contiguous range of numbers prints out the following:
+
 * the number
 * 'Fizz' for numbers that are multiples of 3
 * 'Buzz' for numbers that are multiples of 5
@@ -43,7 +44,7 @@ e.g. Running over a range from 1-20 should give the following output
 ```
 
 Code Jugalbandi in Functional Programming & Array-Oriented Paradigms
-------------------------------------------------------------------
+----
 
 **BRAHMA** Lets look at implementing Fizz Buzz in Scala.  For simplicity and gradually building the solution in 3 parts as put above:
 
