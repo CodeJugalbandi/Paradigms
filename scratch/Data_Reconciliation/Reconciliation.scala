@@ -24,16 +24,14 @@ def matches(source: Rows, mirror: Rows) = {
     if source_row(0) == mirror_row(0)
   } yield (source_row, mirror_row)
   
-  def consolidate(acc: List[(Rows, Rows)], records: List[(Row, Row)]): List[(Rows, Rows)] = records match {
-    case Nil => acc
-    case (s,m)::rest =>
-       val filtered = records.filter { case((srow, mrow)) => srow(0) == s(0) && mrow(0) == m(0) }
-       val remaining = rest diff filtered
-       val (left, right) = filtered.unzip
-       consolidate(acc :+ (left.distinct, right.distinct), remaining)
+  val groupedByFirstColumn = matched.groupBy { 
+    case(srow, mrow) => srow(0) 
   }
-  
-  consolidate(Nil, matched)
+  groupedByFirstColumn.mapValues { tuple => 
+    val (left, right) = tuple.unzip
+    (left.distinct, right.distinct) 
+  }.values.toList
+
 }
 
 def nonMatches(consolidatedMatches: List[(Rows, Rows)], source: Rows, mirror: Rows): (Rows, Rows) = {

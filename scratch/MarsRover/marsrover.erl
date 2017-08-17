@@ -1,18 +1,18 @@
 -module (marsrover).
 -export ([rove/2]).
 -define(COMPASS, #{
-    {'N',000} => {0,1},
-    {'E',090} => {1,0},
-    {'S',180} => {0,-1},
-    {'W',270} => {-1,0}
+    {'N',00} => {0,1},
+    {'E',09} => {1,0},
+    {'S',18} => {0,-1},
+    {'W',27} => {-1,0}
 }).
 
 execute(Cmd,{X,Y,Deg},{Dx,Dy}) ->
   case Cmd of
     'L' -> 
-      {X,Y,Deg-90};
+      {X,Y,Deg-9};
     'R' -> 
-      {X,Y,Deg+90};
+      {X,Y,Deg+9};
     'M' -> 
       {X+Dx,Y+Dy,Deg};
     _ -> 
@@ -25,7 +25,7 @@ rove(Vec={X,Y,D},Cmd) ->
     CKey = {_, Deg} ->
       {Dx,Dy} = maps:get(CKey, ?COMPASS),
       {NewX,NewY,NewDeg} = execute(Cmd, {X,Y,Deg}, {Dx,Dy}),
-      {NewD,_} = lists:keyfind(NewDeg rem 360, 2, Keys),
+      {NewD,_} = lists:keyfind(NewDeg rem 36, 2, Keys),
       {NewX,NewY,NewD};
       
     false ->
