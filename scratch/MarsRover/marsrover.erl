@@ -1,30 +1,39 @@
 -module (marsrover).
 -export ([rove/2]).
--define(ROVER, 
-  #{
-    'N' => 
-       #{'L' => fun({X,Y,_}) -> {X,Y,'W'} end, 
-         'R' => fun({X,Y,_}) -> {X,Y,'E'} end, 
-         'M' => fun({X,Y,D}) -> {X,Y+1,D} end },
-    'E' =>           
-       #{'L' => fun({X,Y,_}) -> {X,Y,'N'} end, 
-         'R' => fun({X,Y,_}) -> {X,Y,'S'} end, 
-         'M' => fun({X,Y,D}) -> {X+1,Y,D} end },
-    'W' =>           
-       #{'L' => fun({X,Y,_}) -> {X,Y,'S'} end, 
-         'R' => fun({X,Y,_}) -> {X,Y,'N'} end, 
-         'M' => fun({X,Y,D}) -> {X-1,Y,D} end },
-    'S' =>           
-       #{'L' => fun({X,Y,_}) -> {X,Y,'E'} end, 
-         'R' => fun({X,Y,_}) -> {X,Y,'W'} end, 
-         'M' => fun({X,Y,D}) -> {X,Y-1,D} end }
+-define(COMPASS, #{
+    {'N',000} => {0,1},
+    {'E',090} => {1,0},
+    {'S',180} => {0,-1},
+    {'W',270} => {-1,0}
 }).
 
-rove(Vector, Cmds) -> 
-  lists:foldl(fun(Cmd, Vec={_X,_Y,D}) -> 
-    Function = maps:get(Cmd, maps:get(D, ?ROVER)),
-    Function(Vec)
-  end, Vector, Cmds).
+execute(Cmd,{X,Y,Deg},{Dx,Dy}) ->
+  case Cmd of
+    'L' -> 
+      {X,Y,Deg-90};
+    'R' -> 
+      {X,Y,Deg+90};
+    'M' -> 
+      {X+Dx,Y+Dy,Deg};
+    _ -> 
+      {X,Y,Deg}
+  end.
+  
+rove(Vec={X,Y,D},Cmd) ->
+  Keys = maps:keys(?COMPASS),
+  case lists:keyfind(D, 1, Keys) of
+    CKey = {_, Deg} ->
+      {Dx,Dy} = maps:get(CKey, ?COMPASS),
+      {NewX,NewY,NewDeg} = execute(Cmd, {X,Y,Deg}, {Dx,Dy}),
+      {NewD,_} = lists:keyfind(NewDeg rem 360, 2, Keys),
+      {NewX,NewY,NewD};
+      
+    false ->
+      Vec
+  end.
 
-%1> marsrover:rove({3,3,'E'}, ['M','R','M','L']).
+%1> P1 = marsrover:rove({3,3,'E'}, 'M').
+%2> P2 = marsrover:rove(P1, 'R').
+%3> P3 = marsrover:rove(P2, 'M').
+%4> marsrover:rove(P3, 'L').
 % {4,2,'E'}

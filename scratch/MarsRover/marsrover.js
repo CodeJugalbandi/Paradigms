@@ -1,15 +1,15 @@
 function Direction(dirString){
   var allDirections = {
-    'N' : { left: 'W', right: 'E', forward: (x, y) => [x, y + 1]},
-    'E' : { left: 'N', right: 'S', forward: (x, y) => [x + 1, y]},
-    'W' : { left: 'S', right: 'N', forward: (x, y) => [x - 1, y]},
-    'S' : { left: 'E', right: 'W', forward: (x, y) => [x, y - 1]}
+    'N' : ['W', 'E', (x, y) => [x, y + 1]],
+    'E' : ['N', 'S', (x, y) => [x + 1, y]],
+    'W' : ['S', 'N', (x, y) => [x - 1, y]],
+    'S' : ['E', 'W', (x, y) => [x, y - 1]]
   };  
   
   var direction = allDirections[dirString];
-  this.left = () => direction.left;
-  this.right = () => direction.right;
-  this.forward = (x, y) => direction.forward(x, y);
+  this.left = () => direction[0];
+  this.right = () => direction[1];
+  this.forward = (x, y) => direction[2](x, y);
   this.toString = () => dirString;
 };
 
