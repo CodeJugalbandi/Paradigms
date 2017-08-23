@@ -40,3 +40,10 @@ n ← 13
 
   ⍸2=+⌿0=(⍳n)∘.|⍳n
 ⍝ 2 3 5 7 11 13
+
+]RUNTIME ⍸2=+⌿0=(⍳n)∘.|⍳n
+
+* Benchmarking "⍴⍸2=+⌿0=(⍳n)∘.|⍳n"
+             (ms) 
+ CPU (avg):   999 
+ Elapsed:    1005 

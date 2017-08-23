@@ -9,4 +9,18 @@ def primes(until: Int) : List[Int] = {
   summed.zip(Stream.from(1)).collect { case (value, idx) if (value == 2) => idx}
 }
 
-println(primes(13))
+def time[T, R](f: Function[T, R]): Function[T, R] = {
+  return t => {
+    val startTime = System.currentTimeMillis  
+    val result = f(t)
+    val diff = System.currentTimeMillis - startTime
+    println(s"Time Taken = $diff(ms).")
+    result
+  }
+} 
+
+// println(time(primes)(13)) //37ms
+// println(time(primes)(130)) //160ms
+// println(time(primes)(1300)) //554ms
+println(time(primes)(13000)) //28442ms
+println("Done")
