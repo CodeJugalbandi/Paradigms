@@ -1,5 +1,5 @@
-Finding Primes
-==============
+Finding First n Primes
+====
 
 **BRAHMA** Let us take a very simple problem of finding primes until a given number.  I'll do this in Haskell.
 
@@ -142,7 +142,7 @@ val summed = matrix.map(_.sum)
 
 // Vector(1, 2, 2, 3, 2, 4, 2, 4, 3, 4, 2, 6, 2)
 ```
-**BRAHMA** Now I have the ```2```s at positions where number has a factor of ```1``` and itself.  All I need is indices at that position, so by zipping this with a ```Stream``` starting from ```1``` is how I achieve that:
+**BRAHMA** Now I have the ```2```s at positions where number has a factor of ```1``` and itself.  All I need is indices at that position, so by using ```zipWithIndex``` is how I achieve that.  In Scala, index starts at 0, so I've to add ```1```:
 
 ```scala
 val until = 13
@@ -155,7 +155,7 @@ val vector = for {
 val matrix = vector.grouped(until).toVector.transpose
 val summed = matrix.map(_.sum)
 
-summed.zip(Stream.from(1)).collect { case (value, idx) if (value == 2) => idx}
+summed.zipWithIndex.collect { case (value, idx) if (value == 2) => idx + 1}
 // Vector(2, 3, 5, 7, 11, 13)
 ```
 
@@ -171,7 +171,7 @@ def primes(until: Int): Vector[Int] = {
   val matrix = vector.grouped(until).toVector.transpose
   val summed = matrix.map(_.sum)
 
-  summed.zip(Stream.from(1)).collect { case (value, idx) if (value == 2) => idx}
+  summed.zipWithIndex.collect { case (value, idx) if (value == 2) => idx + 1}
 }
 
 println(primes(13)) // Vector(2, 3, 5, 7, 11, 13)
@@ -189,8 +189,7 @@ def primes(until: Int): Vector[Int] = {
 
   val matrix = vector.grouped(until).toVector.transpose
   val summed = matrix.map(_.sum)
-
-  summed.zip(Stream.from(1)).collect { case (value, idx) if (value == 2) => idx}
+  summed.zipWithIndex.collect { case (value, idx) if (value == 2) => idx + 1}
 }
 
 def time[T, R](f: Function[T, R]): Function[T, R] = {
@@ -268,7 +267,19 @@ def primes(until: Int) : Array[Int] = {
     i <- 1 to until
     j <- 1 to until
   } yield if (j % i == 0) matrix(i-1)(j-1) = 1 else matrix(i-1)(j-1) = 0
-  val summed = matrix.transpose.map(_.sum)
+```
+
+**BRAHMA**  Also, instead of doing transpose as a functional array operation, I'll produce a transposed matrix already in one shot.
+
+```scala
+def primes(until: Int) : Array[Int] = {
+  val matrix = Array.ofDim[Int](until, until)
+  for {
+    i <- 1 to until
+    j <- 1 to until
+  } yield if (j % i == 0) matrix(j-1)(i-1) = 1 else matrix(j-1)(i-1) = 0
+  
+  val summed = matrix.map(_.sum)
   summed.zipWithIndex.collect { case (value, idx) if (value == 2) => idx + 1}
 }
 
@@ -282,29 +293,45 @@ def time[T, R](f: Function[T, R]): Function[T, R] = {
   }
 }
 
-// println(time(primes)(13)) //20ms
-// println(time(primes)(130)) // 67ms
-// println(time(primes)(1300)) //389ms
-println(time(primes)(13000)) //26862ms, 25522ms, 31083ms
+// println(time(primes)(13)) //12ms, 9ms
+// println(time(primes)(130)) //39ms, 51ms
+// println(time(primes)(1300)) //264ms, 228ms
+println(time(primes)(13000)) //13120 ms, 13384ms
 println("Done")
+
 ```
+
+**BRAHMA** The performance has increased by around 50%.
 
 **BRAHMA** Also, the documentation throws light on an important caveat:  
 
 > At run-time, when an element of an array of type Array[T] is accessed or updated there is a sequence of type tests that determine the actual array type, followed by the correct array operation on the Java array. These type tests slow down array operations somewhat. You can expect accesses to generic arrays to be three to four times slower than accesses to primitive or object arrays. This means that if you need maximal performance, you should prefer concrete over generic arrays. 
 
-**BRAHMA** Lets park moving to concrete arrays and doing bare bones transformations, instead lets see if I can make it parallel and see if we get any performance benefits.
+**BRAHMA** Lets park moving to concrete arrays and doing bare bones transformations, instead lets see if I can use available data-structures and make it performant.
 
 ```scala
-//TODO
+def isPrime(n: Int) = (2::List.range(3,n,2)).takeWhile(Math.pow(_,2) <= n).forall(n % _ > 0)
 
+def primes(n: Int) : List[Int] = (1 to n).filter(isPrime).toList
+
+def time[T, R](f: Function[T, R]): Function[T, R] = {
+  return t => {
+    val startTime = System.currentTimeMillis  
+    val result = f(t)
+    val diff = System.currentTimeMillis - startTime
+    println(s"Time Taken = $diff(ms).")
+    result
+  }
+} 
+
+// println(time(primes)(13)) //14ms, 13ms
+// println(time(primes)(130)) // 29ms, 25ms
+// println(time(primes)(1300)) //118ms, 76ms
+println(time(primes)(13000))  //1296ms, 1308ms
+println("Done")
 ```
 
-**BRAHMA**  Hmmmmm, not that much different!
-
-**KRISHNA** In APL, the earlier benchmarking that you saw was out of operations being performed on a single-core and there was nothing parallel about it.
-
-**BRAHMA** I see.  Lets reflect on all this...
+**BRAHMA**  Hmmmmm, very efficient!  Getting closer to APLs performance.  Lets reflect on all this...
 
 
 Reflections
@@ -316,7 +343,7 @@ Reflections
 
 **KRISHNA** In other paradigms, though the optimisations may be present on individual data-structures, but it may not be highly normalised because the designers have a more general purpose use in mind.  
 
-**KRISHNA** Also, I don't know about other platforms, but getting performance benefits on the JVM appears as an involved process with many things to be kept in mind.  
+**KRISHNA** Also, I don't know about other platforms, but measuring  performance on the JVM appears to an involved process with many things to be kept in mind.  
 
 **BRAHMA** As I reflect further through this, for example - whether its OO or FP paradigm, a List or Vector data-structure is a generic structure that can hold elements of type T.  It will have to work with type T that satisfy certain type-constraints.  In APL, all you have is Integers and Characters, no Booleans, no Strings or any other data-type.  Does that help in getting performance benefits?  //Please review this Morten
 
