@@ -36,8 +36,8 @@ index_of(_, [], _) -> not_found;
 index_of(Item, [Item|_], Index) -> Index;
 index_of(Item, [_|Tail], Index) -> index_of(Item, Tail, Index + 1).
 
-%1> P1 = marsrover_after_apl_realization:rove({3,3,'E'}, 'M').
-%2> P2 = marsrover_after_apl_realization:rove(P1, 'R').
-%3> P3 = marsrover_after_apl_realization:rove(P2, 'M').
-%4> marsrover_after_apl_realization:rove(P3, 'L').
-% {4,2,'E'}
+main([]) ->
+ P1 = rove({3,3,'E'}, 'M'),
+ P2 = rove(P1, 'R'),
+ P3 = rove(P2, 'M'),
+ io:format("~p", [rove(P3, 'L')]).

@@ -32,8 +32,26 @@ rove(Vec={X,Y,D},Cmd) ->
       Vec
   end.
 
-%1> P1 = marsrover:rove({3,3,'E'}, 'M').
-%2> P2 = marsrover:rove(P1, 'R').
-%3> P3 = marsrover:rove(P2, 'M').
-%4> marsrover:rove(P3, 'L').
-% {4,2,'E'}
+% escript provides support for running short Erlang programs without 
+% having to compile them first and an easy way to retrieve the command 
+% line arguments. By default, the script will be interpreted.  Execution
+% of interpreted code is slower than compiled code. If much of
+% the execution takes place in interpreted code it may be worthwhile to 
+% compile it, even though the compilation itself will take a little while.
+% 
+% The header of the Erlang script in the example differs from a normal 
+% Erlang module. The first line is intended to be the interpreter line,
+% which invokes escript. However if you invoke the escript like this
+%
+% $ escript marsrover        
+%
+% the contents of the first line does not matter, but it cannot contain
+% Erlang code as it will be ignored.
+%
+% Run this as escript marsrover
+
+main([]) ->
+ P1 = rove({3,3,'E'}, 'M'),
+ P2 = rove(P1, 'R'),
+ P3 = rove(P2, 'M'),
+ io:format("~p", [rove(P3, 'L')]).

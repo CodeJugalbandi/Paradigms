@@ -1,43 +1,52 @@
-function Direction(dirString){
-  var allDirections = {
-    'N' : ['W', 'E', (x, y) => [x, y + 1]],
-    'E' : ['N', 'S', (x, y) => [x + 1, y]],
-    'W' : ['S', 'N', (x, y) => [x - 1, y]],
-    'S' : ['E', 'W', (x, y) => [x, y - 1]]
-  };  
+function Direction(dirString) {
+  let directions = {
+    'N' : ['W', 'E', (x,y) => [x, y+1]],
+    'E' : ['N', 'S', (x,y) => [x+1, y]],
+    'S' : ['E', 'W', (x,y) => [x, y-1]],
+    'W' : ['S', 'N', (x,y) => [x-1, y]]
+  };
   
-  var direction = allDirections[dirString];
-  this.left = () => direction[0];
-  this.right = () => direction[1];
-  this.forward = (x, y) => direction[2](x, y);
+  this.moveForward = (x, y) => directions[dirString][2](x, y);
+  this.left = () => new Direction(directions[dirString][0]);
+  this.right = () => new Direction(directions[dirString][1]);
   this.toString = () => dirString;
-};
+}
 
-function Vector(x, y, direction) {
-  this.turnLeft = () => new Vector(x, y, new Direction(direction.left()));
-  this.turnRight = () => new Vector(x, y, new Direction(direction.right()));
-  this.moveForward = function() {
-    var [newx, newy] = direction.forward(x, y);
-    return new Vector(newx, newy, direction);
-  };
-  this.toString = () => x + " " + y + " " + direction.toString();
-};
+class Vector {
+  constructor(x, y, dirString) {
+    this.x = x;
+    this.y = y;
+    this.direction = new Direction(dirString);
+  }
+  moveForward() { 
+    var [newX, newY] = this.direction.moveForward(this.x, this.y);
+    return new Vector(newX, newY, this.direction.toString()); 
+  }
+  turnLeft() { return new Vector(this.x, this.y, this.direction.left().toString()); }
+  turnRight() { return new Vector(this.x, this.y, this.direction.right().toString()); }
+  toString() { return `${this.x} ${this.y} ${this.direction.toString()}`;}
+}
 
-function MarsRover (x, y, direction) {
-  var vector = new Vector(x, y, new Direction(direction));
-  
-  this.rove = function(command) {
-    if (command === 'M') {
-      vector = vector.moveForward();
-    } else if (command === 'L') {
-      vector = vector.turnLeft();  
-    } else if (command === 'R') {
-      vector = vector.turnRight();  
-    }
+class MarsRover {
+  constructor(x, y, dirString) {
+    this.vector = new Vector(x, y, dirString);
+  }
+    
+  rove(command) {
+    if(command === 'M') 
+      this.vector = this.vector.moveForward();
+    else if(command === 'L') 
+      this.vector = this.vector.turnLeft();
+    else if(command === 'R') 
+      this.vector = this.vector.turnRight();
+
     return this;
-  };
-  this.toString = () => vector.toString()
-};
+  }
+    
+  toString() {
+    return this.vector.toString();
+  }
+}
 
-var rover = new MarsRover(3, 3, new Direction('E'));
+var rover = new MarsRover(3, 3, 'E');
 console.info(rover.rove('M').rove('R').rove('M').rove('L').toString());
