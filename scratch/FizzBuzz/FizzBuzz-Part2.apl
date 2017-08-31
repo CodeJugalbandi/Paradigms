@@ -41,6 +41,7 @@ fivesAndThrees ← 0=5 3∘.|input
 digitsWith3 ← 3=((⌊1+10⍟input)[N]⍴10)⊤input
 select ← 2⊥fivesAndThrees
 select3 ← 4×0≠2⊥digitsWith3
+⍝ ∨/'3'=⍕⍪123 432 12247
 indices ← ⍸select≠0
 indices3 ← ⍸select3≠0
 messages ← 'Fizz' 'Buzz' 'FizzBuzz' 'Lucky'

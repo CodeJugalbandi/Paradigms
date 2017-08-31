@@ -29,6 +29,6 @@ main :: IO ()
 main = do  
   start <- getCurrentTime
   print $ map fizzBuzz [1..2000]
-  stop <- getCurrentTime  
-  print $ diffUTCTime stop start  
+  stop <- getCurrentTime
+  print $ diffUTCTime stop start
   print "DONE"

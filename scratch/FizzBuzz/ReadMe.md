@@ -1,5 +1,5 @@
-Real FizzBuzz
-=============
+#FizzBuzz
+
 
 Part 0
 ------
@@ -46,7 +46,7 @@ e.g. Running over a range from 1-20 should give the following output
 Code Jugalbandi in Functional Programming & Array-Oriented Paradigms
 ----
 
-**BRAHMA** Lets look at implementing Fizz Buzz in Scala.  For simplicity and gradually building the solution in 3 parts as put above:
+**BRAHMA** Lets look at implementing Fizz Buzz in Scala.  For simplicity and gradually building the solution in 2 parts as put above:
 
 ```scala
 def toFizzBuzz(n: Int) = {
@@ -74,20 +74,6 @@ val fizzBuzzed = (1 to 20) map toFizzBuzz
 println(fizzBuzzed)
 ```
 
-**BRAHMA** ...and for Part-3, all I need to do is check for presence of digit 3 in the number.  I can simply do it like this:
-
-```scala
-def toFizzBuzz(n: Int) = {
-    if (n.toString contains "3") "Lucky"
-    else if (n % 15 == 0) "FizzBuzz"
-    else if (n % 3 == 0) "Fizz"
-    else if (n % 5 == 0) "Buzz"
-    else n
-}                                             
-
-val fizzBuzzed = (1 to 20) map toFizzBuzz
-println(fizzBuzzed)
-```
 **BRAHMA** So, this was a vanilla implementation of FizzBuzz.  Krishna, how does this look in an array-oriented language like APL?  
 
 **KRISHNA** Well, array-oriented languages use array as the *only* data structure and so instead of thinking in terms of flow, we think in terms of data.  Let me show you how this would look like in APL.  I will straight away implement Part-1 of the problem:
@@ -308,7 +294,7 @@ main = do
 
 **KRISHNA**  Yes, we are, but its in our discretion parallelize and put each computation on a GPU or CPU for instance.  I can then improve the performance and reduce memory consumed greatly. 
 
-**BRAHMA** Well, as far as Haskell is concerned, it is lazy by default and so is list data-structure, so entire list is never materialized, only the needed element is brought in one at a time in memory and GCed after use.  Also, one cannot tell, how the function is allocating data chunks whether  to CPU or GPUs, its all the how part that is abstracted away.
+**BRAHMA** Well, as far as Haskell is concerned, it is lazy by default and so is list data-structure, so entire list is never materialized, only the needed element is brought in one at a time in memory and GCed after use.  Though it appears that we are process element-by-element, one cannot tell, theoretically, whether the ```zipWith``` function is splitting into data chunks or whether data is CPU bound or GPU bound.  The how-part is abstracted away - the code is declarative.  But, yes the lambda is applied to every element during zipping is a fact.
 
 **BRAHMA** I must say one thing though, I can see how you evolved the algorithm, which I think would be difficult to think in the first go itself.  Let me use Haskell to re-write this in the APL form, but I think I still won't be able to get rid of lambda.
 
@@ -361,8 +347,16 @@ main = do
 
 **KRISHNA** In fact, the lambda-based expression is arguably simpler than the array-oriented one. However, the array based solution will be much more efficient, it terms of both memory and CPU time.
 
+**KRISHNA** Lets reflect on this...
+
 Reflections
 -----------
 
+**KRISHNA** Most programming languages emphasize the use of control flow for managing programming logic...like the initial attempt in Scala, the logic is present in the ```toFizzBuzz``` function.   
 
+**KRISHNA** Logic in APL is often most efficiently expressed in a data representation.  It is this representation that is processed using array operations, achieving the end result.  
+
+**BRAHMA** So rather than rendering source structure that embeds the logic in the control flow of the program, in APL the logic is embedded in the data flow.
+
+**BRAHMA** So, essentially this an eye-opening contrast - Control Flow or Data-Flow? Lets move to the next melody in our jugalbandi.
 
