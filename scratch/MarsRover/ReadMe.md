@@ -283,11 +283,46 @@ rove(Vec={X,Y,Dir},Cmd) ->
 
 **BRAHMA**  So, here everything is functions, we did not require ```Direction``` or ```Vector``` abstractions, the essence has become more transparent and is there for anyone to see.  Earlier, this was encapsulated away within ```Direction``` and we were using it.  So Krishna, how does this look in an Array-Oriented Paradigm like APL?
 
-**KRISHNA** Well, let me show you APL code.
+**KRISHNA** In an array language, an important goal is to find data representations which allows operations to be applied to large subsets of data - ideally the entire problem set at once. We are moving around in a grid where row and column co-ordinates increase when you move down (South) and to the right (East). Thus, the movement resulting from a move of length 1 in each of these four directions NESW gives us changes to the row and column co-ordinates, which we will store in an array called movement:
 
-```apl
-//TODO
-```
+        directions←'NESW'
+        movement←4 2⍴¯1 0 0 1 1 0 0 ¯1 ⍝ 4x2 matrix
+
+The initial conditions can be stored in 3 arrays as follows:
+
+        position←3 3
+        heading←1     ⍝ index into directions
+        commands←'MMRMMLMRML'
+
+If we think of the four directions as an array, and represent the direction as an index into this array, then a turn to the left decreases the index by one, while a turn to the right increases the index. The ```index of``` primitive ⍳ allows us to look the commands up in the character array 'LMR' and subtract 1 from the result, we get ¯1 for L, 0 for M and 1 for R. This allows us to compute the direction that the robot is pointing at each step as follows:
+
+        bearings←4|+\heading,'LMR'⍳commands
+
+The 4| gives us the rsult modulus 4, ensuring that we wrap around nicely from W to N or vice versa and that ```bearings``` is an arrays of integers between 0 and 3. If we now index the ```movement``` array by the bearings and mask this out by *multiplying* each row by 1 where the command is M and 0 elsewhere, we get a list of movements made by the robot.
+
+        movements←movement[¯1↓bearings;] (×⍤1 0) 'M'=commands
+
+The rank operator is used above, in (×⍤1 0), to multiply each vector on the left (rank 1 cells) by each scalar on the right (rank 0) cells. If the above gives an INDEX ERROR when you try to reproduce it, remember to set index origin to zero (⎕IO←0). Finally, we can compute the final position by doing a plus reduction on the starting position followed by the list of movements:
+
+        +⌿position⍪movements
+    4 4
+
+The final direction is simply the last item of the bearing vector:
+
+        directions[¯1↑bearings]
+    E
+
+If we were to collect the above into a function in APL, it might look like this:
+
+     rove←{(position heading commands)←⍵          
+           directions←'NESW'
+           movement←4 2⍴¯1 0,0 1,1 0,0 ¯1 
+           bearings←4|+\heading,'LMR'⍳commands
+           movements←movement[¯1↓bearings;]×'M'=commands
+           (+⌿position⍪movements),directions[¯1↑bearings] 
+          }
+
+Note that there are no conditionals and no loops in the above function: Every operation is applied to dense arrays of small integers. This means that the function will be efficient even when executed by an interpreter, and that a compiler stands a decent chance of running large parts of the code - possibly all of it - in parallel.
 
 **BRAHMA** Let me re-write this in JavaScript again.  So, I don't need ```COMPASS``` macro this time, a simple Array holding the movement tuples would do.  The indices of the array represent directions ```1``` for ```N```, ```2``` for ```E```, ```3``` for ```S``` and ```4``` for ```W```.
 
