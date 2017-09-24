@@ -27,3 +27,33 @@ The even digits:
 
 s1 + s2 = 70 which ends in zero which means that 49927398716 passes the Luhn test
 ```
+
+```apl
+    creditCardAsString ← '49927398716'
+    creditCard ← (⎕UCS creditCardAsString)-48
+    reversed ← ⌽creditCard
+⍝ 61789372994
+
+    ⍴⌽reversed
+⍝ 11
+
+    indices ← ⍳⍴⌽reversed    
+⍝ 1 2 3 4 5 6 7 8 9 10 11
+
+    2|indices
+⍝ 1 0 1 0 1 0 1 0 1 0 1
+  
+    0=2|indices
+⍝ 0 1 0 1 0 1 0 1 0 1 0
+
+    oddIndices ← ⍸2|indices
+⍝ 1 3 5 7 9 11
+  
+    evenIndices ← ⍸0=2|indices
+⍝ 2 4 6 8 10
+
+    oddSum ← +/reversed[oddIndices]
+    evenSum ← +/+/⍉10 10⊤2×reversed[evenIndices]
+    isLuhn ← 0=10|(evenSum + oddSum)
+      
+```

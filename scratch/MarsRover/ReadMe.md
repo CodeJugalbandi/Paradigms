@@ -274,8 +274,8 @@ rove(Vec={X,Y,Dir},Cmd) ->
       Vec;
       
     Key={_,Deg} ->
-      DPos = maps:get(Key, ?COMPASS),
-      {NewX,NewY,NewDeg} = execute({X,Y,Deg},DPos,Cmd),
+      Delta = maps:get(Key, ?COMPASS),
+      {NewX,NewY,NewDeg} = execute({X,Y,Deg},Delta,Cmd),
       {NewD, _} = lists:keyfind(NewDeg rem 36, 2, Keys),
       {NewX,NewY,NewD}
   end.
@@ -283,54 +283,72 @@ rove(Vec={X,Y,Dir},Cmd) ->
 
 **BRAHMA**  So, here everything is functions, we did not require ```Direction``` or ```Vector``` abstractions, the essence has become more transparent and is there for anyone to see.  Earlier, this was encapsulated away within ```Direction``` and we were using it.  So Krishna, how does this look in an Array-Oriented Paradigm like APL?
 
+
 **KRISHNA** In an array language, an important goal is to find data representations which allows operations to be applied to large subsets of data - ideally the entire problem set at once. We are moving around in a grid where row and column co-ordinates increase when you move down (South) and to the right (East). Thus, the movement resulting from a move of length 1 in each of these four directions NESW gives us changes to the row and column co-ordinates, which we will store in an array called movement:
 
-        ⎕IO←0    ⍝ Default index origin in APL is 1; we prefer 0
-        directions←'NESW'
-        movement←4 2⍴¯1 0 0 1 1 0 0 ¯1 ⍝ 4x2 matrix
+```apl
+  ⎕IO←0    ⍝ Default index origin in APL is 1; we prefer 0
+  directions←'NESW'
+  movement←4 2⍴¯1 0 0 1 1 0 0 ¯1 ⍝ 4x2 matrix
+```
 
-The initial conditions can be stored in 3 arrays as follows:
+**KRISHNA** The initial conditions can be stored in 3 arrays as follows:
 
-        position←3 3
-        heading←1     ⍝ index into directions
-        commands←'MMRMMLMRML'
+```apl
+  position←3 3
+  heading←1     ⍝ index into directions
+  commands←'MMRMMLMRML'
+```
 
-Since the four directions and corresponding movements are arrays, we can represent the direction as an index into these array, then a turn to the left decreases the index by one, while a turn to the right increases the index. The ```index of``` primitive (⍳) allows us to look the commands up in the character array 'LMR'. If we subtract 1 from this, we get ¯1 for L, 0 for M and 1 for R. This allows us to compute the direction that the robot is pointing at each step as the cumulative sum of the initial heading, and ¯1 or 1 for turns, using the following expression:
+**KRISHNA** Since the four directions and corresponding movements are arrays, we can represent the direction as an index into these array, then a turn to the left decreases the index by one, while a turn to the right increases the index. The ```index of``` primitive (⍳) allows us to look the commands up in the character array 'LMR'. If we subtract 1 from this, we get ¯1 for L, 0 for M and 1 for R. This allows us to compute the direction that the robot is pointing at each step as the cumulative sum of the initial heading, and ¯1 or 1 for turns, using the following expression:
 
-        bearings←4|+\heading,¯1+'LMR'⍳commands
+```apl
+  bearings←4|+\heading,¯1+'LMR'⍳commands
+```
 
-The 4| gives us the result modulus 4, ensuring that we wrap around nicely from W to N or vice versa and that ```bearings``` is now an array of integers between 0 and 3. If we now index the ```movement``` array by the bearings and mask this out by *multiplying* each row by 1 where the command is M and 0 elsewhere, we get a list of movements made by the robot.
+**KRISHNA** The ```4|``` gives us the result modulus 4, ensuring that we wrap around nicely from W to N or vice versa and that ```bearings``` is now an array of integers between 0 and 3. If we now index the ```movement``` array by the bearings and mask this out by *multiplying* each row by 1 where the command is M and 0 elsewhere, we get a list of movements made by the robot.
 
-        movements←movement[¯1↓bearings;] (×⍤1 0) 'M'=commands
+```apl
+  movements←movement[¯1↓bearings;] (×⍤1 0) 'M'=commands
+```
+**KRISHNA** The rank operator is used above, in ```(×⍤1 0)```, to multiply each vector on the left (rank 1 cells) by each scalar on the right (rank 0) cells. Finally, we can compute the final position by doing a plus reduction on 
+the starting position followed by the list of movements:
 
-The rank operator is used above, in (×⍤1 0), to multiply each vector on the left (rank 1 cells) by each scalar on the right (rank 0) cells. Finally, we can compute the final position by doing a plus reduction on the starting position followed by the list of movements:
+```apl
+  +⌿ position⍪movements
+6 6
+```
 
-        +⌿ position⍪movements
-    6 6
+**KRISHNA** The final direction is given by the last item of the vector of bearings, if we index the ```directions``` array, we can translate it back into a character:
 
-The final direction is given by the last item of the vector of bearings, if we index the ```directions``` array, we can translate it back into a character:
+```apl
+  directions[¯1↑bearings]
+E
 
-        directions[¯1↑bearings]
-    E
+```
 
-If we were to collect the above into a function in APL, it might look like this:
+**KRISHNA** If we were to collect the above into a function in APL, it might look like this:
 
-     rove←{⎕IO←0
-           (position heading commands)←⍵        ⍝ Deconstruct right argument       
-           movement←4 2⍴¯1 0, 0 1, 1 0, 0 ¯1    ⍝ One row per direction (NESW)
-           bearings←4|+\heading,¯1+'LMR'⍳commands ⍝ Bearing after each command
-           moves←movement[¯1↓bearings;]×'M'=commands ⍝ Movement resulting from each command
-           (+⌿position⍪moves),'NESW'[¯1↑bearings] ⍝ Return final position and bearing
-          }
+```apl
+  rove←{⎕IO←0
+    (position heading commands)←⍵        ⍝ Deconstruct right argument       
+    movement←4 2⍴¯1 0, 0 1, 1 0, 0 ¯1    ⍝ One row per direction (NESW)
+    bearings←4|+\heading,¯1+'LMR'⍳commands ⍝ Bearing after each command
+    moves←movement[¯1↓bearings;]×'M'=commands ⍝ Movement resulting from each command
+    (+⌿position⍪moves),'NESW'[¯1↑bearings] ⍝ Return final position and bearing
+  }
+```
 
-We could call it as follows:
+**KRISHNA** We could call it as follows:
+```apl
+  rove (3 3) 'E' 'MMRMMLMRML'
+6 6 E
+```
 
-          rove (3 3) 'E' 'MMRMMLMRML'
-    6 6 E
+**KRISHNA** Note that there are no conditionals and no loops in the above function. the operations are applied to dense arrays of small integers or chacters. The "switches" on the three different commands are implemented by computing numbers (¯1 0 1) for LMR, and by multiplying movements by the result of comparing the commands to M - and switching on direction has become indexing into the movement array. This means that the function will be efficient even when executed by an interpreter, and also that it can be compiled for highly data parallel execution if suitable hardware is available.
 
-Note that there are no conditionals and no loops in the above function. the operations are applied to dense arrays of small integers or chacters. The "switches" on the three different commands are implemented by computing numbers (¯1 0 1) for LMR, and by multiplying movements by the result of comparing the commands to M - and switching on direction has become indexing into the movement array. This means that the function will be efficient even when executed by an interpreter, and also that it can be compiled for highly data parallel execution if suitable hardware is available.
 
-**BRAHMA** Let me re-write this in JavaScript again.  So, I don't need ```COMPASS``` macro this time, a simple Array holding the movement tuples would do.  The indices of the array represent directions ```1``` for ```N```, ```2``` for ```E```, ```3``` for ```S``` and ```4``` for ```W```.
+**BRAHMA** Let me re-write this in JavaScript again.  So, I don't need ```Vector``` or ```Direction``` abstractions this time, a simple Array holding the movement tuples would do.  The indices of the array represent directions ```1``` for ```N```, ```2``` for ```E```, ```3``` for ```S``` and ```4``` for ```W```.
 
 ```javascript
 function MarsRover(x, y, dirString) {
@@ -358,6 +376,7 @@ function MarsRover(x, y, dirString) {
 var rover = new MarsRover(3, 3, 'E');
 console.info(rover.rove('M').rove('R').rove('M').rove('L').toString());
 ```
+
 **BRAHMA**  So, thats it.  Lets reflect on what we did...
 
 
@@ -376,7 +395,7 @@ Reflections
 
 **KRISHNA** In APL, abstraction is considered harmful. This isn't to say that we don't work with abstractions, or at an abstraction, but the process of programming by which we build progressively upon previous abstractions with new abstractions, eventually resulting in layers of generic frameworks with unknown inner workings, that we can then plug in our desired instance and obtain a result, is considered to be potentially dangerous.
 
-**KRISHNA** Also, nature of abstraction is to hide the details, rather than subordinating them. "Good" abstraction hides it so well that you cannot access it. Good programming languages often provide means of solid abstractions that prevent introspection beyond the abstraction boundaries, while languages are often criticized for permitting too much leakiness in their abstraction boundaries.
+**KRISHNA** Also, the nature of abstraction is to hide the details, rather than subordinating them. A "Good" abstraction hides it so well that you cannot access it. Introspection beyond the abstraction boundaries is criticized for being leaky and tightly coupled or outright as breaking encapsulation in OO.
 
 **KRISHNA** APL on the other hand, embraces transparency of expression, and tends to eschew the ever-increasing introduction of abstraction to solve complexity. Instead, transparency of ideas, and directness of expression serve as the weapons with which the APLer falls upon the enemy called "Complexity" and deals a mortal blow.
 
