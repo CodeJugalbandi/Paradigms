@@ -295,20 +295,20 @@ The initial conditions can be stored in 3 arrays as follows:
         heading←1     ⍝ index into directions
         commands←'MMRMMLMRML'
 
-If we think of the four directions as an array, and represent the direction as an index into this array, then a turn to the left decreases the index by one, while a turn to the right increases the index. The ```index of``` primitive ⍳ allows us to look the commands up in the character array 'LMR' and subtract 1 from the result, we get ¯1 for L, 0 for M and 1 for R. This allows us to compute the direction that the robot is pointing at each step as follows:
+Since the four directions and corresponding movements are arrays, we can represent the direction as an index into these array, then a turn to the left decreases the index by one, while a turn to the right increases the index. The ```index of``` primitive (⍳) allows us to look the commands up in the character array 'LMR'. If we subtract 1 from this, we get ¯1 for L, 0 for M and 1 for R. This allows us to compute the direction that the robot is pointing at each step as the cumulative sum of the initial heading, and ¯1 or 1 for turns, using the following expression:
 
         bearings←4|+\heading,¯1+'LMR'⍳commands
 
-The 4| gives us the rsult modulus 4, ensuring that we wrap around nicely from W to N or vice versa and that ```bearings``` is an arrays of integers between 0 and 3. If we now index the ```movement``` array by the bearings and mask this out by *multiplying* each row by 1 where the command is M and 0 elsewhere, we get a list of movements made by the robot.
+The 4| gives us the result modulus 4, ensuring that we wrap around nicely from W to N or vice versa and that ```bearings``` is now an array of integers between 0 and 3. If we now index the ```movement``` array by the bearings and mask this out by *multiplying* each row by 1 where the command is M and 0 elsewhere, we get a list of movements made by the robot.
 
         movements←movement[¯1↓bearings;] (×⍤1 0) 'M'=commands
 
-The rank operator is used above, in (×⍤1 0), to multiply each vector on the left (rank 1 cells) by each scalar on the right (rank 0) cells. If the above gives an INDEX ERROR when you try to reproduce it, remember to set index origin to zero (⎕IO←0). Finally, we can compute the final position by doing a plus reduction on the starting position followed by the list of movements:
+The rank operator is used above, in (×⍤1 0), to multiply each vector on the left (rank 1 cells) by each scalar on the right (rank 0) cells. Finally, we can compute the final position by doing a plus reduction on the starting position followed by the list of movements:
 
-        +⌿position⍪movements
+        +⌿ position⍪movements
     6 6
 
-The final direction is simply the last item of the bearing vector:
+The final direction is given by the last item of the vector of bearings, if we index the ```directions``` array, we can translate it back into a character:
 
         directions[¯1↑bearings]
     E
@@ -317,17 +317,18 @@ If we were to collect the above into a function in APL, it might look like this:
 
      rove←{⎕IO←0
            (position heading commands)←⍵        ⍝ Deconstruct right argument       
-           directions←'NESW'                    ⍝ One letter per direction
-           movement←4 2⍴¯1 0, 0 1, 1 0, 0 ¯1    ⍝ One row per direction
+           movement←4 2⍴¯1 0, 0 1, 1 0, 0 ¯1    ⍝ One row per direction (NESW)
            bearings←4|+\heading,¯1+'LMR'⍳commands ⍝ Bearing after each command
-           movements←movement[¯1↓bearings;]×'M'=commands ⍝ Movement resulting from each command
-           (+⌿position⍪movements),directions[¯1↑bearings] ⍝ Return final position and bearing
+           moves←movement[¯1↓bearings;]×'M'=commands ⍝ Movement resulting from each command
+           (+⌿position⍪moves),'NESW'[¯1↑bearings] ⍝ Return final position and bearing
           }
 
 We could call it as follows:
-          rove (3 3) 'E' 'MMRMMLMRML'
 
-Note that there are no conditionals and no loops in the above function: Every operation is applied to dense arrays of small integers. This means that the function will be efficient even when executed by an interpreter, and that a compiler stands a decent chance of running large parts of the code - possibly all of it - in parallel.
+          rove (3 3) 'E' 'MMRMMLMRML'
+    6 6 E
+
+Note that there are no conditionals and no loops in the above function. the operations are applied to dense arrays of small integers or chacters. The "switches" on the three different commands are implemented by computing numbers (¯1 0 1) for LMR, and by multiplying movements by the result of comparing the commands to M - and switching on direction has become indexing into the movement array. This means that the function will be efficient even when executed by an interpreter, and also that it can be compiled for highly data parallel execution if suitable hardware is available.
 
 **BRAHMA** Let me re-write this in JavaScript again.  So, I don't need ```COMPASS``` macro this time, a simple Array holding the movement tuples would do.  The indices of the array represent directions ```1``` for ```N```, ```2``` for ```E```, ```3``` for ```S``` and ```4``` for ```W```.
 
