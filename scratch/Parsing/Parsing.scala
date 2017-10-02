@@ -99,27 +99,39 @@ implicit class ParserExtensions[T](p: Parser[T]) {
   def ^^[U](f: T => U): Parser[U] = p >>= (x => success(f(x)))
   
   // other sequential composition operators
-  // return right
+  // return right result, ignore left
   def ~> [U](q: Parser[U]) = (p~q) ^^ { case (x,y) => y }
-  // return left
+  // return left result, ignore right
   def <~ [U](q: Parser[U]) = (p~q) ^^ { case (x,y) => x }
 
-  def flatMap = >>= _ 
-  def map = ^^ _  
+  // def flatMap = >>= _
+  // def map = ^^ _
+  
   //optional parser: convert to Option[T].
   def ? : Parser[Option[T]] = p ^^ {
     case List() => None
     case x => Some(x)
   }
   
-  //WIP
-  def * : Parser[List[T]] = (input: String) => {
-    println(p(input))
-    for {
-      (v, input1) <- p(input)
-      (vs, input2) <- p*(input1)
-    } yield (v::vs, input2)
-  }
+  import scala.language.postfixOps
+  def * : Parser[List[T]] = (input: String) => 
+    // (p~(p*) ^^ { case(x, xs) => x::xs })(input)
+    (p~(p*) ^^ { case (x,xs) => x::xs } | success(List()))(input)
+
+ 
+  // Sometimes we are interested in non-empty sequences of items.
+  // So, we define a + combinator, in terms of *
+  def + : Parser[List[T]] = (input: String) =>
+    (p~(p*) ^^ { case (x,xs) => x::xs })(input)
+  
+  // many parsing with seperator
+  def * (sep: Parser[Any]) : Parser[List[T]] = (input: String) =>
+    (p~((sep~>p)*) ^^ { case (x,xs) => x::xs }|success(List()))(input) 
+    
+  // many1 parsing with seperator
+  def + (sep: Parser[Any]) : Parser[List[T]] = (input: String) =>
+    (p~((sep~>p)+) ^^ { case (x,xs) => x::xs }|success(List()))(input) 
+ 
 }
 
 def satisfy(pred: Char => Boolean) = 
@@ -151,7 +163,13 @@ def stringLiteral = {
 
 def floatingPointNumber = regex("-?(\\d+(\\.\\d*)?|\\d*\\.\\d+)([eE][+-]?\\d+)?".r)
 
+// def word : Parser[String] = (input: String) =>
+//   ((letter~word) ^^ {case (x, xs) => x + xs } | success(""))(input)
 
+// Re-defining word in terms of *
+import scala.language.postfixOps
+def word: Parser[String] = (letter*) ^^ { case chs => chs.mkString }
+   
 
 def parse[T](inp: String, p: Parser[T]): Any = p(inp) match {
   case Nil => Nil
@@ -186,9 +204,9 @@ ParserExtensions _
 // println(letter("love"))
 // println(letter("Love"))
 // println(letter("3ove"))
-println("digit ->")
-println(digit("345"))
-println(digit("h345"))
+// println("digit ->")
+// println(digit("345"))
+// println(digit("h345"))
 // println("Oring ->")
 // println((success("success") | failure)("10"))
 // println(parse("10", failure | success("success")))
@@ -205,10 +223,10 @@ println(digit("h345"))
 // println((string("{") ~ string("}"))("{}"))
 // println((string("{") >>= (x => string("}")))("{}"))
 // println("regex parsers ->")
-// println(parse("identifier_string", regex("[a-zA-Z_][a-zA-Z0-9_]*".r)))
-println("stringLiteral ->")
-println(parse("\"अध्यनाम उपनाम\"", stringLiteral))
-println(parse("'अध्यनाम.उपनाम@पृथ्वी.अाकाशगंगा'", stringLiteral))
+// println(regex("Scala".r)("ScalaScala is Scalable"))
+// println("stringLiteral ->")
+// println(parse("\"अध्यनाम उपनाम\"", stringLiteral))
+// println(parse("'अध्यनाम.उपनाम@पृथ्वी.अाकाशगंगा'", stringLiteral))
 // println(parse("10e-2", (floatingPointNumber ^^ (java.lang.Float.parseFloat(_)))))
 // println("return left <~")
 // println(parse("a}", (letter <~ string("}")) ^^ (ch => ch.toString)))
@@ -216,16 +234,29 @@ println(parse("'अध्यनाम.उपनाम@पृथ्वी.अा�
 // println(parse("{b' ", (string("{") ~> letter) ^^ (ch => ch.toString)))
 // println("return ~> center <~")
 // println(parse("[3]", ((char('[') ~> digit <~ char(']')) ^^ (List(_)))))
+// println("optional parser ->")
+// println(letter?("345"))
+// println(letter?("abc"))
+// println(digit?("345"))
+// println(digit?("abc"))
 
-println("optional parser ->")
-println(letter?("345"))
-println(letter?("abc"))
-println(digit?("345"))
-println(digit?("abc"))
-println("many1 parser ->")
+println("word ->")
+println(word("Hello5 world"))
+println("* (many - zero or more) parser ->")
 println(letter*(""))
 println(letter*("abc567"))
 println(digit*("345abc"))
+println("+ (many1 - one or more) parser ->")
+println(letter+(""))
+println(letter+("abc567"))
+println(digit+("345abc"))
+println("* with seperator (many - zero or more) parser ->")
+println((letter*(string(",")))("abc"))
+println((letter*(string(",")))("a,b,cdefg"))
+println("+ with seperator (many1 - one or more) parser ->")
+println((letter+(string(",")))("abc"))
+println((letter+(string(",")))("a,b,cdefg"))
+
 
 // BNF notation for JSON
 // value ::= obj | arr | stringLiteral | floatingPointNumber | "null" | "true" | "false".
