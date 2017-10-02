@@ -1,21 +1,60 @@
+// THE PARSER TYPE
+// ===============
+//
+// So to formalize a parser type, it would be a function that
+// consumes a string and returns a Tree.  In a functional language
+// such as Scala, parsers can naturally be viewed as functions.
+//
+// type Parser = String -> Tree
+//
+// So essentially a parser is a function that takes a string
+// and returns some form of tree.
+//
+// However, in reality a parser might not require all of its
+// input string, so we also return any unused input, so lets
+// generalize the parser as consuming string and returning
+// a pair of Tree and String:
+//
+// type Parser = String -> (Tree, String)
+//
+// Further, a given string can be parsed in many ways, if
+// the grammar is ambiguous this can happen.  Also, its
+// quite possible that the string cannot be parsed into a
+// Tree.  So, in such cases, we need to return a list of
+// results like this:
+//
+// type Parser = String -> [(Tree, String)]
+//
+// so, that list can be empty when there is nothing to parse,
+// or if it is ambiguous, it can contain many pairs or if it
+// is a non-ambiguous grammar, it can be a singleton list (a
+// list containing one element) or an empty list.
+//
+// Summarizing:
+// 1. Parsing Fails -> Empty List.
+// 2. Parsing Succeeds -> Singleton List with Pair.
+// 3. Ambiguous Grammar -> List with Pairs of elements.
+//
+// Finally, a parser might not always produce a tree, so we
+// generalize to a value of any type using type parameter.  
 // For simplicity our parser reads a raw sequence of characters
 // or in other words consumes a String.
 // 
-// Now parser is just a function from String input type to 
+// So parser is just a function from String input type to 
 // a parse result.  The type could be written as:
 // 
 type Parser[T] = String => List[(T, String)]
 
 def success[T](t: T) = (input: String) => List((t, input))
 
-def failure[T] = (input: String) => Nil
+def failure[T] = (input: String) => List()
 // TODO: Introduce failure message
 // def failure[T](msg: String = "Failed =>") =
 //   (input: String) => List((msg, input))
 
-
+// single item parser
 def item[T] = (input: String) => input match {
-    case "" => Nil
+    case "" => List()
     case _ => List((input.head, input.tail))
   }
    
@@ -27,7 +66,7 @@ def seq[T, U](p: Parser[T], q: Parser[U]) = (input: String) =>
   } yield ((x,y), input2)
 
   
-  
+// Parser Combinators  
 implicit class ParserExtensions[T](p: Parser[T]) {
 
   // seq re-written with symbol ~ inside extension class
@@ -36,35 +75,57 @@ implicit class ParserExtensions[T](p: Parser[T]) {
       (x, input1) <- p(input)
       (y, input2) <- q(input1)
     } yield ((x,y), input2)
+
   
-  // Result Conversion
-  // map in Scala
-  def ^^[U](f: T => U): Parser[U] = p >>= (x => success(f(x)))
-  
-  // other sequential composition operators
-  def ~> [U](q: Parser[U]) = (p~q) ^^ { case (x,y) => y }
-  def <~ [U](q: Parser[U]) = (p~q) ^^ { case (x,y) => x }
-  
+  // chain output of first parser to second and return
+  // the result of second parser and remaining input.
   // flatMap in Scala
   def >>=[U](f: T => Parser[U]): Parser[U] = 
     (input: String) => 
       (for {
         (x, input1) <- p(input)
       } yield f(x)(input1)).flatten
-      
+
+
   // Alternative composition
   def | (q: Parser[T]): Parser[T] = 
     (input: String) => p(input) match {
       case Nil => q(input)
       case result => result
-    }
+  }
+  
+  // Result Conversion
+  // map in Scala
+  def ^^[U](f: T => U): Parser[U] = p >>= (x => success(f(x)))
+  
+  // other sequential composition operators
+  // return right
+  def ~> [U](q: Parser[U]) = (p~q) ^^ { case (x,y) => y }
+  // return left
+  def <~ [U](q: Parser[U]) = (p~q) ^^ { case (x,y) => x }
+
+  def flatMap = >>= _ 
+  def map = ^^ _  
+  //optional parser: convert to Option[T].
+  def ? : Parser[Option[T]] = p ^^ {
+    case List() => None
+    case x => Some(x)
+  }
+  
+  //WIP
+  def * : Parser[List[T]] = (input: String) => {
+    println(p(input))
+    for {
+      (v, input1) <- p(input)
+      (vs, input2) <- p*(input1)
+    } yield (v::vs, input2)
+  }
 }
 
 def satisfy(pred: Char => Boolean) = 
   item >>= (x => if (pred(x)) success(x) else failure)
 
 def char(ch: Char) = satisfy ((x:Char) => x == ch)
-def lower = satisfy (Character.isLowerCase _)
 def letter = satisfy (Character.isLetter _)
 def digit = satisfy (Character.isDigit _)
 // def alphanum = satisfy (Character.isLetterOrDigit _)
@@ -82,9 +143,15 @@ def regex(r: Regex): Parser[String] =
     case None => failure(input)
   }
   
-def stringLiteral = regex("[a-zA-Z_][a-zA-Z0-9_]*".r)
+def stringLiteral = {
+  val e = """[\"|']([^"\p{Cntrl}\\]|\\[\\'"bfnrt]|\\u[a-fA-F0-9]{4})*[\"|']""".r
+    regex(e)
+}
+
 
 def floatingPointNumber = regex("-?(\\d+(\\.\\d*)?|\\d*\\.\\d+)([eE][+-]?\\d+)?".r)
+
+
 
 def parse[T](inp: String, p: Parser[T]): Any = p(inp) match {
   case Nil => Nil
@@ -115,16 +182,16 @@ ParserExtensions _
 // println(char('[')("[]"))
 // println(char('a')("bcd"))
 // println((char('[') >>= (x => char(']')))("[]"))
-// println("lower -> ")
-// println(lower("love"))
-// println(lower("Love"))
 // println("letter -> ")
 // println(letter("love"))
 // println(letter("Love"))
 // println(letter("3ove"))
-// println("digit ->")
-// println(digit("345"))
-// println(digit("h345"))
+println("digit ->")
+println(digit("345"))
+println(digit("h345"))
+// println("Oring ->")
+// println((success("success") | failure)("10"))
+// println(parse("10", failure | success("success")))
 // println("alphanum -> ")
 // println(alphanum("h345"))
 // println(alphanum("3hello"))
@@ -132,15 +199,33 @@ ParserExtensions _
 // println(string("hello")("hello"))
 // println(string("hello4")("hello4535"))
 // println(string("hello")("desi"))
-println("map ->")
-println((digit ^^ (x => Integer.parseInt(x.toString)))("345"))
-println(((char('[') ~ char(']')) ^^  { case (x,y) => Nil })("[]"))
-println(parse("[3]", ((char('[') ~> digit <~ char(']')) ^^ (List(_)))))
+// println("map ->")
+// println((digit ^^ (x => Integer.parseInt(x.toString)))("345"))
+// println(((char('[') ~ char(']')) ^^  { case (x,y) => Nil })("[]"))
 // println((string("{") ~ string("}"))("{}"))
 // println((string("{") >>= (x => string("}")))("{}"))
-println(parse("identifier_string", regex("[a-zA-Z_][a-zA-Z0-9_]*".r)))
-println(parse("dhaval_2धवल", stringLiteral))
-println(parse("10e-2", (floatingPointNumber ^^ (java.lang.Float.parseFloat(_)))))
+// println("regex parsers ->")
+// println(parse("identifier_string", regex("[a-zA-Z_][a-zA-Z0-9_]*".r)))
+println("stringLiteral ->")
+println(parse("\"अध्यनाम उपनाम\"", stringLiteral))
+println(parse("'अध्यनाम.उपनाम@पृथ्वी.अाकाशगंगा'", stringLiteral))
+// println(parse("10e-2", (floatingPointNumber ^^ (java.lang.Float.parseFloat(_)))))
+// println("return left <~")
+// println(parse("a}", (letter <~ string("}")) ^^ (ch => ch.toString)))
+// println("return ~> right ")
+// println(parse("{b' ", (string("{") ~> letter) ^^ (ch => ch.toString)))
+// println("return ~> center <~")
+// println(parse("[3]", ((char('[') ~> digit <~ char(']')) ^^ (List(_)))))
+
+println("optional parser ->")
+println(letter?("345"))
+println(letter?("abc"))
+println(digit?("345"))
+println(digit?("abc"))
+println("many1 parser ->")
+println(letter*(""))
+println(letter*("abc567"))
+println(digit*("345abc"))
 
 // BNF notation for JSON
 // value ::= obj | arr | stringLiteral | floatingPointNumber | "null" | "true" | "false".
@@ -149,8 +234,8 @@ println(parse("10e-2", (floatingPointNumber ^^ (java.lang.Float.parseFloat(_))))
 // member ::= stringLiteral ":" value.
 // arr ::= "[" [ values ] "]".
 // values ::= value {"," value}.
-// stringLiteral ::= [a-zA-Z_][a-zA-Z0-9_]*
-// floatingPointNumber ::= -?(\d+(\.\d*)?|\d*\.\d+)([eE][+-]?\d+)?
+// stringLiteral ::= """[\"|']([^"\p{Cntrl}\\]|\\[\\'"bfnrt]|\\u[a-fA-F0-9]{4})*[\"|']"""
+// floatingPointNumber ::= "-?(\d+(\.\d*)?|\d*\.\d+)([eE][+-]?\d+)?"
 
 
 // We can minimally implement
@@ -160,7 +245,25 @@ println(parse("10e-2", (floatingPointNumber ^^ (java.lang.Float.parseFloat(_))))
 // members ::= member {"," member}.
 // member ::= stringLiteral ":" value.
 // values ::= value {"," value}.
-// stringLiteral ::= [a-zA-Z_][a-zA-Z0-9_]*
+// stringLiteral ::= """[\"|']([^"\p{Cntrl}\\]|\\[\\'"bfnrt]|\\u[a-fA-F0-9]{4})*[\"|']"""
 
-
+//  Sample JSON
+// {
+//   "contact": {
+//     "name": "First Last",
+//     "email" : "अध्यनाम.उपनाम@पृथ्वी.अाकाशगंगा",
+//     "address": {
+//       "street": "10 Market Road",
+//       "city"  : "Mumbai, MH",
+//       "country" : "भारत",
+//       "zip"   : 555555
+//     },
+//     "phone numbers": [
+//       {"home" : "123 456-7890"},
+//       {"office" : "987 654-3210"},
+//       {"cell" : "222 444-6666"}
+//     ]
+//   }
+// }
+ 
   
