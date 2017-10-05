@@ -86,20 +86,31 @@ implicit class ParserExtensions[T](p: Parser[T]) {
         (x, input1) <- p(input)
       } yield f(x)(input1)).flatten
 
-  // Alternative composition
+  // Alternative composition, if first parser fails
+  // second is tried.  If first succeeds, second is
+  // never tried, output from the first is returned.
   def | [U >: T](q: => Parser[U]): Parser[U] = 
     (input: String) => p(input) match {
       case List() => q(input)
       case result => result
   }
   
+  // Apply both parsers p and q to the same input, and
+  // concat their result lists to form a single result
+  // list. If both parsers succeed on the input string
+  // then more than one result value will be returned,
+  // reflecting the different ways that the input string
+  // can be parsed
+  def & (q: Parser[T]): Parser[T] = (input: String) => 
+    p(input) ::: q(input)
+  
   // Result Conversion: map in Scala
   def ^^[U](f: T => U): Parser[U] = p >>= (x => success(f(x)))
   
   // other sequential composition operators
-  // return right result, ignore left
+  // return right result, ignore left (a.k.a second combinator)
   def ~> [U](q: => Parser[U]) = (p~q) ^^ { case (x,y) => y }
-  // return left result, ignore right
+  // return left result, ignore right (a.k.a first combinator)
   def <~ [U](q: => Parser[U]) = (p~q) ^^ { case (x,y) => x }
 
   //optional parser: convert to Option[T].
@@ -120,7 +131,7 @@ implicit class ParserExtensions[T](p: Parser[T]) {
     
   // many1 parsing with seperator
   def + (sep: Parser[Any]) : Parser[List[T]] = 
-    (p~((sep~>p)+) ^^ { case (x,xs) => x::xs }|success(List()))
+    (p~((sep~>p)+) ^^ { case (x,xs) => x::xs }|success(List()))    
 }
 
 def satisfy(pred: Char => Boolean) = 
@@ -178,12 +189,40 @@ def whitespace : Parser[String] = (input: String) => {
 // defining whitespace in-terms of regex
 // def whitespace = regex("\\s+".r)
 
-// def word : Parser[String] = ((letter~word) ^^ {case (x, xs) => x + xs } | success(""))
 
-// Re-defining word in terms of +
+// IV. Re-defining word in terms of + and ^^
+// import scala.language.postfixOps
+// def word: Parser[String] = (letter+) ^^ { case chs => chs.mkString }
+
+// III. re-define word in terms of ~ and ^^
+// def word: Parser[String] =
+//   ((letter~word) ^^ {case(x, xs) => x + xs}) | success("")
+
+// II. We re-defining word in terms of >>= and &
+// For example, applying word to the input "Yes!" 
+// gives the result [("Yes","!"), ("Ye","s!"), ("Y","es!"), 
+// ("","Yes!")]. The first result, ("Yes","!"), is the 
+// expected result: the string of letters "Yes" has been 
+// consumed, and the unconsumed input is "!". In the 
+// subsequent results a decreasing number of letters are 
+// consumed. This behaviour arises because the operator &
+// is non-deterministic: both alternatives can be explored, 
+// even if the first alternative is successful. Thus, at 
+// each application of letter, there is always the option 
+// to just finish parsing, even if there are still letters 
+// left to be consumed from the start of the input.
+def word : Parser[String] =
+    (letter >>= ((l:Char) => (word >>= ((w:String) =>success(l + w))))) & success("")
+
+// I. we can write recursive definition of parsing a word in terms of >>=
+// def word : Parser[String] = (input: String) => {
+//   input match {
+//     case "" => List(("", ""))
+//     case _ => (letter >>= ((l:Char) => (word >>= ((w:String) => success(l + w)))))(input)
+//   }
+// }
+
 import scala.language.postfixOps
-def word: Parser[String] = (letter+) ^^ { case chs => chs.mkString }
-   
 def integer : Parser[Int] = 
   ((char('-')?) ^^ { 
     case Some(x) => Math.negateExact _
@@ -200,10 +239,12 @@ def _false = string("false")
 def str(in: String): Parser[String] = 
   whitespace~string(in) ^^ { case (wspaces, useful) => useful }
 
-def parse[T](inp: String, p: Parser[T]): Any = p(inp) match {
-  case Nil => s"Parsing Failed! => $inp"
-  case List((x, _)) => x
-  case results => results
+import scala.util.{Try, Success, Failure}
+class ParseException(msg:String) extends Exception(msg)
+def parse[T](inp: String, p: Parser[T]): Try[T] = p(inp) match {
+  case List() => Failure(new ParseException(inp))
+  case List((x, _)) => Success(x)
+  case results => Failure(new ParseException(s"Ambiguous $results"))
 }
 
 // println(success("d")("Hello"))
@@ -303,7 +344,12 @@ def parse[T](inp: String, p: Parser[T]): Any = p(inp) match {
 // println((char('[') ~> (integer*(char(','))) <~ char(']'))("[1,2,3,4,5,6,7,8,9,10]"))
 // println(((stringLiteral~(string(":")~stringLiteral)) ^^ { case (k,(_,v)) => (k,v) })(""""name":"test""""))
 // println(((stringLiteral~(str(":")~stringLiteral)) ^^ { case (k,(_,v)) => (k,v) })("""  "name":"test""""))
+// println("& -> ")
+// println((letter & digit)("abc1"))
+println(word("Yes!"))
 
+
+// JSON Parsing
 // BNF notation for JSON
 // value ::= obj | arr | stringLiteral | floatingPointNumber | "null" | "true" | "false".
 // obj ::= "{" [ members ] "}".
