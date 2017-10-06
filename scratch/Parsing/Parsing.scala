@@ -239,8 +239,10 @@ def _false = string("false")
 def str(in: String): Parser[String] = 
   whitespace~string(in) ^^ { case (wspaces, useful) => useful }
 
-import scala.util.{Try, Success, Failure}
+
 class ParseException(msg:String) extends Exception(msg)
+
+import scala.util.{Try, Success, Failure}
 def parse[T](inp: String, p: Parser[T]): Try[T] = p(inp) match {
   case List() => Failure(new ParseException(inp))
   case List((x, _)) => Success(x)
@@ -346,7 +348,7 @@ def parse[T](inp: String, p: Parser[T]): Try[T] = p(inp) match {
 // println(((stringLiteral~(str(":")~stringLiteral)) ^^ { case (k,(_,v)) => (k,v) })("""  "name":"test""""))
 // println("& -> ")
 // println((letter & digit)("abc1"))
-println(word("Yes!"))
+// println(word("Yes!"))
 
 
 // JSON Parsing
@@ -357,9 +359,8 @@ println(word("Yes!"))
 // member ::= stringLiteral ":" value.
 // arr ::= "[" [ values ] "]".
 // values ::= value {"," value}.
-// stringLiteral ::= """[\"|']([^"\p{Cntrl}\\]|\\[\\'"bfnrt]|\\u[a-fA-F0-9]{4})*[\"|']"""
+// stringLiteral ::= """\"([^"\p{Cntrl}\\]|\\[\\'"bfnrt]|\\u[a-fA-F0-9]{4})*\""""
 // floatingPointNumber ::= "-?(\d+(\.\d*)?|\d*\.\d+)([eE][+-]?\d+)?"
-
 
 object ParseJSON {
   def obj : Parser[Map[String, Any]] =
@@ -372,7 +373,14 @@ object ParseJSON {
     (stringLiteral ~ str(":") ~ value) ^^ { case((k,_),v) => (k,v) }
     
   def value : Parser[Any] = 
-     (obj | arr | stringLiteral | (floatingPointNumber ^^ (_.toDouble)) | (_null ^^ (_ => null)) | (_true ^^ (_ => true)) | (_false  ^^ (_ => false)))
+     (obj 
+       | arr 
+       | stringLiteral 
+       | floatingPointNumber ^^ (_.toDouble)
+       | _null               ^^ (_ => null)
+       | _true               ^^ (_ => true)
+       | _false              ^^ (_ => false)
+     )
      
   def apply(input: String) = parse(input, obj)
 }
@@ -389,6 +397,7 @@ object ParseJSON {
 // println(ParseJSON("""{"name":{}}"""))
 // println(ParseJSON("""{"name":[]}"""))
 // println(ParseJSON("""["hello"]"""))
+
 // We can minimally implement
 // value ::= obj | arr | stringLiteral
 // obj ::= "{" [ members ] "}".
@@ -398,7 +407,7 @@ object ParseJSON {
 // values ::= value {"," value}.
 // stringLiteral ::= """[\"|']([^"\p{Cntrl}\\]|\\[\\'"bfnrt]|\\u[a-fA-F0-9]{4})*[\"|']"""
 
-val sampleJSON = """
+val sample = """
 {
   "contact": {
     "name": "First Last",
@@ -417,5 +426,5 @@ val sampleJSON = """
   }
 }
 """
-println(ParseJSON(sampleJSON))
+println(ParseJSON(sample))
   
