@@ -109,29 +109,30 @@ implicit class ParserExtensions[T](p: Parser[T]) {
   
   // other sequential composition operators
   // return right result, ignore left (a.k.a second combinator)
-  def ~> [U](q: => Parser[U]) = (p~q) ^^ { case (x,y) => y }
+  def ~> [U](q: => Parser[U]) = p~q ^^ { case (x,y) => y }
   // return left result, ignore right (a.k.a first combinator)
-  def <~ [U](q: => Parser[U]) = (p~q) ^^ { case (x,y) => x }
+  def <~ [U](q: => Parser[U]) = p~q ^^ { case (x,y) => x }
 
   //optional parser: convert to Option[T].
   def ? : Parser[Option[T]] = p ^^ (Option(_)) | success(None)
   
+  
   import scala.language.postfixOps
   def * : Parser[List[T]] = 
     // (p~(p*) ^^ { case(x, xs) => x::xs })(input)
-    (p~(p*) ^^ { case (x,xs) => x::xs } | success(List()))
+    p~(p*) ^^ { case (x,xs) => x::xs } | success(List())
 
   // Sometimes we are interested in non-empty sequences of items.
   // So, we define a + combinator, in terms of *
-  def + : Parser[List[T]] = (p~(p*) ^^ { case (x,xs) => x::xs })
+  def + : Parser[List[T]] = p~(p*) ^^ { case (x,xs) => x::xs }
   
   // many parsing with seperator
   def * (sep: Parser[Any]) : Parser[List[T]] = 
-    (p~((sep~>p)*) ^^ { case (x,xs) => x::xs }|success(List()))
+    p~(sep~>p*) ^^ { case (x,xs) => x::xs } | success(List())
     
   // many1 parsing with seperator
   def + (sep: Parser[Any]) : Parser[List[T]] = 
-    (p~((sep~>p)+) ^^ { case (x,xs) => x::xs }|success(List()))    
+    p~(sep~>p*) ^^ { case (x, xs) => x :: xs }
 }
 
 def satisfy(pred: Char => Boolean) = 
@@ -143,15 +144,13 @@ def digit = satisfy (Character.isDigit _)
 // def alphanum = satisfy (Character.isLetterOrDigit _)
 def alphanum = letter | digit
 
-def string(s: String): Parser[String] = s.toList match {
-  case List() => success("")
-  case x::xs =>
-    ((char(x)~string(xs.mkString)) >>= (_ => success((x::xs).mkString)))
-}
-  
+def string(s: String): Parser[String] =
+  if (s.isEmpty) success("")
+  else char(s.head)~string(s.tail) ^^ {case (x,xs) => x + xs} 
+
 // def string(s: String): Parser[String] = s.toList match {
-//   case Nil => success("")
-//   case x::xs => char(x) >>= (_ => (string(xs.mkString) >>= (_ =>success((x::xs).mkString))))
+//   case List() => success("")
+//   case x::xs => char(x)~string(xs.mkString) ^^ {case (x,xs) => x + xs }
 // }
 
 import scala.util.matching.Regex
@@ -235,9 +234,8 @@ def _true = string("true")
 
 def _false = string("false")
 
-  
-def str(in: String): Parser[String] = 
-  whitespace~string(in) ^^ { case (wspaces, useful) => useful }
+
+def str(in: String): Parser[String] = whitespace~>string(in) 
 
 
 class ParseException(msg:String) extends Exception(msg)
@@ -336,6 +334,9 @@ def parse[T](inp: String, p: Parser[T]): Try[T] = p(inp) match {
 // println("+ with seperator (many1 - one or more) parser ->")
 // println((letter+(string(",")))("abc"))
 // println((letter+(string(",")))("a,b,cdefg"))
+// println((integer+(string(",")))("3,3"))
+// println((integer+(string(",")))("3"))
+// println((integer+(string(",")))(""))
 // println("integer ->")
 // println(integer("12345"))
 // println(integer("-123"))
@@ -360,7 +361,7 @@ def parse[T](inp: String, p: Parser[T]): Try[T] = p(inp) match {
 // arr ::= "[" [ values ] "]".
 // values ::= value {"," value}.
 // stringLiteral ::= """\"([^"\p{Cntrl}\\]|\\[\\'"bfnrt]|\\u[a-fA-F0-9]{4})*\""""
-// floatingPointNumber ::= "-?(\d+(\.\d*)?|\d*\.\d+)([eE][+-]?\d+)?"
+// floatingPointNumber ::= "[-|+]?(\d+(\.\d*)?|\d*\.\d+)([eE][+-]?\d+)?"
 
 object ParseJSON {
   def obj : Parser[Map[String, Any]] =
