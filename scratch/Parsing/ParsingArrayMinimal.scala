@@ -41,14 +41,12 @@ implicit class ParserExtensions[T](p: Parser[T]) {
       (x, in1) <- p(in)
       (y, in2) <- q(in1)
     } yield ((x,y), in2)
-    
   // This is flatMap in Scala.
   def >>= [U](f: T => Parser[U]): Parser[U] =
     (in: String) => p(in) match {
       case Some((x, in1)) => f(x)(in1)
       case None => None
     }
-
   // This is map in Scala.
   def ^^ [U](f: T => U): Parser[U] = 
     p >>= (x => success(f(x)))
@@ -86,9 +84,6 @@ def digitAsInt: Parser[Int] =
   digit ^^ (ch => Integer.parseInt(ch.toString))
 
 def alphanum: Parser[Any] = letter | digitAsInt
-
-def word: Parser[String] =
-  letter~word ^^ { case (x,xs) => x + xs } | success("")
 
 // Generalizing word to many.
 def many[T](p: Parser[T]) : Parser[List[T]] = 
