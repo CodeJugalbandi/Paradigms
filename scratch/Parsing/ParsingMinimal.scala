@@ -6,6 +6,7 @@
 // arr ::= "[" [ values ] "]".
 // values ::= value {"," value}.
 // stringLiteral ::= """\"([^"\p{Cntrl}\\]|\\[\\'"bfnrt]|\\u[a-fA-F0-9]{4})*\""""
+// floatingPointNumber ::= "-?(\d+(\.\d*)?|\d*\.\d+)([eE][+-]?\d+)?"
 
 type Parser[T] = String => Option[(T, String)]
 
@@ -86,9 +87,6 @@ def string(s: String): Parser[String] =
   if (s.isEmpty) success("")
   else char(s.head)~string(s.tail) ^^ {case (x,xs) => x + xs}
 
-// def word : Parser[String] =
-//   letter~word ^^ { case (x,xs) => x + xs } | success("")
-
 def many[T](p: Parser[T]) : Parser[List[T]] = 
   p~many(p) ^^ { case (x, xs) => x :: xs } | success(List())
 
@@ -131,14 +129,9 @@ object ArrayParser {
   // stringLiteral ::= """\"([^"\p{Cntrl}\\]|\\[\\'"bfnrt]|\\u[a-fA-F0-9]{4})*\""""
   // floatingPointNumber ::= "-?(\d+(\.\d*)?|\d*\.\d+)([eE][+-]?\d+)?"
 
-  def value =  (
-   arr
-    | stringLiteral
-    | floatingPointNumber  ^^ (_.toDouble)
-  )
+  def value = arr | stringLiteral | floatingPointNumber  ^^ (_.toDouble)
 
-  def arr: Parser[List[Any]] = 
-    str("[") ~> (value*(str(","))) <~ str("]")
+  def arr: Parser[List[Any]] = str("[") ~> (value*(str(","))) <~ str("]")
 
   def apply(in: String) = parse(in, arr)
 }
@@ -146,7 +139,7 @@ object ArrayParser {
 // Sample Array
 val eatry = """
 [
-   "Maratha Pavillion - मराठा पविलीयन",
+   "Maratha Pavillion - मराठा पविल्लीयन",
    19.0760, "° N", 72.8777, "° E", "Mumbai, भारत", 
    ["123 456-7890", "987 654-3210"]
 ]
