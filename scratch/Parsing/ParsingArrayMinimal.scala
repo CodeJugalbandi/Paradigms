@@ -5,7 +5,6 @@
 // 
 // NOTE: For simplicity, we will not consider whitespaces to be parsed.
 // 
-// 
 // 1. Show minimalist code to start with
 // 2. Take one step to demo value by extension of feature
 //    - repetition
@@ -85,7 +84,6 @@ def digitAsInt: Parser[Int] =
 
 def alphanum: Parser[Any] = letter | digitAsInt
 
-// Generalizing word to many.
 def many[T](p: Parser[T]) : Parser[List[T]] = 
   p~many(p) ^^ { case (x, xs) => x :: xs } | success(List())
 
