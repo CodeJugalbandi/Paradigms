@@ -2,22 +2,22 @@
 
       ⎕IO←0
 
-      ArrayParser←{             ⍝ Convert string representation to array  
-          ~((⊃,(⊃⌽))⍵)≡'[]':'missing outer []' ⎕SIGNAL 11 
-          inner←1↓¯1↓⍵                 ⍝ drop []
-          here←0=+\1 ¯1 0['[]'⍳inner]  ⍝ (here=1) means not within []
-          items←{1↓¨(1,here∧⍵=',')⊂',',⍵} inner ⍝ cut on "," (not within []) 
-          leaf←~sub←'['=⊃¨items        ⍝ sub-arrays vs leaves
+      ArrayParser←{   ⍝ Convert string representation to array  
+          '[]'≢(⊣/,⊢/)⍵: 'missing outer []' ⎕SIGNAL 11 
+          inner←1↓¯1↓⍵                   ⍝ drop []
+          here←0=+\1 ¯1 0['[]'⍳inner]    ⍝ (here=1) means not in []
+          items←{1↓¨(1,here∧⍵=',')⊂',',⍵} inner ⍝ cut on "," which are not within []
+          leaf←~sub←'['=⊃¨items          ⍝ sub-arrays vs leaves
           values←∇¨@(⍸sub)⍣(∨/sub)⊢items ⍝ recursively parse sub-arrays
-          LeafParser@(⍸leaf)⊢values ⍝ parse leaf "items"
+          LeafParser@(⍸leaf)⊢values      ⍝ parse leaves
       }         
 
       LeafParser←{             ⍝ parse leaves (single letters or digit)
           1∨.≠≢¨⍵ : 'only one char allowed per item' ⎕SIGNAL 11
-          values←⊃¨⍵            
+          values←⊃¨⍵           ⍝ extract scalar items 
           ~∧/values∊⎕UCS∊48 65 97+⍳¨10 26 26: 'a-z, A-Z, 0-9 only' ⎕SIGNAL 11
           (⎕D∘⍳)@(∊∘⎕D)values  ⍝ replace digits by corresponding integers
-          }
+      }
 
    :Section Tests
 
@@ -51,4 +51,4 @@
    :EndSection
 
 :EndNamespace
-⍝)(!Test!mkrom!2017 10 24 9 4 48 0!0
+⍝)(!Test!mkrom!2017 10 24 9 17 26 0!0
