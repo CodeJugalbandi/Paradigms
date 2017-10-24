@@ -15,7 +15,6 @@
       LeafParser←{             ⍝ parse leaves (single letters or digit)
           1∨.≠≢¨⍵ : 'only one char allowed per item' ⎕SIGNAL 11
           values←⊃¨⍵           ⍝ extract scalar items 
-          ~∧/values∊⎕UCS∊48 65 97+⍳¨10 26 26: 'a-z, A-Z, 0-9 only' ⎕SIGNAL 11
           (⎕D∘⍳)@(∊∘⎕D)values  ⍝ replace digits by corresponding integers
       }
 
@@ -51,4 +50,3 @@
    :EndSection
 
 :EndNamespace
-⍝)(!Test!mkrom!2017 10 24 9 17 26 0!0

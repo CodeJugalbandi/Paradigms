@@ -8,7 +8,6 @@
           items←{1↓¨(⍵=',')⊂⍵} ',',inner ⍝ cut on ","
           1∨.≠≢¨items: 'only one char allowed per item' ⎕SIGNAL 11
           values←⊃¨items      ⍝ 1-element vectors to scalars
-          ~∧/values∊⎕UCS∊48 65 97+⍳¨10 26 26: 'a-z, A-Z, 0-9 only' ⎕SIGNAL 11
           (⎕D∘⍳)@(∊∘⎕D)values ⍝ replace digits by corresponding integers
       }         
 
