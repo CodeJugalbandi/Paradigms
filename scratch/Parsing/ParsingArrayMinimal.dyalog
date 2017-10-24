@@ -3,9 +3,10 @@
       ⎕IO←0
 
       ArrayParser←{            ⍝ Convert string representation to array
-          ~((⊃,(⊃⌽))⍵)≡'[]':'missing outer []' ⎕SIGNAL 11
-          items←{1↓¨(⍵=',')⊂⍵} ',',1↓¯1↓⍵ ⍝ drop "[]" and cut on ","
-          1∨.≠≢¨items:'only one char allowed per item' ⎕SIGNAL 11
+          ~((⊃,(⊃⌽))⍵)≡'[]':'missing outer []' ⎕SIGNAL 11 
+          inner←1↓¯1↓⍵                   ⍝ drop "[]"
+          items←{1↓¨(⍵=',')⊂⍵} ',',inner ⍝ cut on ","
+          1∨.≠≢¨items: 'only one char allowed per item' ⎕SIGNAL 11
           values←⊃¨items       ⍝ 1-element vectors to scalars
           ~∧/values∊⎕UCS∊48 65 97+⍳¨10 26 26: 'a-z, A-Z, 0-9 only' ⎕SIGNAL 11
           (⎕D∘⍳)@(∊∘⎕D)values  ⍝ replace digits by corresponding integers
@@ -41,4 +42,4 @@
    :EndSection
 
 :EndNamespace
-⍝)(!Test!mkrom!2017 10 23 22 46 56 0!0
+⍝)(!Test!mkrom!2017 10 24 9 4 45 0!0

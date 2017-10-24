@@ -4,17 +4,17 @@
 
       ArrayParser←{             ⍝ Convert string representation to array  
           ~((⊃,(⊃⌽))⍵)≡'[]':'missing outer []' ⎕SIGNAL 11 
-          text←1↓¯1↓⍵           ⍝ drop []
-          here←0=+\1 ¯1 0['[]'⍳text]  ⍝ (here=1) means not within []
-          items←{1↓¨(1,here∧⍵=',')⊂',',⍵} text ⍝ cut on "," (not within []) 
-          leaf←~sub←'['=⊃¨items ⍝ sub-arrays vs leaves
+          inner←1↓¯1↓⍵                 ⍝ drop []
+          here←0=+\1 ¯1 0['[]'⍳inner]  ⍝ (here=1) means not within []
+          items←{1↓¨(1,here∧⍵=',')⊂',',⍵} inner ⍝ cut on "," (not within []) 
+          leaf←~sub←'['=⊃¨items        ⍝ sub-arrays vs leaves
           values←∇¨@(⍸sub)⍣(∨/sub)⊢items ⍝ recursively parse sub-arrays
-          1∨.≠≢¨leaf/items : 'only one char allowed per item' ⎕SIGNAL 11
           LeafParser@(⍸leaf)⊢values ⍝ parse leaf "items"
       }         
 
       LeafParser←{             ⍝ parse leaves (single letters or digit)
-          values←⊃¨⍵
+          1∨.≠≢¨⍵ : 'only one char allowed per item' ⎕SIGNAL 11
+          values←⊃¨⍵            
           ~∧/values∊⎕UCS∊48 65 97+⍳¨10 26 26: 'a-z, A-Z, 0-9 only' ⎕SIGNAL 11
           (⎕D∘⍳)@(∊∘⎕D)values  ⍝ replace digits by corresponding integers
           }
@@ -51,4 +51,4 @@
    :EndSection
 
 :EndNamespace
-⍝)(!Test!mkrom!2017 10 23 22 48 0 0!0
+⍝)(!Test!mkrom!2017 10 24 9 4 48 0!0
