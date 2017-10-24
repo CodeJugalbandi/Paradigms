@@ -7,11 +7,10 @@ Let us consider the problem of parsing arrays.  Examples could be:
 * An heterogeneous array with a letter and a digit - ```"[a,1]"```,
 * Nested Arrays - ```"[a,[1]]", "[अ,१,[२,ब]]"```
 
-
-The BNF (Backus-Naur Form) grammar for Array Parsing can be described as:
+The BNF (Backus-Naur Form) grammar for Arrays containing letters, digits and nested arrays can be described as:
 
 ```
-value ::= arr | letter | digit
+value ::= arr | letter | digit.
 arr ::= "[" [ values ] "]".
 values ::= value {"," value}.
 ```
@@ -24,7 +23,7 @@ Code Jugalbandi in Functional Programming & Array-Oriented Paradigms
 
 **BRAHMA** Lets look at implementing this in APL.
 
-**BRAHMA** I'll approach this in 2 parts, first make sure the parsing of digits and letter happens, then look at parsing multiple elements and finally look at parsing nested arrays.
+**BRAHMA** I'll approach this in 3 parts, first make sure the parsing of digits and letter happens, then look at parsing multiple elements and finally look at parsing nested arrays.
 
 ```apl
 ⍝ TODO
@@ -81,7 +80,15 @@ println(success(1)("world"))       // Some((1, "world"))
 println(success("hello")("world")) // Some(("hello", "world"))
 ```
 
-**KRISHNA** Now, that we have these primitive parsers, we can start building complex parsers  by combining them.  Taking cues from BNF grammar - a language for defining a language, wherein it composes bigger grammar from smaller grammer.  In that light, lets define a sequential parser that consumes two parsers and produces another parser, thus combining the two parsers.  Operationally, the first parser in the sequence consumes the input and feeds its unparsed output as input to the second parser.  The sequence combinator thus applies the two parsers one after the other and returns the results of the two parsers as a pair along with the residual output from the second parser.
+**KRISHNA** Now, that we have these primitive parsers, we can start building complex parsers  by combining them.  Taking cues from BNF grammar - a language for defining a language, wherein it composes bigger grammar from smaller grammer. BNF grammar for an array can be given as:
+
+```
+value ::= array | letter | digit
+array ::= "[" [ values ] "]".
+values ::= value {"," value}.
+```
+
+**KRISHNA** In that light, lets define a sequential parser that consumes two parsers and produces another parser, thus combining the two parsers.  Operationally, the first parser in the sequence consumes the input and feeds its unparsed output as input to the second parser.  The sequence combinator thus applies the two parsers one after the other and returns the results of the two parsers as a pair along with the residual output from the second parser.
 
 ```scala
 def seq[T, U](p: Parser[T], q: Parser[U]): Parser[(T,U)] = 
@@ -228,7 +235,7 @@ println(parse("a", digitAsInt)) // None       type: Option[(Int, String)]
 **KRISHNA** Now, I can parse an array with single element like this:
 
 ```scala
-println(parse("[a]", char('[') ~ alphanum ~ char(']'))) // Some(((([,a),]),))
+println(parse("[a]", char('[') ~ (letter | digitAsInt) ~ char(']'))) // Some(((([,a),]),))
 ```
 
 **KRISHNA** If you look at the output, I'm really not interested in accumulating the square brackets, I'd like to drop them, so that I can simply extract the value.  For this, I'll write a drop left and drop right parsers.
@@ -244,7 +251,21 @@ implicit class ParserExtensions[T](p: Parser[T]) {
     p~q ^^ { case (x, y) => x }
 }
 
-println(parse("[a]", char('[') ~> alphanum <~ char(']'))) // Some((a,))
+println(parse("[a]", char('[') ~> (letter | digitAsInt) <~ char(']'))) // Some((a,))
+```
+**KRISHNA** Using this, I can start shaping an array parser like this:
+
+```scala
+object ParseArray {
+
+  def value = letter | digitAsInt
+  
+  def array = char('[') ~> value <~ char(']')
+  
+  def apply(in: String) = parse(in, array)
+}
+
+println(ParseArray("[a]")) // Some((a,))
 ```
 
 **KRISHNA** So this is how we can parse singleton arrays in a functional programming paradigm.  Brahma, can you show me, how will you modify APL code to parse multiple array elements?
@@ -257,7 +278,7 @@ println(parse("[a]", char('[') ~> alphanum <~ char(']'))) // Some((a,))
 
 **BRAHMA** Krishna, can you evolve your code to show how would you approach parsing multiple array elements?
 
-**KRISHNA** Yes, I'll have to evolve another parser combinator that will take care of parsing many elements.  I'll represent the many parser by symbol ```*```.
+**KRISHNA** Yes, I'll have to evolve another parser combinator that will take care of parsing many elements and return those as a list of elements.  I'll denote ```many``` parser by symbol ```*```.  
 
 ```scala
 implicit class ParserExtensions[T](p: Parser[T]) {
@@ -268,37 +289,87 @@ implicit class ParserExtensions[T](p: Parser[T]) {
     } yield ((x,y),in2)
   ...
   ...
-  def many[T](p: Parser[T]): Parser[List[T]] = 
-    p~many(p) ^^ { case (x, xs) => x :: xs } | success(List())
-    
+  import scala.language.postfixOps  
   def * : Parser[List[T]] = 
-    p~(p*) | success(List())
+    p~(p*) ^^ { case (x, xs) => x :: xs } | success(List())
 }
 ```
 
-**KRISHNA** In the ```many``` implementation, I apply the parser ```p``` once and compose with the same parser recursively until I exhaust all the elements or there are none available.
+**KRISHNA** In the many combinator ```*``` implementation, I apply the parser ```p``` once and compose with the same parser recursively until I exhaust all the elements or there are none available.  As ```*``` is applied postfix, I need to add the line ```import scala.language.postfixOps``` else I'll get a warning message from the compiler.
 
-**KRISHNA** 
+**KRISHNA** Further, I'll have to make sure that for the sequential ```~``` combinator, I use the call-by-name semantics denoted by ```=>``` for the ```q``` parser.  A call-by-name argument ```q``` will be evaluated only when it is needed, which is only after ```p``` has run. If call-by-value semantics is used, it will cause stack overflow without reading any input, when calling the many ```*``` combinator.
 
-**BRAHMA**  Let me now show you, how can I extend the existing implementation to make nested arrays parsing work.
+**KRISHNA** Finally, I'll have to add the base case for recursion, i.e., for empty string I'd OR ```|``` with ```success(List())``` parser.  
+
+**KRISHNA** Now that I have the ```many``` parser, I can parse many letters
+
+```scala
+println(parse("hi", letter*)) // Some((List('h','i'),))
+```
+
+**KRISHNA** Now, our array elements are separated by a comma ```,``` delimiter, so I'll create an overloaded version of the many ```*``` parser that takes in a separator parser as a parameter.  Also, just as in the earlier case, I had to take the second parser as call-by-name, so will I do in the ```~>``` combinator.  For symmetry, I'll also do it in ```<~``` combinator.
+
+```scala
+implicit class ParserExtensions[T](p: Parser[T]) {
+  def ~> [U](q: => Parser[U]): Parser[U] = 
+    p~q ^^ { case (x, y) => y }
+    
+  def <~ [U](q: => Parser[U]): Parser[T] = 
+    p~q ^^ { case (x, y) => x }
+  ...
+  ...
+  def * (sep: Parser[Any]): Parser[List[T]] = 
+    p~(sep~>p*) ^^ { case (x, xs) => x :: xs } | success(List())
+}
+
+println(parse("[a,1]", char('[') ~> (alphanum*(char(','))) <~ char(']'))) // Some((List(a,1),)
+```
+
+**KRISHNA** In here, I used the right ```~>``` combinator and drop the separator from the output and the rest is same as the ```*``` many combinator.  So, now I can modify the array parser as:
+
+```scala
+object ParseArray {
+
+  def value: Parser[Any] = letter | digitAsInt
+  
+  def array: Parser[List[Any]] = char('[') ~> (value*(char(','))) <~ char(']')
+  
+  def apply(in: String) = parse(in, array)
+}
+
+println(ParseArray("[a,1]")) // Some((List(a,1),)
+```
+
+**BRAHMA** Let me now show you, how can I extend the existing implementation to make nested arrays parsing work.
 
 ```apl
 ⍝ TODO
 ```
 
-**KRISHNA** For me to implement that change, all I've to do is add the ```arr``` clause to the existing grammar and make it mutually recursive.  
+**KRISHNA** For me to implement that change, all I've to do is add the ```array``` clause to the existing grammar and make it recursive.  
 
+```scala
+object ParseArray {
+
+  def value: Parser[Any] = array | letter | digitAsInt
+  
+  def array: Parser[List[Any]] = char('[') ~> (value*(char(','))) <~ char(']')
+  
+  def apply(in: String) = parse(in, array)
+}
+
+println(ParseArray("[a,1,[२,ब]]")) // Some((List(a,1,List(२,ब)),)
+```
 
 **BRAHMA** Lets reflect on this...
 
 Reflections
 -----------
 
-**KRISHNA** Most programming languages emphasize the use of control flow for managing programming logic...like the initial attempt in Scala, the logic is present in the ```toFizzBuzz``` function.   
+**KRISHNA** 
 
-**KRISHNA** Logic in APL is often most efficiently expressed in a data representation.  It is this representation that is processed using array operations, achieving the end result.  
+**KRISHNA** 
 
-**BRAHMA** So rather than rendering source structure that embeds the logic in the control flow of the program, in APL the logic is embedded in the data flow.
+**BRAHMA** 
 
-**BRAHMA** So, essentially this an eye-opening contrast - Control Flow or Data-Flow? Lets move to the next melody in our jugalbandi.
-
+**BRAHMA** 

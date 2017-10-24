@@ -59,6 +59,14 @@ implicit class ParserExtensions[T](p: Parser[T]) {
   import scala.language.postfixOps
   def * : Parser[List[T]] = 
     p~(p*) ^^ { case (x, xs) => x :: xs } | success(List())
+    
+  // long form of *   
+  // import scala.language.postfixOps
+  // def * : Parser[List[T]] = (in: String) => {
+  //   if (in.isEmpty) Some((List()), in)
+  //   else ((p~(p*) ^^ { case (x, xs) => x :: xs }))(in)
+  // }
+    
   // Right
   def ~> [U](q: => Parser[U]): Parser[U] = 
     p~q ^^ { case (x,y) => y }
@@ -104,9 +112,10 @@ object ArrayParser {
     
   def apply(in: String) = parse(in, arr)
 }
+println(parse("abc", letter*))
 // val sample = "[a]"
 // val sample = "[a1]"
 // val sample = "[a,1]"
 // val sample = "[a,[1]]"
-val sample = "[a,1,[2,b]]"
-println(ArrayParser(sample))
+// val sample = "[a,1,[2,b]]"
+// println(ArrayParser(sample))
