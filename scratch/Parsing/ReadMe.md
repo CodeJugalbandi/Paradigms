@@ -10,8 +10,8 @@ Let us consider the problem of parsing arrays.  Examples could be:
 The BNF (Backus-Naur Form) grammar for Arrays containing letters, digits and nested arrays can be described as:
 
 ```
-value ::= arr | letter | digit.
-arr ::= "[" [ values ] "]".
+value ::= array | letter | digit.
+array ::= "[" [ values ] "]".
 values ::= value {"," value}.
 ```
 
@@ -52,10 +52,8 @@ type Parser[T] = String => Option[(T, String)]
 **KRISHNA** Having defined parser type, we can now start implementing parsers.  The way we approach this is - we start with simple parsers and then build complicated parsers out of simple parsers.  An example of simple parser is one that consumes a single character from the string and returns that character along with the unused string.
 
 ```scala
-def item: Parser[Char] = (in: String) => in match {
-  case "" => None
-  case _  => Some((in.head, in.tail))
-}
+def item = (in: String) => 
+  if (in.isEmpty) None else Some((in.head, in.tail))
 
 println(item("hello")) // Some(h,ello)
 println(item(""))      // None
@@ -152,17 +150,15 @@ println(parse("world", item >>= (x => failure))) // None
 def satisfy(pred: Char => Boolean): Parser[Char] = ???
 ```
 
-**KRISHNA** If we recall, the earlier ```item``` parser consumed a character without any reservations, so we will use that and chain its output and apply the predicate.  If the predicate fails, return a failure parser and if it succeeds, return the accepted character in a success parser along with the residual input.
+**KRISHNA** If we recall, the earlier ```item``` parser consumed a character without any reservations, so we will use that to chain its output and apply the predicate.  If the predicate fails, return a failure parser and if it succeeds, return the accepted character in a success parser along with the residual input.
 
 ```scala
 def satisfy(pred: Char => Boolean): Parser[Char] = 
   item >>= (ch => if (pred(ch)) success(ch) else failure)
     
 println(parse("hello", satisfy(_ == 'h'))) // Some((h,ello))
-println(parse("world", satisfy(_ == 'h'))) //
-None
-println(parse("", satisfy(_ == 'h'))) //
-None
+println(parse("world", satisfy(_ == 'h'))) // None
+println(parse("", satisfy(_ == 'h')))      // None
 ```
 
 **KRISHNA** Using the satisfy parser, I can now build a parser that consumes a specific character from the input string and rejects everything else:
@@ -346,7 +342,9 @@ println(ParseArray("[a,1]")) // Some((List(a,1),)
 ⍝ TODO
 ```
 
-**KRISHNA** For me to implement that change, all I've to do is add the ```array``` clause to the existing grammar and make it recursive.  
+**BRAHMA** How would you do this in Scala?
+
+**KRISHNA** To implement that change, all I've to do is add the ```array``` clause to the existing grammar and make it recursive.  
 
 ```scala
 object ParseArray {

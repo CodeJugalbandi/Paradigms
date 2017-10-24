@@ -20,10 +20,13 @@ def success[T](t: T): Parser[T] = (in: String) => Some((t, in))
   
 def failure = (in: String) => None
 
-def item = (in: String) => in match {
-  case "" => None
-  case _ => Some((in.head, in.tail))
-}
+def item = (in: String) => 
+  if (in.isEmpty) None else Some((in.head, in.tail))
+
+// def item = (in: String) => in match {
+//   case "" => None
+//   case _ => Some((in.head, in.tail))
+// }
 
 def parse[T](in: String, p: Parser[T]) = p(in)
 
@@ -42,10 +45,21 @@ implicit class ParserExtensions[T](p: Parser[T]) {
     } yield ((x,y), in2)
   // This is flatMap in Scala.
   def >>= [U](f: T => Parser[U]): Parser[U] =
-    (in: String) => p(in) match {
-      case Some((x, in1)) => f(x)(in1)
-      case None => None
-    }
+    (in: String) => for {
+      (x, in1) <- p(in)
+      (y, in2) <- f(x)(in1)
+    } yield (y, in2)
+
+  // def >>= [U](f: T => Parser[U]): Parser[U] =
+  //     (in: String) => (for {
+  //       (x, in1) <- p(in)
+  //     } yield f(x)(in1)).flatten
+  // def >>= [U](f: T => Parser[U]): Parser[U] =
+  //   (in: String) => p(in) match {
+  //     case Some((x, in1)) => f(x)(in1)
+  //     case None => None
+  //   }
+
   // This is map in Scala.
   def ^^ [U](f: T => U): Parser[U] = 
     p >>= (x => success(f(x)))
