@@ -151,7 +151,7 @@ println(parse("world", item >>= (x => failure))) // None
 ```
 **KRISHNA**  This is called monadic sequencing, where the nest is removed, whereas the earlier combinator ```~``` is plain nested sequencing. So just like the earlier operator, if any one parser in the sequence fails, the entire sequence fails and if all parsers succeed, then the entire sequence succeeds.
 
-**KRISHNA** Using the above definition, I can now define another simple and a useful parser that consumes a character from input and checks that against a given predicate.  If the predicate is satisfied, then it returns that character else it simply fails.  Lets call this character parser ```satisfy```.  
+**KRISHNA** Usually we are interested in parsing particular characters. I should be able to specify which characters I'm interested in parsing and rejecting if it does not match my specification.  Using the above definition, I can now define another simple and a useful parser that consumes a character from input and checks that against a given predicate.  If the predicate is satisfied, then it returns that character else it simply fails.  Lets call this character parser ```satisfy```.  
 
 ```scala
 def satisfy(pred: Char => Boolean): Parser[Char] = ???
