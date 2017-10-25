@@ -5,9 +5,9 @@ Let us consider the problem of parsing arrays.  Examples could be:
 * An empty array - ```"[]"```, 
 * An array with single letter - ```"[a]"``` or a single digit - ```"[1]"```,
 * An heterogeneous array with a letter and a digit - ```"[a,1]"```,
-* Nested Arrays - ```"[a,[1]]", "[अ,१,[२,ब]]"```
+* Nested Arrays - ```"[[]]", "[a,[]]", "[a,[1]]", "[अ,१,[२,ब]]"```
 
-The BNF (Backus-Naur Form) grammar for Arrays containing letters, digits and nested arrays can be described as:
+The BNF (Backus-Naur Form) or EBNF (Extended BNF) grammar for Arrays containing letters, digits and nested arrays can be described as:
 
 ```
 value ::= array | letter | digit.
@@ -15,6 +15,13 @@ array ::= "[" [ values ] "]".
 values ::= value {"," value}.
 ```
 
+Notation      | Meaning
+------------- | -------------
+```|```       | Alternative
+```[ ... ]``` | Optional
+```{ ... }``` | Repeated Zero, or One or Many times
+
+ 
 **_NOTE_**: For simplicity, we will not consider whitespaces to be parsed.
  
 
@@ -23,7 +30,7 @@ Code Jugalbandi in Functional Programming & Array-Oriented Paradigms
 
 **BRAHMA** Lets look at implementing this in APL.
 
-**BRAHMA** I'll approach this in 3 parts, first make sure the parsing of digits and letter happens, then look at parsing multiple elements and finally look at parsing nested arrays.
+**BRAHMA** I'll approach this in 3 parts, first make sure the parsing of digits and letter happens, then look at parsing multiple elements and finally arrive at parsing nested arrays.
 
 ```apl
 ⍝ TODO
@@ -78,7 +85,7 @@ println(success(1)("world"))       // Some((1, "world"))
 println(success("hello")("world")) // Some(("hello", "world"))
 ```
 
-**KRISHNA** Now, that we have these primitive parsers, we can start building complex parsers  by combining them.  Taking cues from BNF grammar - a language for defining a language, wherein it composes bigger grammar from smaller grammer. BNF grammar for an array can be given as:
+**KRISHNA** Now, that we have these primitive parsers, we can start building complex parsers  by combining them.  Taking cues from BNF grammar - a language for defining a language, wherein it composes bigger grammar from smaller grammer. BNF/EBNF grammar for an array can be given as:
 
 ```
 value ::= array | letter | digit
@@ -100,7 +107,7 @@ println(seq(success("hello"), item)("world")) // Some(((hello,w),orld))
 println(seq(item, failure)("world")) // None
 ```
 
-**KRISHNA** Now again, in effort to go closer to  BNF symbols used for defining grammar, i'll make `seq` sequential composition an infix operator, so that its possible to translate BNF grammar to a parser specification without much effort.  For this I'll resort to Scala's ```implicit class``` mechanism and move the ```seq``` method inside.   Scala requires that an implicit class must have a constructor that takes in a parameter on which the operator can be invoked (in other words a receiver).  So the first parameter ```p: Parser[T]``` goes in as constructor parameter and the second remains with the method itself.  I'll also rename ```seq``` to symbol ```~```, here is how it looks:
+**KRISHNA** I'll make `seq` sequential composition an infix operator, so that its possible to translate BNF grammar to a parser specification without much effort.  For this I'll resort to Scala's ```implicit class``` mechanism and move the ```seq``` method inside.   Scala requires that an implicit class must have a constructor that takes in a parameter on which the operator can be invoked (in other words a receiver).  So the first parameter ```p: Parser[T]``` goes in as constructor parameter and the second remains with the method itself.  I'll also rename ```seq``` to symbol ```~```, here is how it looks:
 
 ```scala
 implicit class ParserExtensions[T](p: Parser[T]) {
@@ -122,7 +129,7 @@ println(parse("world", success("hello") ~ item)) // Some(((hello,w),orld))
 println(parse("world", item ~ failure)) // None
 ```
 
-**KRISHNA** Many a times, we simply don't want to have the nested tuples in the output like the above, its messy. We would rather not return the output of the first parser, instead simply chain that output as input to the second parser in sequence.  I'll then return the output of the second parser - which comprises of its actual output value and residual input after both the parsers have done their job.  To enable chaining, in place of the second parameter ```q: Parser[U]```, i'll install a function that consumes the output produced by the first parser and returns the second parser.  We define another operator called ```chain``` or ```flatMap``` as generally named in Scala.   Haskell terminology uses ```bind``` or ```shove``` for it.  For this, i'll use the Haskell symbol ```>>=``` and define it within ParserExtensions so that its available in its infix form.  
+**KRISHNA** Many a times, we simply don't want to have the nested tuples in the output like the above, its messy to extract values out of it. So, we would rather not return the output of the first parser, instead simply chain that output as input to the second parser in sequence.  I'll then return the output of the second parser - which comprises of its actual output value and residual input after both the parsers have done their job.  To enable chaining, in place of the second parameter ```q: Parser[U]```, i'll install a function that consumes the output produced by the first parser and returns the second parser.  We define another operator called ```chain``` or ```flatMap``` as generally named in Scala.   Haskell calls it ```bind``` or ```shove``` for it.  For this, i'll use the Haskell symbol ```>>=``` and define it within ParserExtensions so that its available in its infix form.  
 
 ```scala
 implicit class ParserExtensions[T](p: Parser[T]) {
@@ -190,7 +197,7 @@ println(parse("hello", digit)) // None
 def alphanum = letter | digit
 ```
 
-**KRISHNA** But I don't have the choice ```|``` combinator, so I'll create one.  The choice combinator applies the first parser, if ```p``` fails, it tries the second parser ```q``` on the same input (allows back-tracking) and returns the output of the second parser.  In case the first succeeds, it returns the output from the first and does not evaluate the second.
+**KRISHNA** But I don't have the choice combinator, so I'll create one.  Now again, in effort to go closer to  BNF symbols used for defining grammar, I'll use the ```|``` symbol.  The choice combinator applies the first parser, if ```p``` fails, it tries the second parser ```q``` on the same input (allows back-tracking) and returns the output of the second parser.  In case the first succeeds, it returns the output from the first and does not evaluate the second.
 
 ```scala
 implicit class ParserExtensions[T](p: Parser[T]) {
@@ -264,6 +271,14 @@ object ParseArray {
 println(ParseArray("[a]")) // Some((a,))
 ```
 
+**KRISHNA**  Also look at the BNF/EBNF grammar and see how the above closely resembles its spec.
+
+```
+value ::= array | letter | digit.
+array ::= "[" [ values ] "]".
+values ::= value {"," value}.
+```
+
 **KRISHNA** So this is how we can parse singleton arrays in a functional programming paradigm.  Brahma, can you show me, how will you modify APL code to parse multiple array elements?
 
 **BRAHMA** Sure, lets look at this...
@@ -307,18 +322,17 @@ println(parse("hi", letter*)) // Some((List('h','i'),))
 
 ```scala
 implicit class ParserExtensions[T](p: Parser[T]) {
+  ...
+  ...
   def ~> [U](q: => Parser[U]): Parser[U] = 
     p~q ^^ { case (x, y) => y }
     
   def <~ [U](q: => Parser[U]): Parser[T] = 
     p~q ^^ { case (x, y) => x }
-  ...
-  ...
+
   def * (sep: Parser[Any]): Parser[List[T]] = 
     p~(sep~>p*) ^^ { case (x, xs) => x :: xs } | success(List())
 }
-
-println(parse("[a,1]", char('[') ~> (alphanum*(char(','))) <~ char(']'))) // Some((List(a,1),)
 ```
 
 **KRISHNA** In here, I used the right ```~>``` combinator and drop the separator from the output and the rest is same as the ```*``` many combinator.  So, now I can modify the array parser as:
@@ -335,6 +349,7 @@ object ParseArray {
 
 println(ParseArray("[a,1]")) // Some((List(a,1),)
 ```
+**KRISHNA** So this is how we can parse multiple array elements with a separator/delimiter.  How will you make nested parsing work in APL?
 
 **BRAHMA** Let me now show you, how can I extend the existing implementation to make nested arrays parsing work.
 
@@ -356,13 +371,14 @@ object ParseArray {
   def apply(in: String) = parse(in, array)
 }
 
-println(ParseArray("[a,1,[२,ब]]")) // Some((List(a,1,List(२,ब)),)
+println(ParseArray("[a,1,[ब,२]]")) // Some((List(a,1,List(ब,२)),)
 ```
 
 **BRAHMA** Lets reflect on this...
 
 Reflections
 -----------
+<!--TODO-->
 
 **KRISHNA** 
 
