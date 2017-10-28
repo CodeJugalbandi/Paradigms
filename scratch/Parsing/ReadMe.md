@@ -41,35 +41,39 @@ Code Jugalbandi in Functional Programming & Array-Oriented Paradigms
      }
 ```
 
-**BRAHMA** Each of the first three lines is a ```guard```, containing two expressions separated by a colon. The first expression is a logical test; if the test is true the second expression is executed and it's result becomes the result of the function. In this case, the first two lines are performing validation.
+**BRAHMA** Each of the first three lines is a ```guard```, containing two expressions separated by a colon.  The expression on the left is a logical test; if the test is true the second expression is executed and it's result becomes the result of the function. In this case, the first two lines are performing validation.
 
-**BRAHMA** The first test ```'[]'≢(⊣/,⊢/)⍵``` determines whether the string "[]" is different from a string formed from the first and last element of the argument. If this is the case, we throw an exception using ```⎕SIGNAL``` and the function terminates. We use the standard APL event number 11 (DOMAIN ERROR) with a customer error message, provided as the left argument.
+**BRAHMA** The first test ```'[]'≢(⊣/,⊢/)⍵``` determines whether the string "[]" is different from a string formed from the first and last element of the argument.  If this is the case, we throw an exception using ```⎕SIGNAL``` and the function terminates.  We use the standard APL event number 11 (DOMAIN ERROR) with a customer error message, provided as the left argument.
 
-**BRAHMA** The second test expression forms a new string called ```inner```by dropping the first and last character from the argument. If the length of inner is greater than one, an exception is thrown.
+**BRAHMA** The second test expression forms a new string called ```inner``` by dropping the first and last character from the argument.  If the length of inner is greater than one, an exception is thrown.
 
-**BRAHMA** The third guard expression tests whether the first (and only) element of inner is a member of ```⎕D```, a system constant containing the digits 0..9. If it is, the expresion on the right returns the index of the character in this array, essentially casting the character to an integer. If the character is not a digit, we fall through to the 4th line, which simply returns the string ```inner``` as the result.
+**BRAHMA** The third guard expression tests whether the first (and only) element of inner is a member of ```⎕D```, a system constant containing the digits 0..9.  If it is, the expresion on the right returns the index of the character in this array, essentially casting the character to an integer.  If the character is not a digit, we fall through to the 4th line, which simply returns the string ```inner``` as the result.
 
 **BRAHMA** Krishna, how would you play this tune in an OO or Functional paradigm?
 
-**KRISHNA** Ok, let me show you how this can be approached in a functional programming paradigm.  I'll use Scala once again.  We can visualize parser as a function that consumes a ```String``` and produces a structure of type ```T```.  Formalizing the parser type:
+**KRISHNA** Ok, let me show you how this can be approached in a functional programming paradigm.  I'd like to take full advantage of functional programming and create a solution which may require a bit more work to begin with, but will be easy to extend to the more complex cases and actually allow us to more or less use BNF 
+
+**KRISHNA** I'll use Scala once again, to construct a framework of ```parsers``` and ```infix``` compositional forms that will allow me to write statements which closely resemble BNF and have them produce an executable parser.  We can define a parser as a function that consumes a ```String``` and produces a structure of type ```T```:
 
 ```scala
 type Parser[T] = String => T
 ```
 
-**KRISHNA**  However, in reality a parser may not consume all the input string, so we return the unused string.  So lets change the return type to a tuple in order to accomodate the unused string:
+**KRISHNA**  A useful technique is to define a number of parsers which each look for a specific pattern and - if they find it - "consume" the part of the input string corresponding to that pattern.  We can change the return type to a tuple and also return the unused part of the string:
 
 ```scala
 type Parser[T] = String => (T, String)
 ```
 
-**KRISHNA** Also, the parser may or may not be able to parse the input string.  So, it either the produces the desired structure ```T``` or it does not.  Lets make this absence or presence explicit in the Parser return type using ```Option```:
+**KRISHNA** Each parser may or may not find the pattern it is looking for.  We can represent this by making the return t of the type ```T```optional:
 
 ```scala
 type Parser[T] = String => Option[(T, String)]
 ```
 
-**KRISHNA** Having defined parser type, we can now start implementing parsers.  The way we approach this is - we start with simple parsers and then build complicated parsers out of simple parsers.  An example of simple parser is one that consumes a single character from the string and returns that character along with the unused string.
+**KRISHNA** Having defined parser type, we can now start implementing parsers.  A functional language allows us to start with simple parsers to find single digits or letters, and then use combinators to produce compound parsers which search for sequences of patterns (a sequence of digits gives a number) - or look for alternative patterns (an array item can be number or a string).
+
+**KRISHNA** The first parser we will implement is one that consumes a single character from the string and returns that character along with the unused string:
 
 ```scala
 def item = (in: String) => 
