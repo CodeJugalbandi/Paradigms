@@ -28,17 +28,30 @@ Notation      | Meaning
 Code Jugalbandi in Functional Programming & Array-Oriented Paradigms
 ----
 
-**BRAHMA** Lets look at implementing this in APL.
+**BRAHMA** We have agreed to play three verses: first we will write a parser for an array containing a single digit or letter (or none). Then we will look at how we need to adapt our solutions in order to extend them, first to parse arrays with more than one elements, and finally nested arrays, where each item of an array can be another array.
 
-**BRAHMA** I'll approach this in 3 parts, first make sure the parsing of digits and letter happens, then look at parsing multiple elements and finally arrive at parsing nested arrays.
+**BRAHMA** Lets play the first verse in APL. The terseness of APL and the ability to experiment interactively encourages an "extreme" approach to solving problems, so I choose to write a minimal solution to the zero-or-one element case:
 
 ```apl
-⍝ TODO
+    ArrayParser←{
+       '[]'≢(⊣/,⊢/)⍵ : 'missing outer []' ⎕SIGNAL 11 
+       1<≢inner←1↓¯1↓⍵ : 'max one item allowed' ⎕SIGNAL 11
+       ⊃inner∊⎕D: ⎕D⍳inner
+       inner
+     }
 ```
 
-**BRAHMA** Krishna, how does this look in OO or Functional paradigm?
+**BRAHMA** Each of the first three lines is a ```guard```, containing two expressions separated by a colon. The first expression is a logical test; if the test is true the second expression is executed and it's result becomes the result of the function. In this case, the first two lines are performing validation.
 
-**KRISHNA** Ok, let me show you how this can be approached in a functional programming paradigm.  I'll use Scala once again.  We can visualize  parser as a function that consumes a ```String``` and produces a structure of type ```T```.  Formalizing the parser type:
+**BRAHMA** The first test ```'[]'≢(⊣/,⊢/)⍵``` determines whether the string "[]" is different from a string formed from the first and last element of the argument. If this is the case, we throw an exception using ```⎕SIGNAL``` and the function terminates. We use the standard APL event number 11 (DOMAIN ERROR) with a customer error message, provided as the left argument.
+
+**BRAHMA** The second test expression forms a new string called ```inner```by dropping the first and last character from the argument. If the length of inner is greater than one, an exception is thrown.
+
+**BRAHMA** The third guard expression tests whether the first (and only) element of inner is a member of ```⎕D```, a system constant containing the digits 0..9. If it is, the expresion on the right returns the index of the character in this array, essentially casting the character to an integer. If the character is not a digit, we fall through to the 4th line, which simply returns the string ```inner``` as the result.
+
+**BRAHMA** Krishna, how would you play this tune in an OO or Functional paradigm?
+
+**KRISHNA** Ok, let me show you how this can be approached in a functional programming paradigm.  I'll use Scala once again.  We can visualize parser as a function that consumes a ```String``` and produces a structure of type ```T```.  Formalizing the parser type:
 
 ```scala
 type Parser[T] = String => T
