@@ -1,8 +1,8 @@
-﻿:Namespace ParsingArray
+﻿:Namespace ParsingArrayNested
 
       ⎕IO←0
 
-      ArrayParser←{   ⍝ Convert string representation to array  
+      ArrayParser←{   ⍝ Convert string representation to a nested array  
           '[]'≢(⊣/,⊢/)⍵: 'missing outer []' ⎕SIGNAL 11 
           inner←1↓¯1↓⍵                   ⍝ drop []
           here←0=+\1 ¯1 0['[]'⍳inner]    ⍝ (here=1) means not in []

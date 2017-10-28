@@ -1,14 +1,12 @@
-﻿:Namespace ParsingArrayMinimal
+﻿:Namespace ParsingAtom
 
       ⎕IO←0
 
-      ArrayParser←{           ⍝ Convert string representation to an APL vector
+      ArrayParser←{           ⍝ Convert string representation to APL array with 0 or 1 elements
           '[]'≢(⊣/,⊢/)⍵: 'missing outer []' ⎕SIGNAL 11 
-          inner←1↓¯1↓⍵                   ⍝ drop "[]"
-          items←{1↓¨(⍵=',')⊂⍵} ',',inner ⍝ cut on ","
-          1∨.≠≢¨items: 'only one char allowed per item' ⎕SIGNAL 11
-          values←⊃¨items      ⍝ 1-element vectors to scalars
-          (⎕D∘⍳)@(∊∘⎕D)values ⍝ replace digits by corresponding integers
+          1<≢inner←1↓¯1↓⍵ : 'max one item allowed' ⎕SIGNAL 11 ⍝ drop "[]"
+          ⊃inner∊⎕D: ⎕D⍳inner  ⍝ replace digit by corresponding integer
+          inner
       }         
 
    :Section Tests
@@ -27,10 +25,11 @@
      
      ⍝ Tests which should succeed
       ('one letter: ',txt)assert(,'a')≡ArrayParser txt←'[a]'
-      ('letter and integer: ',txt)assert('a' 1)≡ArrayParser txt←'[a,1]'
+      ('one integer: ',txt)assert(,2)≡ArrayParser txt←'[2]'
+      ('empty array: ',txt) assert ''≡ArrayParser txt←'[]'
      
      ⍝ Tests which should fail
-      (ArrayParser catch'only one char')'[a1]'
+      (ArrayParser catch'max one item')'[ab]'
       (ArrayParser catch'missing outer []')'a,1'
      
       now←⎕AI[3]
@@ -40,4 +39,4 @@
    :EndSection
 
 :EndNamespace
-⍝)(!Test!mkrom!2017 10 25 19 59 45 0!0
+⍝)(!Test!mkrom!2017 10 25 19 59 1 0!0
