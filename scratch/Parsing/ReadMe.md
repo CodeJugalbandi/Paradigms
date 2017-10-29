@@ -24,11 +24,10 @@ Notation      | Meaning
  
 **_NOTE_**: For simplicity, we will not consider whitespaces to be parsed.
  
-
 Code Jugalbandi in Functional Programming & Array-Oriented Paradigms
 ----
 
-**BRAHMA** We have agreed to play three verses: first we will write a parser for an array containing a single digit or letter (or none). Then we will look at how we need to adapt our solutions in order to extend them, first to parse arrays with more than one elements, and finally nested arrays, where each item of an array can be another array.
+**BRAHMA** We have agreed to play three verses: first we will write a parser for an array containing a single digit or letter (or none). Then we will look at how we need to adapt our solutions in order to extend them, first to parse arrays with more than one element, and finally nested arrays, where each item of an array can be another array.
 
 **BRAHMA** Lets play the first verse in APL. The terseness of APL and the ability to experiment interactively encourages an "extreme" approach to solving problems, so I choose to write a minimal solution to the zero-or-one element case:
 
@@ -45,7 +44,7 @@ Code Jugalbandi in Functional Programming & Array-Oriented Paradigms
 
 **BRAHMA** The first test ```'[]'≢(⊣/,⊢/)⍵``` determines whether the string "[]" is different from a string formed from the first and last element of the argument.  If this is the case, we throw an exception using ```⎕SIGNAL``` and the function terminates.  We use the standard APL event number 11 (DOMAIN ERROR) with a customer error message, provided as the left argument.
 
-**BRAHMA** The second test expression forms a new string called ```inner``` by dropping the first and last character from the argument.  If the length of inner is greater than one, an exception is thrown.
+**BRAHMA** The second test expression forms a new string called ```inner``` by dropping the first and last character from the argument, and then checks the length; if the length of ```inner``` is greater than one, an exception is thrown.
 
 **BRAHMA** The third guard expression tests whether the first (and only) element of inner is a member of ```⎕D```, a system constant containing the digits 0..9.  If it is, the expresion on the right returns the index of the character in this array, essentially casting the character to an integer.  If the character is not a digit, we fall through to the 4th line, which simply returns the string ```inner``` as the result.
 
@@ -53,7 +52,7 @@ Code Jugalbandi in Functional Programming & Array-Oriented Paradigms
 
 **KRISHNA** Ok, let me show you how this can be approached in a functional programming paradigm.  I'd like to take full advantage of functional programming and create a solution which may require a bit more work to begin with, but will be easy to extend to the more complex cases and actually allow us to more or less use BNF 
 
-**KRISHNA** I'll use Scala once again, to construct a framework of ```parsers``` and ```infix``` compositional forms that will allow me to write statements which closely resemble BNF and have them produce an executable parser.  We can define a parser as a function that consumes a ```String``` and produces a structure of type ```T```:
+**KRISHNA** I'll use Scala once again, to construct a framework of ```parsers``` and ```infix``` compositional forms that will allow me to write statements which closely resemble BNF and have them produce an executable parser.  We can define a parser as a function that consumes a ```String``` and produces a structure of type ```T```, containing a more useful representation of the string.
 
 ```scala
 type Parser[T] = String => T
@@ -65,7 +64,7 @@ type Parser[T] = String => T
 type Parser[T] = String => (T, String)
 ```
 
-**KRISHNA** Each parser may or may not find the pattern it is looking for.  We can represent this by making the return t of the type ```T```optional:
+**KRISHNA** Each parser may or may not find the pattern it is looking for.  We can represent this by making the return of the type ```T```optional:
 
 ```scala
 type Parser[T] = String => Option[(T, String)]
@@ -75,14 +74,12 @@ type Parser[T] = String => Option[(T, String)]
 
 **KRISHNA** The first parser we will implement is one that consumes a single character from the string and returns that character along with the unused string:
 
-**Morten** I suggest we rename this parser something like "onechar", I would think of "item" as either a number or a string in an array
-
 ```scala
-def item = (in: String) => 
+def anychar = (in: String) => 
   if (in.isEmpty) None else Some((in.head, in.tail))
 
-println(item("hello")) // Some(h,ello)
-println(item(""))      // None
+println(anychar("hello")) // Some(h,ello)
+println(anychar(""))      // None
 ```
 
 **KRISHNA** In addition to parsers like item, which we can use to take our string apart, we'll need parsers that validate whether part of the string satisfies a particular constraint, like being a digit.  The next building block I want to define is a parser that always fails:
@@ -117,13 +114,10 @@ def seq[T, U](p: Parser[T], q: Parser[U]): Parser[(T,U)] =
       (y, out) <- q(out1)
   } yield ((x,y), out)
 
-println(seq(item, success("hello"))("world")) // Some(((w,hello),orld))
-println(seq(success("hello"), item)("world")) // Some(((hello,w),orld))
-println(seq(item, failure)("world")) // None
+println(seq(anychar, success("hello"))("world")) // Some(((w,hello),orld))
+println(seq(success("hello"), anychar)("world")) // Some(((hello,w),orld))
+println(seq(anychar, failure)("world")) // None
 ```
-
-**Morten** the examples with success don't seem very meaningful / motivated, would it not be better to have a sequence of two items:
-println(seq(item, item)("world")) // Some(((w,o),rld))
 
 **KRISHNA** In order to get closer to BNF, we are going to need our combinators to be infix operators.  I will take advantage of Scala's ```implicit class``` mechanism and define ```seq``` as an infix operator called ```~```.   Scala requires that an implicit class must have a constructor that takes in a parameter on which the operator can be invoked (in other words a receiver).  So the first parameter ```p: Parser[T]``` goes in as constructor parameter and the second remains with the method itself:
 
@@ -142,33 +136,33 @@ implicit class ParserExtensions[T](p: Parser[T]) {
 ```scala
 def parse[T](in: String, p: Parser[T]) = p(in)
 
-println(parse("world", item ~ item)) // Some(((w,o),rld))
-println(parse("world", item ~ failure)) // None
+println(parse("world", anychar ~ anychar)) // Some(((w,o),rld))
+println(parse("world", anychar ~ failure)) // None
 ```
 
-**KRISHNA** Sometimes we want to combine a parser which extracts data with one which will perform a test on the extracted data but otherwise return the data unchanged (unless it fails). For this purpose, I will define a combination which only returns the output of the second parser (which includes the residual input after both the parsers have done their job).  To enable this chaining, in place of the second parameter ```q: Parser[U]```, I'll take a function that consumes the output produced by the first parser and returns the second parser.  I'll define this as another infix operator using the Haskell symbol ```>>=```.
+**KRISHNA** Sometimes we want to combine a parser which extracts data with one which will perform a test on the extracted data but otherwise return the data unchanged (unless it fails). For this purpose, I will define a combination which only returns the output of the second parser (which includes the residual input after both the parsers have done their job).  To enable this chaining, in place of the second parameter ```q: Parser[U]```, I'll take a function that consumes the output produced by the first parser and returns the second parser.  This chaining is a common operation known as ```bind``` or```flatMap```, depending on which language you are using - I will define this as another infix operator using the Haskell symbol ```>>=```:
 
 ```scala
 implicit class ParserExtensions[T](p: Parser[T]) {
   ...
   def >>= [U](f: T => Parser[U]): Parser[U] = 
     (in: String) => for {
-      (x, in1) <- p(in)
-      (y, in2) <- f(x)(in1)
+      (x, out1) <- p(in)
+      (y, out) <- f(x)(out1)
     } yield (y, in2)
 }
 
-println(parse("world", item >>= (x => success(x)))) // Some((w,orld))
-println(parse("world", item >>= (x => failure))) // None
+println(parse("world", anychar >>= (x => success(x)))) // Some((w,orld))
+println(parse("world", anychar >>= (x => failure))) // None
 ```
 
 **KRISHNA**  Just like the earlier operator, if any one parser in the sequence fails, the entire sequence fails and if all parsers succeed, then the entire sequence succeeds.
 
-**KRISHNA**  One of the most common operations in parsing is to validate whether a character satisfies some kind of test, and fail if it does not.  If we recall, the earlier ```item``` parser consumed a character without any reservations. Using the above definition, I can now define another simple and a useful parser that uses ```item``` to consume a character from input, apply any predicate to it.  If the predicate is satisfied, then it returns that character else it simply fails. Lets call this parser ```satisfy```:  
+**KRISHNA**  One of the most common operations in parsing is to validate whether a character satisfies some kind of test, and fail if it does not.  The ```anychar``` parser consumes a character without any reservations. Using the above definition, I can now define another simple and a useful parser that uses ```anychar``` to consume a character from input, apply any predicate to it.  If the predicate is satisfied, then it returns that character else it simply fails. Lets call this parser ```satisfy```:  
 
 ```scala
 def satisfy(pred: Char => Boolean): Parser[Char] = 
-  item >>= (ch => if (pred(ch)) success(ch) else failure)
+  anychar >>= (ch => if (pred(ch)) success(ch) else failure)
     
 println(parse("hello", satisfy(_ == 'h'))) // Some((h,ello))
 println(parse("world", satisfy(_ == 'h'))) // None
@@ -195,13 +189,13 @@ println(parse("12345", digit)) //  Some((1,2345))
 println(parse("12345", letter)) // None
 ```
 
-**KRISHNA**  In addition to sequences, we I need to create a combinator which will allows one or more alternatives, like a letter or digit. I wantto use the ```|```  from BNF, so I will be able to write:
+**KRISHNA**  In addition to sequences, we I need to create a combinator which will allows one or more alternatives, like a letter or digit. I want to use the ```|```  from BNF, so I will be able to write:
 
 ```scala
 def alphanum = letter | digit
 ```
 
-**KRISHNA**  I need to define a combinator which will apply the first parser, and that fails, try the second parser ```q``` on the same input (allows back-tracking) and returns the output of the second parser.  In case the first succeeds, it returns the output from the first and does not evaluate the second. You can probably guess what this is going to look like now:
+**KRISHNA**  I need to define a combinator which will apply the first parser, and if that fails, try the second parser ```q``` on the same input and return the output of the second parser.  In case the first succeeds, it returns the output from the first and does not evaluate the second. You can probably guess what this is going to look like now:
 
 ```scala
 implicit class ParserExtensions[T](p: Parser[T]) {
@@ -219,7 +213,7 @@ println(parse("1a", alphanum)) // Some((1,a))
 println(parse("!!", alphanum)) // None
 ```
 
-**KRISHNA**  The last step is to be able to convert extracted sections of our parsed string to other types. For example, it is not useful that the digit parser produces a character, we really want it to be an integer to be able to something useful with it. So let's introduce a mapping operation on the parser that consumes a function which maps the input to the required output type.  I'll use the symbol ```^^``` double caret for that:
+**KRISHNA**  The last step is to be able to convert extracted sections of our parsed string to other types. For example, we really want the digit parser to return an integer to be able to something useful with it. So let's introduce a mapping operation on the parser that consumes a function which maps the input to the required output type.  I'll use the symbol ```^^``` double caret for that:
 
 ```scala
 implicit class ParserExtensions[T](p: Parser[T]) {
@@ -230,7 +224,7 @@ implicit class ParserExtensions[T](p: Parser[T]) {
 }
 ```
 
-**KRISHNA** The above ```map``` is implemented in terms of ```bind``` or```flatMap```.  If ```p``` succeeds, then the value is wrapped in a ```success``` parser. I can now use the above ```digit``` parser as:
+**KRISHNA** The above ```map``` is implemented in terms of ```>>=```, AKA ```bind``` or```flatMap```.  If ```p``` succeeds, then the value is wrapped in a ```success``` parser. I can now use the above ```digit``` parser as:
 
 ```scala
 def digitAsInt: Parser[Int] = digit ^^ (ch => Integer.parseInt(ch.toString))
@@ -274,38 +268,53 @@ println(parse("[a]", char('[') ~> (letter | digitAsInt) <~ char(']'))) // Some((
 object ParseArray {
 
   def value = letter | digitAsInt
-  
   def array = char('[') ~> value <~ char(']')
-  
+
   def apply(in: String) = parse(in, array)
 }
 
 println(ParseArray("[a]")) // Some((a,))
 ```
 
-**KRISHNA** So this is how we can parse singleton arrays in a functional programming paradigm.  Brahma, can you show me, how will you modify APL code to parse multiple array elements?
+**KRISHNA**  So this is how we can parse singleton arrays in a functional programming paradigm. 
 
-**Morten** Had to go to bed at this point.
+**BRAHMA**  That's very cool indeed. You wrote quite a bit more code that I did, but I can see the attraction of a general framework. I have seen APL programmers use similar techniques when writing parsers, but many APL users do not have a computer science background. I'm going to stick with my extreme / minimalistic approach because it is a more natural expression of the array paradigm. I hope I can make it through all three verses without regretting that too much, I am feeling very grateful that we decided we didn't have enough time today to parse a more complex grammar!
 
-**BRAHMA** Sure, lets look at this...
-
-
+**BRAHMA**  The next verse is a parser for arrays containing more than one item, for example ```[a,2,z]```. You may remember the singleton array parser in APL looked like this:
 
 ```apl
-⍝ TODO
+    ArrayParser←{
+       '[]'≢(⊣/,⊢/)⍵ : 'missing outer []' ⎕SIGNAL 11 
+       1<≢inner←1↓¯1↓⍵ : 'max one item allowed' ⎕SIGNAL 11
+       ⊃inner∊⎕D: ⎕D⍳inner
+       inner
+     }
 ```
 
-**BRAHMA** Krishna, can you evolve your code to show how would you approach parsing multiple array elements?
+**BRAHMA** The code to parse arrays with more than one item looks like this - 6 lines of code instead of 4:
 
-**KRISHNA** Yes, I'll have to evolve another parser combinator that will take care of parsing many elements and return those as a list of elements.  I'll denote ```many``` parser by symbol ```*```.  
+```apl
+    ArrayParser←{            ⍝ Convert string representation to an APL vector
+       '[]'≢(⊣/,⊢/)⍵: 'missing outer []' ⎕SIGNAL 11 
+       inner←1↓¯1↓⍵                   ⍝ drop "[]"
+       items←{1↓¨(⍵=',')⊂⍵} ',',inner ⍝ cut on ","
+       1∨.≠≢¨items: 'only one char allowed per item' ⎕SIGNAL 11
+       (⎕D∘⍳)@(∊∘⎕D) ∊values ⍝ replace digits by corresponding integers
+    } 
+```
+
+**BRAHMA**  The first line which validates that we have the expected square brackets, is unchanged.  In the second line, I still drop the first and last character, but no longer validate the total length of ```inner```.  Instead, I will break ```inner``` up into items using the partition primitive, using each occurrence of a new comma to start a new partition (an initial comma is inserted so that the first item is also included). The leading commas in each item are removed using ```1↓¨``` (1 drop each).
+
+**BRAHMA**  If any of the item lengths are not equal to 1, an exception is thrown. We use the enlist function (∊) to turn the array, which is a list of 1-element lists, into a simple list of characters.
+
+Finally, we use the "at" operator (@) to selectively the same type cast as in the singleton case - but only to those characters which are digits (satisfy the constraint ```(∊∘⎕D)```).  The @ operator takes two function operands: a transformation on the left and a selector on the right. It returns a result which is a copy of the right argument, with the transformation applied to the selected items. 
+
+**BRAHMA**  Krishna, I am looking forward to seeing how you will extend your parser framework to allow multiple array elements!
+
+**KRISHNA**  Yes, I am going to need another parser combinator, which will allow me to express that a pattern might be repeated more than once - and if this pattern is found, return the items as a list of elements.  In Extended BNF (EBNF), a postfix ```*``` means that a pattern can be repeated any number of times.  Fortunately, Scala allows me to do exactly what I want; I can create a ```many``` parser as a postfix symbol ```*```.  
 
 ```scala
 implicit class ParserExtensions[T](p: Parser[T]) {
-  def ~ [U](q: => Parser[U]): Parser[(T,U)] = 
-    (in: String) => for {
-      (x, in1) <- p(in)
-      (y, in2) <- q(in1)
-    } yield ((x,y),in2)
   ...
   ...
   import scala.language.postfixOps  
@@ -314,19 +323,23 @@ implicit class ParserExtensions[T](p: Parser[T]) {
 }
 ```
 
-**KRISHNA** In the many combinator ```*``` implementation, I apply the parser ```p``` once and compose with the same parser recursively until I exhaust all the elements or there are none available.  As ```*``` is applied postfix, I need to add the line ```import scala.language.postfixOps``` else I'll get a warning message from the compiler.
+**KRISHNA**  Above, I apply the parser ```p``` once and use ~ to call the same parser recursively or - if that fails I use | and the success parser to return an empty list.  As ```*``` is applied postfix, I need to add the line ```import scala.language.postfixOps``` else I'll get a warning message from the compiler.
 
-**KRISHNA** Further, I'll have to make sure that for the sequential ```~``` combinator, I use the call-by-name semantics denoted by ```=>``` for the ```q``` parser.  A call-by-name argument ```q``` will be evaluated only when it is needed, which is only after ```p``` has run. If call-by-value semantics is used, it will cause stack overflow without reading any input, when calling the many ```*``` combinator.
+**Morten** What is it that makes * postfix, is it simply that the definition follows right after the import of postfixOps? Also, the following text refers to a ```q``` parser, buthere isn't one - so I have reworded this to mention the recursive call, was that incorrect?
+
+**KRISHNA** Further, I need to make sure that for the sequential ```~``` combinator, I use the call-by-name semantics denoted by ```=>``` for the recursive call.  A call-by-name argument will be evaluated only when it is needed, which is only after the first call to ```p```. If call-by-value semantics is used, it will cause stack overflow without reading any input, when calling the many ```*``` combinator.
 
 **KRISHNA** Finally, I'll have to add the base case for recursion, i.e., for empty string I'd OR ```|``` with ```success(List())``` parser.  
 
-**KRISHNA** Now that I have the ```many``` parser, I can parse many letters
+**KRISHNA** Now that I have the ```many``` parser, I can parse a sequence of letters:
 
 ```scala
 println(parse("hi", letter*)) // Some((List('h','i'),))
 ```
 
-**KRISHNA** Now, our array elements are separated by a comma ```,``` delimiter, so I'll create an overloaded version of the many ```*``` parser that takes in a separator parser as a parameter.  Also, just as in the earlier case, I had to take the second parser as call-by-name, so will I do in the ```~>``` combinator.  For symmetry, I'll also do it in ```<~``` combinator.
+**KRISHNA**  Now, our array elements are separated by a comma ```,``` delimiter, so I'll create an overloaded version of the many ```*``` parser that takes in a separator parser as a parameter.  Also, just as in the earlier case, I had to take the second parser as call-by-name, so will I do in the ```~>``` combinator.  For symmetry, I'll also do it in ```<~``` combinator.
+
+**Morten** Are the combinators shown below not identical to the ~> and <~ which were defined previously(?)
 
 ```scala
 implicit class ParserExtensions[T](p: Parser[T]) {
@@ -343,13 +356,12 @@ implicit class ParserExtensions[T](p: Parser[T]) {
 }
 ```
 
-**KRISHNA** In here, I used the right ```~>``` combinator and drop the separator from the output and the rest is same as the ```*``` many combinator.  So, now I can modify the array parser as:
+**KRISHNA** Above, I used the right ```~>``` combinator to drop the separator from the output, the rest of the definition is same as the ```*``` many combinator.  Now, I can write the definition of an array parser which allows multiple array items as:
 
 ```scala
 object ParseArray {
 
   def value: Parser[Any] = letter | digitAsInt
-  
   def array: Parser[List[Any]] = char('[') ~> (value*(char(','))) <~ char(']')
   
   def apply(in: String) = parse(in, array)
@@ -357,23 +369,75 @@ object ParseArray {
 
 println(ParseArray("[a,1]")) // Some((List(a,1),)
 ```
-**KRISHNA** So this is how we can parse multiple array elements with a separator/delimiter.  How will you make nested parsing work in APL?
 
-**BRAHMA** Let me now show you, how can I extend the existing implementation to make nested arrays parsing work.
+**KRISHNA**  So this is how we can parse multiple array elements with a separator/delimiter.  The final verse we're going to play is to enhance our parsers to support nested arrays. How will you do that in APL?
+
+**BRAHMA**  My strategy to parse items is based on using the APL partition function with a boolean vector marking the beginning of each item on the left, and the string to be cut into pieces on the right. In the simple array case, I could simply base the partitioning on comparing the charcters in our string to comma:
 
 ```apl
-⍝ TODO
+     inner←'a,9,z'    ⍝ a 3-element aray (brackeys removed)
+     {1↓¨(','=⍵)⊂⍵}',',inner ⍝ prepend one comma, cut, drop leading commas
+┌─┬─┬─┐
+│a│9│z│
+└─┴─┴─┘
 ```
 
-**BRAHMA** How would you do this in Scala?
+**BRAHMA** The main problem with nested arrays is that some of the commas are inside nested cells, and should not be used to cut the array at the top level. Fortunately, it is easy to mask commas which are inside inner brackets, by computing the level of nesting of brackets. This can be done by looking each character up in the list '[]', mapping these two characters to +1 and -1, respectively, and doing a sum scan of the result:
 
-**KRISHNA** To implement that change, all I've to do is add the ```array``` clause to the existing grammar and make it recursive.  
+```apl
+     inner←'a,9,[b,[c,4]]'
+     depth←+\1 ¯1 0['[]'⍳inner]
+     ↑inner (1 0⍕depth) ⍝ format depth width 1, decimals 0
+a,9,[b,[c,4]]
+0000111222210
+```
+
+**BRAHMA** The last expression above displays inner and the computed depth of nesting. We can see that the depth increases by 1 at each "[" and decreases at each "]". In order to break the representation up at the top level, I only want to break on commas where the depth of nesting is 0:
+
+```apl
+    here←depth=0
+    {1↓¨(1,here∧⍵=',')⊂',',⍵} inner
+┌─┬─┬─────────┐
+│a│9│[b,[c,4]]│
+└─┴─┴─────────┘
+```
+
+**BRAHMA**  Once I have broken the representation up in this way, I can call the parser recursively on any item which begins with "[", and apply the same processing to the other items as for the simple array case.  I've decided to break the parsing or "leaf" items out into a separate function called ```LeafParser```. The complete solution for nested parsing can be written as follows:
+
+```apl
+     LeafParser←{             ⍝ parse leaves (single letters or digit)
+        1∨.≠≢¨⍵ : 'only one char allowed per item' ⎕SIGNAL 11
+        (⎕D∘⍳)@(∊∘⎕D) ∊⍵     ⍝ replace digits by corresponding integers
+     }
+     
+     ArrayParser←{   ⍝ Convert string representation to a nested array  
+        '[]'≢(⊣/,⊢/)⍵: 'missing outer []' ⎕SIGNAL 11 
+        inner←1↓¯1↓⍵                   ⍝ drop []
+        here←0=+\1 ¯1 0['[]'⍳inner]    ⍝ (here=0) means not in []
+        items←{1↓¨(1,here∧⍵=',')⊂',',⍵} inner ⍝ cut on "," which are not within []
+        leaf←~sub←'['=⊃¨items          ⍝ sub-arrays vs leaves
+        values←∇¨@(⍸sub)⍣(∨/sub)⊢items ⍝ recursively parse sub-arrays
+        LeafParser@(⍸leaf)⊢values      ⍝ parse leaves
+      }
+
+     ArrayParser'[a,9,[b,[c,4]],[t,5]]'
+┌─┬─┬───────┬───┐
+│a│9│┌─┬───┐│t 5│
+│ │ ││b│c 4││   │
+│ │ │└─┴───┘│   │
+└─┴─┴───────┴───┘
+```
+
+**BRAHMA**  The 3rd line of code from the bottom computes two masks ```sub``` (which identifies nested items) and ```leaf``` which marks the leaf items. In the final two lines, we use @ to apply the function recursively to the nested items, and ```LeafParser``` to the remaining items. Note that the symbol ```∇``` denotes self-reference, allowing functions to be recursive even if they have not been named.
+
+**BRAHMA**  So, I managed to get away with it, but at this point I had to make a significant structural change to my logic. I presume we're reaching the point where your framework starts to show its true value. How would you do this in Scala?
+
+**KRISHNA**  Indeed! To implement that change, all I need to do is add an ```array |``` to my definition of ```value```, making the whole thing recursive:
 
 ```scala
 object ParseArray {
 
   def value: Parser[Any] = array | letter | digitAsInt
-  
   def array: Parser[List[Any]] = char('[') ~> (value*(char(','))) <~ char(']')
   
   def apply(in: String) = parse(in, array)
