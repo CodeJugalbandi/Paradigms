@@ -7,8 +7,7 @@
           inner←1↓¯1↓⍵                   ⍝ drop "[]"
           items←{1↓¨(⍵=',')⊂⍵} ',',inner ⍝ cut on ","
           1∨.≠≢¨items: 'only one char allowed per item' ⎕SIGNAL 11
-          values←⊃¨items      ⍝ 1-element vectors to scalars
-          (⎕D∘⍳)@(∊∘⎕D)values ⍝ replace digits by corresponding integers
+          (⎕D∘⍳)@(∊∘⎕D)∊items ⍝ replace digits by corresponding integers
       }         
 
    :Section Tests
@@ -40,4 +39,4 @@
    :EndSection
 
 :EndNamespace
-⍝)(!Test!mkrom!2017 10 25 19 59 45 0!0
+⍝)(!Test!mkrom!2017 10 29 22 25 52 0!0

@@ -5,7 +5,7 @@
       ArrayParser←{   ⍝ Convert string representation to a nested array  
           '[]'≢(⊣/,⊢/)⍵: 'missing outer []' ⎕SIGNAL 11 
           inner←1↓¯1↓⍵                   ⍝ drop []
-          here←0=+\1 ¯1 0['[]'⍳inner]    ⍝ (here=1) means not in []
+          here←0=+\1 ¯1 0['[]'⍳inner]    ⍝ (here=0) means not in []
           items←{1↓¨(1,here∧⍵=',')⊂',',⍵} inner ⍝ cut on "," which are not within []
           leaf←~sub←'['=⊃¨items          ⍝ sub-arrays vs leaves
           values←∇¨@(⍸sub)⍣(∨/sub)⊢items ⍝ recursively parse sub-arrays
@@ -14,8 +14,7 @@
 
       LeafParser←{             ⍝ parse leaves (single letters or digit)
           1∨.≠≢¨⍵ : 'only one char allowed per item' ⎕SIGNAL 11
-          values←⊃¨⍵           ⍝ extract scalar items 
-          (⎕D∘⍳)@(∊∘⎕D)values  ⍝ replace digits by corresponding integers
+          (⎕D∘⍳)@(∊∘⎕D) ∊⍵     ⍝ replace digits by corresponding integers
       }
 
    :Section Tests
@@ -50,3 +49,4 @@
    :EndSection
 
 :EndNamespace
+⍝)(!Test!mkrom!2017 10 29 22 59 49 0!0
