@@ -31,18 +31,6 @@ e.g. Running over a range from 1-20 should give the following output
 1 2 Fizz 4 Buzz Fizz 7 8 Fizz Buzz 11 Fizz 13 14 FizzBuzz 16 17 Fizz 19 Buzz
 ```
 
-Part 2
-------
-Enhance FizzBuzz solution to perform the following:
-
-* If the number contains a three you must output the text 'Lucky'. This overrides any existing behaviour
-
-e.g. Running over a range from 1-20 should give the following output
-
-```
-1 2 Lucky 4 Buzz Fizz 7 8 Fizz Buzz 11 Fizz Lucky 14 FizzBuzz 16 17 Fizz 19 Buzz
-```
-
 Code Jugalbandi in Functional Programming & Array-Oriented Paradigms
 ----
 
@@ -125,7 +113,7 @@ println(fizzBuzzed)
 3 5 6 9 10 12 15 18 20
 ```
 
-**KRISHNA* The above gives me the indices of items to be replaced. I can generate the list of replacement values by indexing an array of 3 strings by the array of non-zero cases as follows:
+**KRISHNA** The above gives me the indices of items to be replaced. I can generate the list of replacement values by indexing an array of 3 strings by the array of non-zero cases as follows:
 
 ```apl
       ⎕←texts←('Fizz' 'Buzz' 'FizzBuzz')[case~0]
@@ -230,7 +218,7 @@ main = do
 
 **BRAHMA**  I see. Of course, that means you need to fully materialise the arrays, which could consume a lot of memory - right? In our Haskell solution, everything is lazy by default and so is list data-structure, so entire list is never materialized, only the needed element is brought in one at a time in memory and GCed after use.  Though it appears that we are process element-by-element, one cannot tell, theoretically, whether the ```zipWith``` function is splitting into data chunks or whether data is CPU bound or GPU bound.  The how-part is abstracted away - the code is declarative.  But, yes the lambda is applied to every element during zipping is a fact.
 
-**BRAHMA**  It is interesting how the features of a language suggest solutions. Now that I have seen the APL solution, I can write something similar in Haskell - although that solution would never have occurred to me before. I can't yet see how to get rid of lambda, but I could do something like this:
+**BRAHMA**  It is interesting how the features of a language suggest solutions. Now that I have seen the APL solution, I can write something similar in Haskell - although that solution would have not occurred to me before. I can't yet see how to get rid of lambda, but I could do something like this:
 
 ```haskell
 import Data.Digits (unDigits)
@@ -292,7 +280,7 @@ Reflections
 
 **KRISHNA** Logic in APL is often most efficiently expressed in a data representation.  It is this representation that is processed using array operations, achieving the end result.  
 
-**BRAHMA** So rather than rendering source structure that embeds the logic in the control flow of the program, in APL the logic is embedded in the data flow.
+**BRAHMA** So rather than rendering the source code that embeds the logic in the control flow of the program, in APL the logic is embedded in the data flow.
 
 **BRAHMA** So, essentially this an eye-opening contrast - Control Flow or Data-Flow? Lets move to the next melody in our jugalbandi.
 
