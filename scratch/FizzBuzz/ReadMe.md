@@ -34,32 +34,34 @@ e.g. Running over a range from 1-20 should give the following output
 Code Jugalbandi in Functional Programming & Array-Oriented Paradigms
 ----
 
-**BRAHMA** Lets look at implementing Fizz Buzz in Scala.  For simplicity and gradually building the solution in 2 parts as put above:
+**BRAHMA** Lets look at implementing Fizz Buzz in Haskell.  For simplicity and gradually building the solution in 2 parts as put above:
 
-```scala
-def toFizzBuzz(n: Int) = {
-    if (n % 15 == 0) "FizzBuzz"
-    else if (n % 3 == 0) "Fizz"
-    else if (n % 5 == 0) "Buzz"
-    else ""
-}                                             
+```haskell
+fizzBuzz :: Int -> String
+fizzBuzz n
+  | n `mod` 15 == 0 = "FizzBuzz"
+  | n `mod` 3 == 0 = "Fizz"
+  | n `mod` 5 == 0 = "Buzz"
+  | otherwise =  ""
 
-val fizzBuzzed = (1 to 20) map toFizzBuzz
-println(fizzBuzzed)
+main :: IO ()
+main = do  
+  print $ map fizzBuzz [1..20] -- ["","","Fizz","","Buzz","Fizz","","","Fizz","Buzz","","Fizz","","","FizzBuzz","","","Fizz","","Buzz"]
 ```
 
 **BRAHMA** ...and for Part-1, I simply have to replace last ```else``` 
 
-```scala
-def toFizzBuzz(n: Int) = {
-    if (n % 15 == 0) "FizzBuzz"
-    else if (n % 3 == 0) "Fizz"
-    else if (n % 5 == 0) "Buzz"
-    else n
-}                                             
+```haskell
+fizzBuzz :: Int -> String
+fizzBuzz n
+  | n `mod` 15 == 0 = "FizzBuzz"
+  | n `mod` 3 == 0 = "Fizz"
+  | n `mod` 5 == 0 = "Buzz"
+  | otherwise = show n
 
-val fizzBuzzed = (1 to 20) map toFizzBuzz
-println(fizzBuzzed)
+main :: IO ()
+main = do  
+  print $ map fizzBuzz [1..20] -- ["1","2","Fizz","4","Buzz","Fizz","7","8","Fizz","Buzz","11","Fizz","13","14","FizzBuzz","16","17","Fizz","19","Buzz"]
 ```
 
 **BRAHMA** So, this was a vanilla implementation of FizzBuzz.  Krishna, how does this look in an array-oriented language like APL?  
