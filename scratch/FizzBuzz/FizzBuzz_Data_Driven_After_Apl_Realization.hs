@@ -13,10 +13,11 @@ fizzBuzz n = take n result
     -- Part 1
     -- threes = cycle [0, 0, 1]
     -- fives  = cycle [0, 0, 0, 0, 1]
+    -- indices = [1..]
     -- fizzBuzz = ["", "Fizz", "Buzz", "FizzBuzz"]
     -- base2 = unDigits 2
     -- select = \f t i -> if(base2 [f,t] == 0) then show i else fizzBuzz !! (base2 [f,t])
-    -- result = zipWith3 select fives threes [1..]
+    -- result = zipWith3 select fives threes indices
 
     -- Part 2
     threes = cycle [0, 0, 1]

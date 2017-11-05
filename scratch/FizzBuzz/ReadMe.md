@@ -122,7 +122,7 @@ main = do
  Fizz  Buzz  Fizz  Fizz  Buzz  Fizz  FizzBuzz  Fizz  Buzz 
 ```
 
-**KRISHNA** I can compute the final result using the @ operator to merge these values into my input at the relevant positions:
+**KRISHNA** I can compute the final result using the ```@``` operator to merge these values into my input at the relevant positions:
 
 ```apl
     (texts@(⍸0≠case)) input
@@ -174,7 +174,7 @@ fizzBuzz n = take n result
         
 main :: IO ()
 main = do
-  print $ fizzBuzz 20
+  print $ fizzBuzz 20 -- ["","","Fizz","","Buzz","Fizz","","","Fizz","Buzz","","Fizz","","","FizzBuzz","","","Fizz","","Buzz"]
 ```
 
 **BRAHMA** Having completed that, I can implement Part-1 now, where I have to print indices instead of empty strings.  So, I introduce ```indices``` as a list of strings by using the ```map show``` to convert list of integers to strings.  I change ```zipWith``` to ```zipWith3``` accommodate ```indices``` as the third argument.
@@ -207,7 +207,7 @@ fizzBuzz n = take n result
         
 main :: IO ()
 main = do
-  print $ fizzBuzz 20
+  print $ fizzBuzz 20  -- ["1","2","Fizz","4","Buzz","Fizz","7","8","Fizz","Buzz","11","Fizz","13","14","FizzBuzz","16","17","Fizz","19","Buzz"]
 ```
 
 **BRAHMA**  So this is how I can be data-driven in Haskell.
@@ -230,14 +230,15 @@ fizzBuzz n = take n result
     where
         threes = cycle [0, 0, 1]
         fives  = cycle [0, 0, 0, 0, 1]
+        indices = [1..]
         fizzBuzz = ["", "Fizz", "Buzz", "FizzBuzz"]
         base2 = unDigits 2
         select = \f t i -> if(base2 [f,t] == 0) then show i else fizzBuzz !! (base2 [f,t])
-        result = zipWith3 select fives threes [1..]
+        result = zipWith3 select fives threes indices
     
 main :: IO ()
 main = do
-  print $ fizzBuzz 20
+  print $ fizzBuzz 20  -- ["1","2","Fizz","4","Buzz","Fizz","7","8","Fizz","Buzz","11","Fizz","13","14","FizzBuzz","16","17","Fizz","19","Buzz"]
 ```
 
 **KRISHNA**  An interesting question would be whether that allows the Haskell compiler to produce a better solution. Of course, compilers and interpreters are ofter optimised for idiomatic use of that language, so you need to be careful: something which looks more efficient might not be, if it takes the compiler by surprise.

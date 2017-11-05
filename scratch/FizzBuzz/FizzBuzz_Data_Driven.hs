@@ -27,7 +27,7 @@ fizzBuzz n = take n result
 main :: IO ()
 main = do
   start <- getCurrentTime
-  print $ fizzBuzz 2000
+  print $ fizzBuzz 20
   stop <- getCurrentTime  
   print $ diffUTCTime stop start  
   print "DONE"
