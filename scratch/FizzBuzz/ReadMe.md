@@ -285,7 +285,7 @@ main = do
 Reflections
 -----------
 
-**KRISHNA** Most programming languages emphasize the use of control flow for managing programming logic...like the initial attempt in Scala, the logic is present in the ```toFizzBuzz``` function.   
+**KRISHNA** Most programming languages emphasize the use of control flow for managing programming logic...like the initial attempt in Haskell, the logic is present in the ```toFizzBuzz``` function.   
 
 **KRISHNA** Logic in APL is often most efficiently expressed in a data representation.  It is this representation that is processed using array operations, achieving the end result.  
 
