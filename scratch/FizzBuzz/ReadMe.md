@@ -37,31 +37,37 @@ Code Jugalbandi in Functional Programming & Array-Oriented Paradigms
 **BRAHMA** Lets look at implementing Fizz Buzz in Haskell.  For simplicity and gradually building the solution in 2 parts as put above:
 
 ```haskell
-fizzBuzz :: Int -> String
-fizzBuzz n
+toFizzBuzz :: Int -> String
+toFizzBuzz n
   | n `mod` 15 == 0 = "FizzBuzz"
   | n `mod` 3 == 0 = "Fizz"
   | n `mod` 5 == 0 = "Buzz"
   | otherwise =  ""
 
+fizzBuzz :: Int -> [String]
+fizzBuzz n = map toFizzBuzz [1..n]
+
 main :: IO ()
 main = do  
-  print $ map fizzBuzz [1..20] -- ["","","Fizz","","Buzz","Fizz","","","Fizz","Buzz","","Fizz","","","FizzBuzz","","","Fizz","","Buzz"]
+  print $ fizzBuzz 20 -- ["","","Fizz","","Buzz","Fizz","","","Fizz","Buzz","","Fizz","","","FizzBuzz","","","Fizz","","Buzz"]
 ```
 
 **BRAHMA** ...and for Part-1, I simply have to replace last ```else``` 
 
 ```haskell
-fizzBuzz :: Int -> String
-fizzBuzz n
+toFizzBuzz :: Int -> String
+toFizzBuzz n
   | n `mod` 15 == 0 = "FizzBuzz"
   | n `mod` 3 == 0 = "Fizz"
   | n `mod` 5 == 0 = "Buzz"
   | otherwise = show n
 
+fizzBuzz :: Int -> [String]
+fizzBuzz n = map toFizzBuzz [1..n]
+
 main :: IO ()
 main = do  
-  print $ map fizzBuzz [1..20] -- ["1","2","Fizz","4","Buzz","Fizz","7","8","Fizz","Buzz","11","Fizz","13","14","FizzBuzz","16","17","Fizz","19","Buzz"]
+  print $ fizzBuzz 20 -- ["1","2","Fizz","4","Buzz","Fizz","7","8","Fizz","Buzz","11","Fizz","13","14","FizzBuzz","16","17","Fizz","19","Buzz"]
 ```
 
 **BRAHMA** So, this was a vanilla implementation of FizzBuzz.  Krishna, how does this look in an array-oriented language like APL?  
