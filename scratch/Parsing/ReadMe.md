@@ -42,7 +42,7 @@ Code Jugalbandi in Functional Programming & Array-Oriented Paradigms
 
 **BRAHMA** Each of the first three lines is a ```guard```, containing two expressions separated by a colon.  The expression on the left is a logical test; if the test is true the second expression is executed and it's result becomes the result of the function. In this case, the first two lines are performing validation.
 
-**BRAHMA** The first test ```'[]'≢(⊣/,⊢/)⍵``` determines whether the string "[]" is different from a string formed from the first and last element of the argument.  If this is the case, we throw an exception using ```⎕SIGNAL``` and the function terminates.  We use the standard APL event number 11 (DOMAIN ERROR) with a customer error message, provided as the left argument.
+**BRAHMA** The first test ```'[]'≢(⊣/,⊢/)⍵``` determines whether the string "[]" is different from a string formed from the first and last element of the argument.  If this is the case, we throw an exception using ```⎕SIGNAL``` and the function terminates.  We use the standard APL event number 11 (DOMAIN ERROR) with a custom error message, provided as the left argument.
 
 **BRAHMA** The second test expression forms a new string called ```inner``` by dropping the first and last character from the argument, and then checks the length; if the length of ```inner``` is greater than one, an exception is thrown.
 
@@ -50,15 +50,15 @@ Code Jugalbandi in Functional Programming & Array-Oriented Paradigms
 
 **BRAHMA** Krishna, how would you play this tune in an OO or Functional paradigm?
 
-**KRISHNA** Ok, let me show you how this can be approached in a functional  paradigm.  I'll use composability and create a solution which may require a bit more work to begin with, but will be easy to extend to the more complex cases.  It would actually allow us to more or less use BNF/EBNF. 
+**KRISHNA** Ok, let me show you how this can be approached in a functional  paradigm.  I'll use composability and create a solution which may require a bit more work to begin with, but will be easy to extend to the more complex cases.  It would actually allow us to more or less use EBNF to specify the syntax. 
 
-**KRISHNA** I'll use Scala once again, to construct a framework of ```Parser```s and ```infix``` compositional forms that will allow me to write expressions which closely resemble BNF and thus combine them produce an executable ```Parser```.  We can define a ```Parser``` as a function that consumes a ```String``` and produces a structure of type ```T```, containing a more useful representation of the string.
+**KRISHNA** I'll use Scala once again, to construct a framework of ```Parser```s and ```infix``` compositional forms that will allow me to write expressions which closely resemble EBNF and thus combine them to produce an executable ```Parser```.  We can define a ```Parser``` as a function that consumes a ```String``` and produces a structure of type ```T```, containing a more useful representation of the string.
 
 ```scala
 type Parser[T] = String => T
 ```
 
-**KRISHNA**  A useful technique is to define a number of parsers which each look for a specific pattern and - if they find it - "consume" the part of the input string corresponding to that pattern.  We can change the return type to a tuple and also return the unused part of the string.  Unused string is useful in chaining parsers, so that one parser can operate after another:
+**KRISHNA**  A useful technique is to define a number of parsers which each look for a specific pattern and - if they find it - "consume" the part of the input string corresponding to that pattern.  We can change the return type to a tuple and also return the unused part of the string.  Returning the unused string allows us to chain parsers, so that one parser can operate after another until all input is consumed.
 
 ```scala
 type Parser[T] = String => (T, String)
@@ -93,7 +93,7 @@ println(failure(""))      // None
 
 **KRISHNA** These parsers will be very useful to us when we want to return success or failure parsers after input validation. 
 
-**KRISHNA** The third parser we will implement is one that consumes a single character from the string and returns that character along with the unused string:
+**KRISHNA** The third parser we will implement is one that consumes a single character from the string and returns that character along with the unused part of the string:
 
 ```scala
 def anychar = (in: String) => 
@@ -103,7 +103,7 @@ println(anychar("hello")) // Some(h,ello)
 println(anychar(""))      // None
 ```
 
-**KRISHNA** A functional language allows us to start with simple parsers to find single digits or letters, and use function combinators to produce "compound" parsers which search for sequences of patterns (a sequence of digits gives a number) - or look for alternative patterns (an array item can be number or a string).
+**KRISHNA** A functional language allows us to start with simple parsers to find single digits or letters, and use function combinators to produce "compound" parsers which search for sequences of patterns (a sequence of digits gives a number) - or look for alternative patterns (an array item can be *either* a number *or* a string).
 
 **KRISHNA** In order to be able to declare that we are looking for one pattern immediately followed by another, we can define a ```sequence``` combinator, that consumes two parsers and produces another parser which looks for that sequence of patterns.  The resulting parser feeds the initial input to the first parser, and the unused output from the first parser as input to the second parser.  The sequence combinator thus applies the two parsers one after the other and returns the results of the two parsers as a pair along with the residual output from the second parser:
 
@@ -119,7 +119,7 @@ println(seq(success("hello"), anychar)("world")) // Some(((hello,w),orld))
 println(seq(anychar, failure)("world")) // None
 ```
 
-**KRISHNA** In order to get closer to BNF, we are going to need our combinators to be infix operators.  I will take advantage of Scala's ```implicit class``` mechanism and rename ```sequence``` as an infix operator symbol ```~```.   Scala requires that an implicit class must have a constructor that takes in a parameter on which the operator can be invoked (in other words a receiver).  So the first parameter ```p: Parser[T]``` goes in as constructor parameter and the second remains with the method itself:
+**KRISHNA** In order to get closer to writing code which looks like EBNF, we need our combinators to be infix operators.  I will take advantage of Scala's ```implicit class``` mechanism and rename ```sequence``` as an infix operator symbol ```~```.   Scala requires that an implicit class must have a constructor that takes in a parameter on which the operator can be invoked (in other words a receiver).  So the first parameter ```p: Parser[T]``` goes in as constructor parameter and the second remains with the method itself:
 
 ```scala
 implicit class ParserExtensions[T](p: Parser[T]) {
@@ -278,7 +278,7 @@ println(ParseArray("[a]")) // Some((a,))
 
 **KRISHNA**  So this is how we can parse singleton arrays in a functional programming paradigm. 
 
-**BRAHMA**  That's very cool indeed. You wrote quite a bit more code than I did, but I can see the attraction of a general framework. I have seen APL programmers use similar techniques when writing parsers, but many APL users do not have a computer science background. I'm going to stick with my extreme / minimalistic approach because it is a more natural expression of the array paradigm. I hope I can make it through all three verses without regretting that too much, I am feeling very grateful that we decided we didn't have enough time today to parse a more complex grammar!
+**BRAHMA**  That's very cool indeed. You wrote quite a bit more code than I did, but I can see the attraction of a general framework. I have seen APL programmers use similar techniques when writing parsers, but many do not have computer science backgrounds and are unaware of such techniques. I'm going to stick with my extreme / minimalistic approach because it is a more natural expression of the array paradigm. I hope I can make it through all three verses without regretting that too much, I am feeling very grateful that we decided we didn't have enough time today to parse a more complex grammar (however, check the GitHub repo for a complete JSON parser - it is not too hideous, IMHO).
 
 **BRAHMA**  The next verse is a parser for arrays containing more than one item, for example ```[a,2,z]```. You may remember the singleton array parser in APL looked like this:
 
@@ -303,11 +303,11 @@ println(ParseArray("[a]")) // Some((a,))
     } 
 ```
 
-**BRAHMA**  The first line which validates that we have the expected square brackets, is unchanged.  In the second line, I still drop the first and last character, but no longer validate the total length of ```inner```.  Instead, I will break ```inner``` up into items using the partition primitive, using each occurrence of a new comma to start a new partition (an initial comma is inserted so that the first item is also included). The leading commas in each item are removed using ```1↓¨``` (1 drop each).
+**BRAHMA**  The first line which validates that we have the expected square brackets, is unchanged.  In the second line, I still drop the first and last character, but no longer validate the total length of ```inner```, because we might have more than one item.  Instead, I will break ```inner``` up into items using the partition primitive ```⊂```, using each occurrence of a comma start a new partition (an leading comma is added in order to start the first segment). After the partition, the leading commas in each item are removed using ```1↓¨``` (1 drop each).
 
 **BRAHMA**  If any of the item lengths are not equal to 1, an exception is thrown. We use the enlist function ```(∊)``` to turn the array, which is a list of 1-element lists, into a simple list of characters.
 
-Finally, we use the "at" operator ```(@)``` to selectively the same type cast as in the singleton case - but only to those characters which are digits (satisfy the constraint ```(∊∘⎕D)```).  The ```@``` operator takes two function operands: a transformation on the left and a selector on the right. It returns a result which is a copy of the right argument, with the transformation applied to the selected items. 
+Finally, we use the "at" operator ```(@)``` to selectively apply the same type cast as in the singleton case - but only to those characters which are digits (satisfy the constraint ```(∊∘⎕D)```).  The ```@``` operator takes two function operands: a transformation on the left and a selector on the right. It returns a result which is a copy of the right argument, with the transformation applied to the selected items.
 
 **BRAHMA**  Krishna, I am looking forward to seeing how you will extend your parser framework to allow multiple array elements!
 
@@ -323,7 +323,7 @@ implicit class ParserExtensions[T](p: Parser[T]) {
 }
 ```
 
-**KRISHNA**  Above, I apply the parser ```p``` once and use ```~``` to call the same parser recursively and map ```^^``` the output by consing (```::```) ```x``` (returned from calling ```p```)  with ```xs``` (returned from calling ```p*```) .  As ```*``` is applied postfix, I need to add the line ```import scala.language.postfixOps``` else I'll get a warning message from the compiler.
+**KRISHNA**  Above, I apply the parser ```p``` once and use ```~``` to call ```p*``` recursively on what remains - and map ```^^``` the output by consing (```::```) ```x``` (returned from calling ```p```)  with ```xs``` (returned from calling ```p*```) .  As ```*``` is applied postfix, I need to add the line ```import scala.language.postfixOps``` else I'll get a warning message from the compiler.
 
 **KRISHNA** Further, I need to make sure that for the sequential ```~``` combinator, I use the call-by-name semantics denoted by ```=>``` for the recursive call.  A call-by-name argument will be evaluated only when it is needed, which is only after the first call to ```p```. If call-by-value semantics is used, it will cause stack overflow without reading any input, when calling the many ```*``` combinator.
 
@@ -378,7 +378,7 @@ println(ParseArray("[a,1]")) // Some((List(a,1),)
 └─┴─┴─┘
 ```
 
-**BRAHMA** The main problem with nested arrays is that some of the commas are inside nested cells, and should not be used to cut the array at the top level. Fortunately, it is easy to mask commas which are inside inner brackets, by computing the level of nesting of brackets. This can be done by looking each character up in the list '[]', mapping these two characters to +1 and -1, respectively, and doing a sum scan of the result:
+**BRAHMA** Now, with nested arrays, I have the problem that some of the commas are inside nested cells, and should not be used to cut the array at the top level. Fortunately, it is not too hard to mask commas which are inside inner brackets, by computing the level of nesting of brackets. This can be done by looking each character up in the list '[]', mapping these two characters to +1 and -1, respectively (and anything else to 0), and doing a sum scan of the result:
 
 ```apl
      inner←'a,9,[b,[c,4]]'
@@ -424,9 +424,9 @@ a,9,[b,[c,4]]
 └─┴─┴───────┴───┘
 ```
 
-**BRAHMA**  The 3rd line of code from the bottom computes two masks ```sub``` (which identifies nested items) and ```leaf``` which marks the leaf items. In the final two lines, we use @ to apply the function recursively to the nested items, and ```LeafParser``` to the remaining items. Note that the symbol ```∇``` denotes self-reference, allowing functions to be recursive even if they have not been named.
+**BRAHMA**  The 3rd line of code from the bottom computes two masks ```sub``` (which identifies nested items) and ```leaf``` which marks the leaf items. In the final two lines, we use @ to apply the function recursively to the nested items, and ```LeafParser``` to the remaining items. Note that the symbol ```∇``` denotes self-reference, allowing functions to be recursive even if they have not been named. In this case, we could have written ```ArrayParser``` instead of ```∇```, since we have named the function.
 
-**BRAHMA**  So, I managed to get away with it, but at this point I had to make a significant structural change to my logic. I presume we're reaching the point where your framework starts to show its true value. How would you do this in Scala?
+**BRAHMA**  So, I managed to get away with it, but at this point I had to make a significant structural change to my code. I presume we're reaching the point where your framework starts to show its true value. How would you do this in Scala?
 
 **KRISHNA**  Indeed! To implement that change, all I need to do is add an ```array |``` to my definition of ```value```, making the whole thing recursive:
 

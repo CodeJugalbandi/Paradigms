@@ -1,5 +1,8 @@
 #FizzBuzz
 
+FizzBuzz is a mathematical game for children (of all ages), where you are required to count, 1, 2, ... but when you get to a number which is divisible by three, you should say "Fizz" instead of the number. Likewise, you should say "Buzz" for any number which is divisible by five. And of course, "FizzBuzz" for a number which is divisible by both three AND five.
+
+We will attempt to write some code capable of playing FizzBuzz. First, without displaying the numbers - only the words:
 
 Part 0
 ------
@@ -9,7 +12,7 @@ Write code that for a contiguous range of numbers prints out the following:
 * 'Buzz' for numbers that are multiples of 5
 * 'FizzBuzz' for numbers that are multiples of 15
 
-e.g. Running over a range from 1-20 should give the following output
+e.g. Running over a range from 1-20 should give the following output:
 
 ```
 "" "" Fizz "" Buzz Fizz "" "" Fizz Buzz "" Fizz "" "" FizzBuzz "" "" Fizz "" Buzz
@@ -17,22 +20,11 @@ e.g. Running over a range from 1-20 should give the following output
 
 Part 1
 ------
-Write some code that for a contiguous range of numbers prints out the following:
-
-* the number
-* 'Fizz' for numbers that are multiples of 3
-* 'Buzz' for numbers that are multiples of 5
-* 'FizzBuzz' for numbers that are multiples of 15
-
-
-e.g. Running over a range from 1-20 should give the following output
+The same as Part 1, except now we want to see the numbers displayed for numbers which are not divisible by either 3 or 5:
 
 ```shell
 1 2 Fizz 4 Buzz Fizz 7 8 Fizz Buzz 11 Fizz 13 14 FizzBuzz 16 17 Fizz 19 Buzz
 ```
-
-Code Jugalbandi in Functional Programming & Array-Oriented Paradigms
-----
 
 **BRAHMA** Lets look at implementing Fizz Buzz in Haskell.  For simplicity and gradually building the solution in 2 parts as put above:
 
@@ -72,16 +64,39 @@ main = do
 
 **BRAHMA** So, this was a vanilla implementation of FizzBuzz.  Krishna, how does this look in an array-oriented language like APL?  
 
-**KRISHNA** To an APL user, the first idea that will spring to mind is to start with an array of the integers 1-20, and replace some of them with text. I'll start in an array which I will call ```input```:
+**KRISHNA** I can generate a 20-item array which repeats ('' '' 'Fizz') over and over again as follows:
+
+```apl
+    20⍴¯3↑'' 'fizz'
+     fizz      fizz      fizz      fizz      fizz      fizz     
+```
+
+**KRISHNA** First a reminder: the syntax of APL uses the same rule as (f g x) in mathematics: The right argument of each function is the result of executing everything to the right. So the expression above is evaluated as:
+
+```apl
+    20⍴ (¯3↑ ('' 'fizz'))
+```
+
+**KRISHNA** Although APL *executes* from right to left, the correct way to read the above expression is "the 20 reshape of the negative 3 take of ('' 'Fizz'). The same way as one would say "f of g of x" for (f g x). If an expression gets too long to read it that way comfortably, one should probably break it up.
+
+**KRISHNA** So... I start with a 2-element array containing an empty vector and 'Fizz'. The operation ```¯3↑``` creates an array of size 3 on the left with empty vectors (a positive ```3↑``` would add trailing items). The result is passed to ```20⍴``` is applied to the result, repeating the 3-element vector until it fills an array of size 20. Now, I can write and immediately apply an anonymous function to combine sequences of length 3 and 5 by inserting a ```,¨```(catenate each) between the lists:
+
+```apl
+    {(⍵⍴¯3↑'' 'fizz') ,¨ (⍵⍴¯5↑'' 'buzz')} 20
+     fizz    buzz  fizz      fizz  buzz    fizz      fizzbuzz      fizz    buzz 
+```
+**KRISHNA** The curly braces ```{}``` enclose a function body, within which ```⍵``` (omega is the last letter in the greek alphabet) refers to the right argument. If there was a left argument, it would be ```⍺``` (alpha). Due to the order of execution, the rightmost set of parentheses are redundant, but have been added for symmetry.
+
+**KRISHNA** Moving on to part 1, we are now supposed to include the underlying number. At this point, it starts to feel more natural to an APL user to take as input an array of integers (which could be a contiguous range, but could also be ANY set of integers), and replace some of them with text. To illustrate, I will start by defining an array which I will call ```input```:
 
 ```apl
     ⎕←input←⍳20 ⍝ iota (Index generator) produces the first 20 integers
 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 
 ```
 
-**KRISHNA** The ```⎕←``` at the left of the expression instructs the interpreter to also assign the result of the expression to the terminal - in other words output it.
+**KRISHNA** The ```⎕←``` at the left of the expression instructs the interpreter to also assign the result of the expression to the terminal - in other words output it. Without this, an assignment would produce no output.
 
-**KRISHNA** Next, I'll will use the residue function ```|```, which computes the right argument modulus the left argument. In APL, the "map" is implicit and primitives apply to all items of the argument arrays. If I don't assign the result to a variable, the default is to print the result:
+**KRISHNA** Next, I'll will use the residue function ```|```, which computes its right argument modulus the left argument. Residue is what we call a "scalar function", which means that itapplies to all scalars within the argument arrays. If I don't assign the result to a variable, the default is to print the result:
 
 ```apl
     3|input ⍝ inner product with residue
@@ -96,7 +111,7 @@ main = do
 1 2 3 4 0 1 2 3 4 0 1 2 3 4 0 1 2 3 4 0
 ```
 
-**KRISHNA** If course, what I'm really interested is in the positions where the input is a multiple of 3 or 5, which I can compute by comparing the above to ```0```. Note that I've reversed the order of 3 and 5 below, for reasons which will soon become apparent.
+**KRISHNA** If course, what I'm really interested is in the positions where the input is a multiple of 3 or 5, which I can compute by comparing the above to ```0```. Note that I've reversed the order of 3 and 5 below, for reasons which will soon become apparent:
 
 ```apl
     input←⍳20 ⍝ Remember that input is the integers 1-20
@@ -112,7 +127,7 @@ main = do
 0 0 1 0 2 1 0 0 1 2 0 1 0 0 3 0 0 1 0 2
 ```
 
-**KRISHNA** In the above vector, a 1 means the number was divisible by 3 (Fizz), a 2 means divisible by 5 (Buzz), and 3 means both 3 and 5 (FizzBuzz). We had to reverse the order of 3 and 5 to put the 5 in the top row, which is the most significant digit of the polynomial.
+**KRISHNA** In the above vector, a 1 means the number was divisible by 3 (Fizz), a 2 means divisible by 5 (Buzz), and 3 means both 3 and 5 (FizzBuzz). I reversed the order of 3 and 5 to put the 5 in the top row, which is the most significant digit of the polynomial - in order for 1 to be 3 and 2 to be 5. This doesn't really matter, of course - just feels a bit more natural.
 
 **KRISHNA** I'm nearly done; all I need to do now is to replace elements of input corresponding to non-zero elements of ```case```, with a text selected by the same element. I can find the indices of the non-zero elements using ```where``` (⍸):
 
@@ -128,14 +143,14 @@ main = do
  Fizz  Buzz  Fizz  Fizz  Buzz  Fizz  FizzBuzz  Fizz  Buzz 
 ```
 
-**KRISHNA** I can compute the final result using the ```@``` operator to merge these values into my input at the relevant positions:
+**KRISHNA** I can compute the final result using the ```@``` operator to merge these values into my input at the relevant positions. I would read the expression below as "texts merged with input at positions where case is not zero":
 
 ```apl
-    (texts@(⍸0≠case)) input
+    (texts @ (⍸0≠case)) input
 1 2  Fizz  4  Buzz  Fizz  7 8  Fizz  Buzz  11  Fizz  13 14  FizzBuzz  16 17  Fizz  19  Buzz 
 ```
 
-**KRISHNA** Having experimented a bit interactively, I can now define a function which brings it all together. The code within curly braces below is a function, and ```⍵``` refers to the right argument. For clarity, I have decided to have the primes in ascending order, and use a ```reverse first``` (⊖) to reverse the order of the rows before applying decode:
+**KRISHNA** Having experimented a bit interactively, I can now define a function which brings it all together. The code within curly braces below is a function, which I have named FizzBuzz. Within the function, ```⍵``` refers to the right argument. In this function, I use ```reverse first``` (⊖) to reverse the order of the primes - rather than having the constant in the wrong order, as I did while experimenting:
 
 ```apl
     FizzBuzz←{                                                                            
@@ -146,14 +161,14 @@ main = do
     }
 ```
 
-**KRISHNA** And now I can compute the result on any array of integers. Below I'll do it on the numbers from 21-30: 
+**KRISHNA** And now I can compute the result on any array of integers - not just the integers from 1 to n. To illustrate, here is the result of FizzBuss on the numbers from 21-30: 
       
 ```apl
       FizzBuzz 20+⍳10
  Fizz  22 23  Fizz  Buzz  26  Fizz  28 29  FizzBuzz 
 ```
 
-**KRISHNA** Note that, since APL primitives map to arrays implicitly, this solution has no loops or conditional statements. The data structure drives the application of functions, and there is no control flow in the code.
+**KRISHNA** Note that, since many APL primitives map to arrays implicitly, this solution has no loops or conditional statements. The data structure drives the application of functions, and there is no control flow in the code.
 
 **KRISHNA** Do you want to have a go at producing a data-driven solution?
 
@@ -168,7 +183,7 @@ main = do
   print $ fizzBuzz 20
 ```
 
-**BRAHMA** Haskell library has a cycle function that produces a stream of data.  So i'll use that to produce 3s and 5s.  Then use ```zipWith``` to concatenate one element from each list. 
+**BRAHMA** Haskell library has a cycle function that produces a stream of data.  So I'll use that to produce 3s and 5s.  Then use ```zipWith``` to concatenate one element from each list. 
 
 ```haskell
 fizzBuzz :: Int -> [String]
@@ -222,7 +237,7 @@ main = do
 
 **BRAHMA**  I want to then ask you this - is the APL interpreter not looping inside the primitive operations?
 
-**KRISHNA**  Of course it is... but it is looping in highly optimised C, on dense arrays of booleans and small integers. The fact that we are performing the same computation on evey item of an array provides opportunities to vectorise the operations, or parallelise them on a GPU. 
+**KRISHNA**  Yes, of course it is... but it is looping in highly optimised C, on dense arrays of booleans and small integers. The fact that we are performing the same computation on evey item of an array provides opportunities to vectorise the operations, or parallelise them on a GPU. 
 
 **BRAHMA**  I see. Of course, that means you need to fully materialise the arrays, which could consume a lot of memory - right? In our Haskell solution, everything is lazy by default and so is list data-structure, so entire list is never materialized, only the needed element is brought in one at a time in memory and GCed after use.  Though it appears that we are process element-by-element, one cannot tell, theoretically, whether the ```zipWith``` function is splitting into data chunks or whether data is CPU bound or GPU bound.  The how-part is abstracted away - the code is declarative.  But, yes the lambda is applied to every element during zipping is a fact.
 
@@ -247,7 +262,7 @@ main = do
   print $ fizzBuzz 20  -- ["1","2","Fizz","4","Buzz","Fizz","7","8","Fizz","Buzz","11","Fizz","13","14","FizzBuzz","16","17","Fizz","19","Buzz"]
 ```
 
-**KRISHNA**  An interesting question would be whether that allows the Haskell compiler to produce a better solution. Of course, compilers and interpreters are ofter optimised for idiomatic use of that language, so you need to be careful: something which looks more efficient might not be, if it takes the compiler by surprise.
+**KRISHNA**  An interesting question would be whether that allows the Haskell compiler to produce a better solution. Of course, compilers and interpreters are often optimised for idiomatic use of that language, so you need to be careful: something which looks more efficient might not be, if it takes the compiler by surprise.
 
 **KRISHNA**  Likewise, I think I can simplify the APL solution by using a lambda. I will use an infix function, in which ```⍺``` refers to the left argument and ```⍵``` the right (as before). In APL, user-defined lambdas have the same syntax as primitive functions, they are either infix or prefix. A prefix function which returns a 2-element vector showing whether the a single-element right argument was divisible by 3 or 5 could be written:
 
@@ -276,9 +291,9 @@ main = do
 1 2  Fizz  4  Buzz  Fizz  7 8  Fizz  Buzz  11  Fizz  13 14  FizzBuzz  16 17  Fizz  19  Buzz 
 ```
 
-**KRISHNA** We stored the temporary result of the two residue calculations in a variable called m (for mask), use this to select corresponding elements of a vector containing the two strings Fizz and Buzz, and finally use the enlist function ```∊``` to remove the structure of the result and return a simple character array, which will contain Fizz if m is (1 0), Buzz if m is (0 1), or FizzBuzz if m is (1 1).
+**KRISHNA** Above, I save the result of the residue calculations in a two-element boolean array named ```m``` (for mask). In the second expression (following the statement separator ```⋄```), I use ```m``` to select corresponding elements of a vector containing the two strings Fizz and Buzz, and finally use the enlist function ```∊``` to remove the structure of the result and return a simple character array, which will contain Fizz if m is (1 0), Buzz if m is (0 1), or FizzBuzz if m is (1 1).
 
-**KRISHNA** In many ways, the lambda-based expression is arguably simpler than the array-oriented one - and an APL programmer might well start here in order to "brute force" a solution in a hurry. If the code becomes a performance bottleneck, the array based solution will be much more efficient, it terms of both memory and CPU time.
+**KRISHNA** In many ways, applying a lambda with each is simpler than taking the time to write an array-oriented solution. An APL programmer might well start here in order to "brute force" a solution in a hurry. If the code becomes a performance bottleneck, the array based solution will be much more efficient, it terms of both memory and CPU time.
 
 **KRISHNA** Lets reflect on this...
 
