@@ -99,7 +99,7 @@ main = do
 **KRISHNA** Next, I'll will use the residue function ```|```, which computes its right argument modulus the left argument. Residue is what we call a "scalar function", which means that it applies to all scalars within the argument arrays. If I don't assign the result to a variable, the default is to print the result:
 
 ```apl
-    3|input ⍝ inner product with residue
+    3|input
 1 2 0 1 2 0 1 2 0 1 2 0 1 2 0 1 2 0 1 2
 ```
 
