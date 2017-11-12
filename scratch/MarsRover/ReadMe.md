@@ -396,11 +396,18 @@ Reflections
 
 **BRAHMA** The FP paradigm embraces transparency of the data-structure but makes the structure immutable, so one need not worry about an inadvertent change to the values.  Again, here as in OO, one has to arrive at the correct data-structure suitable for the problem at hand.
 
-**BRAHMA** In the AO paradigm, like APL or J, the data structure is typically designed to make the information easily accessible, rather than being optimised for expected behaviours. The choice of data structure will affect the elegance - and for "big" data impact the performance of the solution - but APL's array operations like inner/outer product, transposing, reductions and scans along selected dimensions can be easily applied to arrays of any rank, shape or depth. The quantity of code is also very small, so significant refactoring of the data structures doesn't lead the same volume of code change.
+**BRAHMA** In the AO paradigm, like APL or J, the data structure is typically designed to make the information easily accessible, rather than being designed to allow a set of predicted behaviours. The choice of data structure may affect the elegance of the code - but APL's array operations like inner/outer product, transpose, reductions and scans along selected dimensions can be easily applied along any axis of arrays of any rank, shape or depth. For very large data volumes, the structure can influence performance and refactoring of the structure (and therefore the code) may become necessary.
 
-The representation of the states of the Rover as a set of arrays also makes it easy to mine the data to answer "ad hoc" questions like "how much time did the robot spend pointing in each compass direction?"
+**KRISHNA** Indeed. For example, with the array representation is it easy to perform "ad hoc" analyses like "how much time did the robot spend pointing in each compass direction?" (6 cycles pointing East, 5 pointing South).
 
-**KRISHNA** AO encourages you to think about the problem mathematically using numbers and arrays, and select array representations which embed or encode mathematical properties of the data (such as realising that the sequence NWSE represents anti-clockwise rotations of pi/2. and therefore simple indexing can be used to access the correct item of data). This does mean that feeling comfortable with basic mathematics is a significant factor for an APL programmer.
+```apl
+     bearings←4| +\ heading, ¯1+'LMR'⍳commands ⍝ recompute bearings from commmands
+     {⍺,≢⍵}⌸bearings                         ⍝ distinct bearings and counts
+1 6
+2 5
+```
+
+**KRISHNA** AO encourages you to think about the problem mathematically using numbers and arrays, and select array representations which embed or encode mathematical properties of the data (such as realising that the sequence NWSE represents anti-clockwise rotations of π/2. and therefore simple indexing can be used to access the correct item of data). This does mean that feeling comfortable with basic mathematics is a significant factor for an APL programmer.
 
 **KRISHNA** In the original JavaScript, the abstractions actually lead the programmer away from the simplification that is available through mathematical insight into the problem. Even the Erlang map is problematic from this perspective, as although in both cases "sound" programming principles of abstraction, aimed at reducing code complexity, have been applied. The solutions are more general, but also more complex, both for the human reader and the language engine.
 
