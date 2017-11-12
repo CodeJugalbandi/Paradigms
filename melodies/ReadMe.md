@@ -1,9 +1,14 @@
-Melodies
-========
+#Melodies
 
-* Control Flow and Data Flow
-* Transparency and Abstraction
-* Conciseness and Verbosity 
-* Parsing
-* Macro and Micro
-* Implicit and Explicit
+* Control Flow and Data Flow Melody
+    * FizzBuzz
+    * Luhn   
+
+* Transparency and Abstraction Melody
+    * MarsRover 
+  
+* Macro and Micro Melody
+    * Parsing Recursive Structures like Arrays, HTML documents etc...
+
+* ??? Melody
+    * Data Reconciliation
