@@ -96,14 +96,14 @@ main = do
 
 **KRISHNA** The ```⎕←``` at the left of the expression instructs the interpreter to also assign the result of the expression to the terminal - in other words output it. Without this, an assignment would produce no output.
 
-**KRISHNA** Next, I'll will use the residue function ```|```, which computes its right argument modulus the left argument. Residue is what we call a "scalar function", which means that itapplies to all scalars within the argument arrays. If I don't assign the result to a variable, the default is to print the result:
+**KRISHNA** Next, I'll will use the residue function ```|```, which computes its right argument modulus the left argument. Residue is what we call a "scalar function", which means that it applies to all scalars within the argument arrays. If I don't assign the result to a variable, the default is to print the result:
 
 ```apl
     3|input ⍝ inner product with residue
 1 2 0 1 2 0 1 2 0 1 2 0 1 2 0 1 2 0 1 2
 ```
 
-**KRISHNA** Now, I will use the ```outer product``` to do the computation for both 3 and 5 at the same time. ```∘.f``` combines each item of the left argument with each item of the right argument, in this case producing a (2×20) array:
+**KRISHNA** Now, I will use the ```outer product``` to do the computation for both 3 and 5 at the same time. ```∘.f``` combines each item of the left argument with each item of the right argument, in this case producing a (2×20) array. One row for each element of the left argument, one column for each in the right:
 
 ```apl
     3 5 ∘.| input  ⍝ outer product with residue
@@ -111,7 +111,7 @@ main = do
 1 2 3 4 0 1 2 3 4 0 1 2 3 4 0 1 2 3 4 0
 ```
 
-**KRISHNA** If course, what I'm really interested is in the positions where the input is a multiple of 3 or 5, which I can compute by comparing the above to ```0```. Note that I've reversed the order of 3 and 5 below, for reasons which will soon become apparent:
+**KRISHNA** If course, what I'm really interested is in the positions where the input is a multiple of 3 or 5, which I can compute by comparing the above to ```0```. Note that I've reversed the order of 3 and 5 below, for reasons which I will explain in a moment:
 
 ```apl
     input←⍳20 ⍝ Remember that input is the integers 1-20
@@ -120,7 +120,7 @@ main = do
 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0
 ```
 
-**KRISHNA** APL was invented as a rationalised mathematical notation, and has primitives designed to work on polynomials. One of these operations is ```⊥```, also known as ```decode```. It takes a vector of coefficients and computes the polynomial that the vector represents using the left arguent as the base. For example, ```x⊥3 ¯1 5``` computes (3x^2 - x + 5). Applied to a matrix, base value interprets each column as a polynomial. This allows me to interpret each number above as a number base two (most significant digit = twos in the top row, least significant = ones in the bottom):
+**KRISHNA** APL was invented as a rationalised mathematical notation, and has primitives designed to work on polynomials. One of these operations is ```⊥```, also known as ```decode```. It takes a vector of coefficients and computes the polynomial that the vector represents using the left argument as the base. For example, ```x⊥3 ¯1 5``` computes (3x<sup>2</sup> - x + 5). Applied to a matrix, base value interprets each column as a polynomial. This allows me to interpret each number above as a number base two (most significant digit = twos in the top row, least significant = ones in the bottom):
 
 ```apl
     ⎕←case← 2⊥ 0 = 5 3 ∘.| input
