@@ -120,7 +120,7 @@ main = do
 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0
 ```
 
-**KRISHNA** APL was invented as a rationalised mathematical notation, and has primitives designed to work on polynomials. One of these operations is ```⊥```, also known as ```decode```. It takes a vector of coefficients and computes the polynomial that the vector represents using the left argument as the base. For example, ```x⊥3 ¯1 5``` computes (3x<sup>2</sup> - x + 5). Applied to a matrix, base value interprets each column as a polynomial. This allows me to interpret each number above as a number base two (most significant digit = twos in the top row, least significant = ones in the bottom):
+**KRISHNA** APL was invented as a rationalised mathematical notation, and has primitives designed to work on polynomials. One of these operations is the base value function ```⊥```. It takes a vector of coefficients and computes the polynomial that the vector represents using the left argument as the base. For example, ```x⊥3 ¯1 5``` computes (3x<sup>2</sup> - x<sup>1</sup> + 5x<sup>0</sup>), or more simply (3x<sup>2</sup> - x + 5). Applied to a matrix, base value interprets each *column* as a polynomial. This allows me to interpret each number above as a number base two (most significant digit = twos in the top row, least significant = ones in the bottom):
 
 ```apl
     ⎕←case← 2⊥ 0 = 5 3 ∘.| input
@@ -132,11 +132,11 @@ main = do
 **KRISHNA** I'm nearly done; all I need to do now is to replace elements of input corresponding to non-zero elements of ```case```, with a text selected by the same element. I can find the indices of the non-zero elements using ```where``` (⍸):
 
 ```apl
-    ⍸0≠case
+    ⍸case≠0
 3 5 6 9 10 12 15 18 20
 ```
 
-**KRISHNA** The above gives me the indices of items to be replaced. I can generate the list of replacement values by indexing an array of 3 strings by the array of non-zero cases as follows:
+**KRISHNA** The above gives me the indices of items to be replaced. I can generate the list of replacement values by indexing an array of 3 strings by the array of non-zero cases as follows. The "without" function ```~``` returns the left argument excluding any elements found in the right:
 
 ```apl
       ⎕←texts←('Fizz' 'Buzz' 'FizzBuzz')[case~0]
@@ -146,7 +146,7 @@ main = do
 **KRISHNA** I can compute the final result using the ```@``` operator to merge these values into my input at the relevant positions. I would read the expression below as "texts merged with input at positions where case is not zero":
 
 ```apl
-    (texts @ (⍸0≠case)) input
+    (texts @ (⍸case≠0)) input
 1 2  Fizz  4  Buzz  Fizz  7 8  Fizz  Buzz  11  Fizz  13 14  FizzBuzz  16 17  Fizz  19  Buzz 
 ```
 
@@ -157,7 +157,7 @@ main = do
       primes←3 5                                                                        
       text←'Fizz' 'Buzz' 'FizzBuzz'                                                     
       case←2⊥⊖0=primes∘.|⍵ ⍝ 0=nothing, 1=Fizz, 2=Buzz, 3=FizzBuzz                      
-      (messages[case~0]@(⍳0≠case)) ⍵ ⍝ merge text where case is non-zero                                            
+      (messages[case~0]@(⍳case≠0)) ⍵ ⍝ merge text where case is non-zero                                            
     }
 ```
 
