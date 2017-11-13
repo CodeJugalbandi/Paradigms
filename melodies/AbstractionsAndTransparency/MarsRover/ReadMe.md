@@ -15,50 +15,40 @@ For example, for a starting position of (3,3,E) and a command sequence "MMRMMLMR
 **BRAHMA** I will use JavaScript: we need a ```MarsRover``` class with a constructor that records the starting position of the rover, and a behavior of ```rove``` that executes a ```command``` sent from Earth. 
 
 ```javascript
-class MarsRover {
-  constructor(x, y, dirString) {}
-  rove(command) {}
-  toString() {}
+function MarsRover(x, y, direction) {
+  this.rove = (command) => this;
+  this.toString = () => `${x} ${y} ${direction}`
 }
 
 var rover = new MarsRover(3, 3, 'E');
 console.info(rover.rove('M').rove('R').rove('M').rove('L').toString());
 ```
 
-**BRAHMA**  Now, I'll need to implement ```rove``` for each of the ```command```s ```L```, ```R``` and ```M```.  Starting with ```M```, say, I'm facing North, I'll increment ```y``` and not ```x```, if I'm facing West, I'll decrement ```x``` and not ```y``` and for the remaining directions, which are duals, the operations will be modifying either ```x``` or ```y```.  Lets take ```L```, for turning left is also relative to direction and so is turning right at a position.  Therefore, I need an abstraction which is direction and position aware.  Simply being either direction or position aware will not help.  From physics, ```Vector``` as a notion seems to fulfill this, it has position as a scalar and direction along with it.  So, for each command let us tell the ```Vector``` to do the job.  For ```M```, we tell the ```Vector``` to move forward, for ```L```, we tell the ```Vector``` to turn left and for ```R``` we tell the ```Vector``` to turn right.  We will also maintain the state of the rover as a ```Vector``` itself.
+**BRAHMA**  Now, I'll need to implement ```rove``` for each of the ```command```s ```L```, ```R``` and ```M```.  Starting with ```M```, say, I'm facing North, I'll increment ```y``` and not ```x```, if I'm facing West, I'll decrement ```x``` and not ```y``` and for the remaining directions, which are duals, the operations will be modifying either ```x``` or ```y```.  Lets take ```L```, for turning left is also relative to direction and so is turning right at a position.  Therefore, I need an abstraction which is direction and position aware and has all the operations like turning left or right on it.  From physics, ```Vector``` as a notion seems to fulfill this, it has position as a scalar and direction along with it.  So, for each command we tell the ```Vector``` to do the job.  For ```M```, we tell the ```Vector``` to move forward, for ```L```, we tell the ```Vector``` to turn left and for ```R``` we tell the ```Vector``` to turn right.  We will also maintain the state of the rover as a ```Vector``` itself.  Also notice that using ```commands``` as a ```Map``` data-structure, I've captured the knowledge as data, rather than using a control-flow ```switch-case``` structure.
 
 ```javascript
-class Vector {
-  constructor(x, y, dirString) {
-    this.x = x;
-    this.y = y;
-    this.dirString = dirString;
-  }
-  moveForward() { return this; }
-  turnLeft() { return this; }
-  turnRight() { return this; }
-  toString() { return `${this.x} ${this.y} ${this.dirString}`;}
-}
+function MarsRover(x, y, dirString) {
+  var vector = new Vector(x, y, dirString);
 
-class MarsRover {
-  constructor(x, y, dirString) {
-    this.vector = new Vector(x, y, dirString);
-  }
-    
-  rove(command) {
-    if(command === 'M') 
-      this.vector = this.vector.moveForward();
-    else if(command === 'L') 
-      this.vector = this.vector.turnLeft();
-    else if(command === 'R') 
-      this.vector = this.vector.turnRight();
-
+  var commands = {
+    'M': vector => vector.moveForward(),
+    'L': vector => vector.turnLeft(),
+    'R': vector => vector.turnRight()
+  };
+  
+  this.rove = command => {
+    vector = commands[command](vector);
     return this;
   }
-    
-  toString() {
-    return this.vector.toString();
-  }
+
+  this.toString = () => vector.toString();
+}
+
+function Vector(x, y, direction) {
+  this.moveForward = () => this;
+  this.turnLeft = () => this; 
+  this.turnRight = () => this; 
+  this.toString = () => `${x} ${y} ${direction}`;
 }
 
 var rover = new MarsRover(3, 3, 'E');
@@ -66,121 +56,73 @@ console.info(rover.rove('M').rove('R').rove('M').rove('L').toString());
 
 ```
 
-**BRAHMA**  Now, I need to implement the 3 behaviors in ```Vector```.  Lets say we want to ```turnLeft```, its turning left from the current direction, keeping position (```x``` and ```y```) same. Say we want to ```turnRight```, its turning right from the current direction, keeping position same again and if its ```moveForward```, its moving forward a position in current direction based on current position, keeping direction same.  As everything is direction based, I now need ```Direction``` as an abstraction.  I'll code ```Direction``` the old ```function``` based as this new ```class``` is bit too verbose!
+**BRAHMA**  Now, I need to implement the 3 behaviors in ```Vector```.  Lets say we want to ```turnLeft```, its turning left from the current direction, keeping position (```x``` and ```y```) same. Say we want to ```turnRight```, its turning right from the current direction, keeping position same again and if its ```moveForward```, its moving forward a position in current direction based on current position, keeping direction same.  
+
+**BRAHMA** As everything is direction based, I'll need a data-structure to hold all the four directions and the respective transformations.  I'll again use a ```Map``` with current direction as a key - lets call it ```directions```.  Values corresponding to each transformation will be held in an ```Array```.  
 
 ```javascript
-function Direction(dirString) {
-  this.moveForward = (x, y) => [x, y];
-  this.left = () => this;
-  this.right = () => this;
-  this.toString = () => dirString;
-}
-
-class Vector {
-  constructor(x, y, dirString) {
-    this.x = x;
-    this.y = y;
-    this.direction = new Direction(dirString);
-  }
-  moveForward() { 
-    var [newX, newY] = this.direction.moveForward(this.x, this.y);
-    return new Vector(newX, newY, this.direction.toString()); 
-  }
-  turnLeft() { return new Vector(this.x, this.y, this.direction.left().toString()); }
-  turnRight() { return new Vector(this.x, this.y, this.direction.right().toString()); }
-  toString() { return `${this.x} ${this.y} ${this.direction.toString()}`;}
-}
-```
-
-**BRAHMA**  Now, I need to implement the 3 behaviors in ```Direction```.  Say current direction is ```N```, so West is to the ```left``` of North and East is to the ```right``` of North.  So, it is for other directions - all fixed.  So, I can hard-code these directions.  To move forward in North, I have to increment ```y``` by ```1```, keeping ```x``` same.
-
-To achieve all this, I need a data-structure to hold all the four directions and the respective transformations.  I'll use a ```Map``` with current direction as a key - lets call it ```allDirections```.  Values corresponding to each transformation will be held in an ```Array```.  So, it will look like this:
-
-```javascript
-function Direction(dirString) {
-  let directions = {
+function Vector(x, y, direction) {
+  var directions = {
     'N' : ['W', 'E', (x,y) => [x, y+1]],
     'E' : ['N', 'S', (x,y) => [x+1, y]],
     'S' : ['E', 'W', (x,y) => [x, y-1]],
     'W' : ['S', 'N', (x,y) => [x-1, y]]
   };
   
-  this.moveForward = (x, y) => directions[dirString][2](x, y);
-  this.left = () => new Direction(directions[dirString][0]);
-  this.right = () => new Direction(directions[dirString][1]);
-  this.toString = () => dirString;
+  this.moveForward = () => {
+    var [newX, newY] = directions[direction][2](x, y);
+    return new Vector(newX, newY, direction); 
+  };
+  
+  this.turnLeft = () => new Vector(x, y, directions[direction][0]); 
+  this.turnRight = () => new Vector(x, y, directions[direction][1]); 
+  this.toString = () => `${x} ${y} ${direction}`;
 }
 ```
 
-**BRAHMA**  So, finally, we have the output.
-
-**MORTEN** In the interests of time, we discussed doing a "fast forward" to this point, just showing the full final OO implementation, with you doing a very quick overview of how you arrived at it.
-
-***MORTEN** BTW, should that not be "class Direction" rather than function below?
+**BRAHMA**  In other words, using ```Vector``` and ```MarsRover``` abstractions,  I've organised data and related behavior together.  So, below is the whole code together:
 
 ```javascript
-function Direction(dirString) {
-  var allDirections = {
+function Vector(x, y, direction) {
+  var directions = {
     'N' : ['W', 'E', (x,y) => [x, y+1]],
     'E' : ['N', 'S', (x,y) => [x+1, y]],
     'S' : ['E', 'W', (x,y) => [x, y-1]],
     'W' : ['S', 'N', (x,y) => [x-1, y]]
   };
+
+  this.moveForward = () => {
+    var [newX, newY] = directions[direction][2](x, y);
+    return new Vector(newX, newY, direction);
+  };
+
+  this.turnLeft = () => new Vector(x, y, directions[direction][0]);
+  this.turnRight = () => new Vector(x, y, directions[direction][1]);
+  this.toString = () => `${x} ${y} ${direction}`;
+}
+
+function MarsRover(x, y, dirString) {
+  var vector = new Vector(x, y, dirString);
+
+  var commands = {
+    'M': vector => vector.moveForward(),
+    'L': vector => vector.turnLeft(),
+    'R': vector => vector.turnRight()
+  };
   
-  this.moveForward = (x, y) => allDirections[dirString][2](x, y);
-  this.left = () => new Direction(allDirections[dirString][0]);
-  this.right = () => new Direction(allDirections[dirString][1]);
-  this.toString = () => dirString;
-}
-
-class Vector {
-  constructor(x, y, dirString) {
-    this.x = x;
-    this.y = y;
-    this.direction = new Direction(dirString);
-  }
-  moveForward() { 
-    var [newX, newY] = this.direction.moveForward(this.x, this.y);
-    return new Vector(newX, newY, this.direction.toString()); 
-  }
-  turnLeft() { 
-    return new Vector(this.x, this.y, this.direction.left().toString()); 
-  }
-  turnRight() { 
-    return new Vector(this.x, this.y, this.direction.right().toString()); 
-  }
-  toString() { 
-    return `${this.x} ${this.y} ${this.direction.toString()}`;
-  }
-}
-
-class MarsRover {
-  constructor(x, y, dirString) {
-    this.vector = new Vector(x, y, dirString);
-  }
-    
-  rove(command) {
-    if(command === 'M') 
-      this.vector = this.vector.moveForward();
-    else if(command === 'L') 
-      this.vector = this.vector.turnLeft();
-    else if(command === 'R') 
-      this.vector = this.vector.turnRight();
-
+  this.rove = command => {
+    vector = commands[command](vector);
     return this;
   }
-    
-  toString() {
-    return this.vector.toString();
-  }
+
+  this.toString = () => vector.toString();
 }
 
 var rover = new MarsRover(3, 3, 'E');
 console.info(rover.rove('M').rove('R').rove('M').rove('L').toString());
-
 ```
 
-**KRISHNA**  Each of the above lines is highly readable, but there are a lot of lines! The two levels of abstraction have my head spinning a bit. 
+**KRISHNA**  Each of the above lines is highly readable, but there are a lot of lines and duplication! The levels of abstraction have my head spinning a bit. 
 
 **BRAHMA**  Yes indeed, I see that too! Let me show you how we can reduce this verbosity in Erlang, using a purely Functional Programming Paradigm.  So i'll begin by creating a module and export the ```rove``` function that takes in current position and a command.  This function will use a ```case``` on ```Cmd``` to do the needful.
 
@@ -267,7 +209,7 @@ rove(Vec={X,Y,Dir},Cmd) ->
   end.
 ```
 
-**BRAHMA**  So, here everything is functions, we did not require ```Direction``` or ```Vector``` abstractions, the essence has become more transparent and is there for anyone to see.  Earlier, this was encapsulated away within ```Direction``` and we were using it.  So Krishna, how does this look in an Array-Oriented Paradigm like APL?
+**BRAHMA**  So, here everything is functions, we did not require ```MarsRover``` or ```Vector``` abstractions, the essence has become more transparent and is there for anyone to see.  So Krishna, how does this look in an Array-Oriented Paradigm like APL?
 
 **KRISHNA** I am going to base my solution on the same fundamental data, tuples of movements for each axis, but rather than "abstract" this into a map, I will just use two simple arrays, a list of four directions and a 2-column matrix with one row per direction, defining the movement along each axis that the direction represents.
 
@@ -369,14 +311,14 @@ function MarsRover(x, y, dirString) {
   let movements = [[0,1], [1,0], [0,-1], [-1,0]];
   let toIndex = directionValue => Math.abs(directionValue % 4)
   
-  this.rove = function(command) {
-    if(command === 'M')
-      point = point.map((value, idx) => value + movements[directionIdx][idx]);
-    else if (command === 'L') 
-      directionIdx--;
-    else if(command === 'R') 
-      directionIdx++;
-    
+  let commands = {
+    'M': (point, directionIdx) => [point.map((value, idx) => value + movements[directionIdx][idx]), directionIdx],
+    'L': (point, directionIdx) => [point, directionIdx - 1],
+    'R': (point, directionIdx) => [point, directionIdx + 1]
+  };
+  
+  this.rove = command => {
+    [point, directionIdx] = commands[command](point, directionIdx);
     return this;
   }
   
@@ -392,7 +334,7 @@ console.info(rover.rove('M').rove('R').rove('M').rove('L').toString());
 Reflections
 -----------
 
-**BRAHMA** In OO paradigm, we arrive at a suitable data-structure for the problem by the act of continuous refactoring.  If one pays attention to that aspect, then it leads to optimisation of the data-structure for a particular behaviour or a set of behaviours for an object.
+**BRAHMA** In OO paradigm, we first organize data and related behaviour together, discover or arrive at a suitable data-structure for the problem by the act of continuous refactoring.  If one pays attention to that aspect, then it leads to optimisation of the data-structure for a particular behaviour or a set of behaviours for an object.
 
 **BRAHMA** The FP paradigm embraces transparency of the data-structure but makes the structure immutable, so one need not worry about an inadvertent change to the values.  Again, here as in OO, one has to arrive at the correct data-structure suitable for the problem at hand.
 
@@ -412,6 +354,14 @@ Reflections
 **KRISHNA** In the original JavaScript, the abstractions actually lead the programmer away from the simplification that is available through mathematical insight into the problem. Even the Erlang map is problematic from this perspective, as although in both cases "sound" programming principles of abstraction, aimed at reducing code complexity, have been applied. The solutions are more general, but also more complex, both for the human reader and the language engine.
 
 **BRAHMA** So... is it correct to say that - in addition to problems which are highly data parallel, the benefits of AO are most apparent when exploring new data, or faced with a project where significant parts of the requirement are in a state of flux? The freedom offered by arrays and being able to avoid abstraction early in a project will make new insights and the discovery of new algorithms and potential optimisations more likely.
+
+
+**DHAVAL ASKS** Few points:
+
+1. Is it possible to add another Jugalbandi where we can explore this Parallellizing data aspect?  I see a full blown melody for this.
+2. Can this Data parallel point, be somehow worded as a separate conversation - we need to find a place where this can be injected into existing one, rather than the current injection point.  I think it would be good to highlight one thing really well here - that is, discovering the underlying mathematics and how abstractions can dissolve in light of that.
+3. Another melody like Primes and Performance where we explored bringing it down to mathematics, can we say that distilling to mathematics is good for any pipelined processor to process - we can pull in Martin's talk here for reference.
+
 
 **BRAHMA** But isn't there a risk that the lack of abstractions can break down? For example, if our robot needs behaviours that require complex state and interaction with the its environment, it might be hard to find a pure array representation with proper separation of information. At that point, I would expect that an object oriented decomposition of the problem - or other abstractions - to make the code easier to understand and maintain.
 
