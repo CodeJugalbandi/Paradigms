@@ -50,7 +50,7 @@ main = do
   print $ fizzBuzz 20 -- ["","","Fizz","","Buzz","Fizz","","","Fizz","Buzz","","Fizz","","","FizzBuzz","","","Fizz","","Buzz"]
 ```
 
-**BRAHMA** ...and for Part-1, I simply have to replace last ```else``` 
+**BRAHMA** ...and for Part-1, I simply have to replace last ```else```:
 
 ```haskell
 toFizzBuzz :: Int -> String
@@ -70,14 +70,14 @@ main = do
 
 **BRAHMA** So, this was a naive functional programming paradigm rendition of FizzBuzz.  Krishna, how does this look in an array-oriented language like APL?  
 
-**KRISHNA** I can generate a 20-item array which repeats ('' '' 'Fizz') over and over again as follows:
+**KRISHNA**  I'll start with a few interactive experiments. For example, I can generate a 20-item array which repeats ('' '' 'Fizz') over and over again as follows:
 
 ```apl
-    20⍴¯3↑'' 'fizz'
+    20⍴ ¯3↑ '' 'fizz'
      fizz      fizz      fizz      fizz      fizz      fizz     
 ```
 
-**KRISHNA** First a reminder: the syntax of APL uses the same rule as (f g x) in mathematics: The right argument of each function is the result of executing everything to the right. So the expression above is evaluated as:
+**KRISHNA**  When reading APL expressions, remember to use the same rule as (f g x) in mathematics: The right argument of each function is the result of executing the rest of the expression on the right. So the expression above is evaluated as:
 
 ```apl
     20⍴ (¯3↑ ('' 'fizz'))
@@ -85,15 +85,15 @@ main = do
 
 **KRISHNA** Although APL *executes* from right to left, the correct way to read the above expression is "the 20 reshape of the negative 3 take of ('' 'Fizz'). The same way as one would say "f of g of x" for (f g x). If an expression gets too long to read it that way comfortably, one should probably break it up.
 
-**KRISHNA** So... I start with a 2-element array containing an empty vector and 'Fizz'. The operation ```¯3↑``` creates an array of size 3 on the left with empty vectors (a positive ```3↑``` would add trailing items). The result is passed to ```20⍴``` is applied to the result, repeating the 3-element vector until it fills an array of size 20. Now, I can write and immediately apply an anonymous function to combine sequences of length 3 and 5 by inserting a ```,¨```(catenate each) between the lists:
+**KRISHNA** So... I start with a 2-element array containing an empty vector and 'Fizz'. The operation ```¯3↑``` creates an array of size 3, adding an empty vector on the left (a positive ```3↑``` would add a trailing item). ```20⍴``` is applied to the result, repeating the 3-element vector until it fills an array of size 20. Now, I can write and immediately apply an anonymous function to combine sequences of length 3 and 5 by inserting a ```,¨```(catenate each) between the lists:
 
 ```apl
     {(⍵⍴¯3↑'' 'fizz') ,¨ (⍵⍴¯5↑'' 'buzz')} 20
      fizz    buzz  fizz      fizz  buzz    fizz      fizzbuzz      fizz    buzz 
 ```
-**KRISHNA** The curly braces ```{}``` enclose a function body, within which ```⍵``` (omega is the last letter in the greek alphabet) refers to the right argument. If there was a left argument, it would be ```⍺``` (alpha). Due to the order of execution, the rightmost set of parentheses are redundant, but have been added for symmetry.
+**KRISHNA** The curly braces ```{}``` define a function body, within which ```⍵``` refers to the right argument. If there was a left argument, it would be ```⍺``` (alpha and omega are the first and last letters of the Greek alphabet). Due to the order of execution, the rightmost set of parentheses are redundant, but have been added for symmetry.
 
-**KRISHNA** Moving on to part 1, we are now supposed to include the underlying number. At this point, it starts to feel more natural to an APL user to take as input an array of integers (which could be a contiguous range, but could also be ANY set of integers), and replace some of them with text. To illustrate, I will start by defining an array which I will call ```input```:
+**KRISHNA** Moving on to part 1, we are now supposed to include the underlying number. For this case, I think it feels more natural to an APL user to take as input an array of integers (which could be a contiguous range, but could also be ANY set of integers), and replace some of them with text. To illustrate, I will start by defining an array which I will call ```input```:
 
 ```apl
     ⎕←input←⍳20 ⍝ iota (Index generator) produces the first 20 integers
@@ -105,7 +105,7 @@ main = do
 **KRISHNA** Next, I'll will use the residue function ```|```, which computes its right argument modulus the left argument. Residue is what we call a "scalar function", which means that it applies to all scalars within the argument arrays. If I don't assign the result to a variable, the default is to print the result:
 
 ```apl
-    3|input ⍝ inner product with residue
+    3|input
 1 2 0 1 2 0 1 2 0 1 2 0 1 2 0 1 2 0 1 2
 ```
 
@@ -133,16 +133,14 @@ main = do
 0 0 1 0 2 1 0 0 1 2 0 1 0 0 3 0 0 1 0 2
 ```
 
-**KRISHNA** In the above vector, a 1 means the number was divisible by 3 (Fizz), a 2 means divisible by 5 (Buzz), and 3 means both 3 and 5 (FizzBuzz). I reversed the order of 3 and 5 to put the 5 in the top row, which is the most significant digit of the polynomial - in order for 1 to be 3 and 2 to be 5. This doesn't really matter, of course - just feels a bit more natural.
+**KRISHNA** In the above vector, a 1 means the number was divisible by 3 (Fizz), a 2 means divisible by 5 (Buzz), and 3 means both 3 and 5 (FizzBuzz). I reversed the order of 3 and 5 to put the 5 in the top row, which will be the most significant digit of the polynomial - in order for 1 to be 3 and 2 to be 5. This doesn't really matter, of course - just feels a bit more natural.
 
 **KRISHNA** I'm nearly done; all I need to do now is to replace elements of input corresponding to non-zero elements of ```case```, with a text selected by the same element. I can find the indices of the non-zero elements using ```where``` (⍸):
 
 ```apl
-    ⍸case≠0
+    ⎕←indices←⍸case≠0
 3 5 6 9 10 12 15 18 20
 ```
-**Dhaval asks** how about ```⎕←indices←⍸case≠0```?
-
 **KRISHNA** The above gives me the indices of items to be replaced. I can generate the list of replacement values by indexing an array of 3 strings by the array of non-zero cases as follows. The "without" function ```~``` returns the left argument excluding any elements found in the right:
 
 ```apl
@@ -152,21 +150,19 @@ main = do
 
 **KRISHNA** I can compute the final result using the ```@``` operator to merge these values into my input at the relevant positions. I would read the expression below as "texts merged with input at positions where case is not zero":
 
-**Dhaval asks** how about ```(texts @ indices) input```?
-
 ```apl
-    (texts @ (⍸case≠0)) input
+    (texts @ indices) input
 1 2  Fizz  4  Buzz  Fizz  7 8  Fizz  Buzz  11  Fizz  13 14  FizzBuzz  16 17  Fizz  19  Buzz 
 ```
 
-**KRISHNA** Having experimented a bit interactively, I can now define a function which brings it all together. The code within curly braces below is a function, which I have named FizzBuzz. Within the function, ```⍵``` refers to the right argument. In this function, I use ```reverse first``` (⊖) to reverse the order of the primes - rather than having the constant in the wrong order, as I did while experimenting:
+**KRISHNA** Having experimented a bit interactively, I can now define a function which brings it all together. The code within curly braces below is a function, which I have named FizzBuzz. In this function, I use ```reverse first``` (⊖) to reverse the order of the primes - rather than having the constant in the wrong order, as I did while experimenting. I also did not bother to name the temporary results of ```messages[case~0]``` and ```(⍸case≠0)```, as I feel this would actually reduce the readability of the solution:
 
 ```apl
     FizzBuzz←{                                                                            
       primes←3 5                                                                        
-      text←'Fizz' 'Buzz' 'FizzBuzz'                                                     
+      texts←'Fizz' 'Buzz' 'FizzBuzz'                                                     
       case←2⊥⊖0=primes∘.|⍵ ⍝ 0=nothing, 1=Fizz, 2=Buzz, 3=FizzBuzz                      
-      (messages[case~0]@(⍳case≠0)) ⍵ ⍝ merge text where case is non-zero                                            
+      (texts[case~0]@(⍳case≠0)) ⍵ ⍝ merge texts where case is non-zero                                            
     }
 ```
 
@@ -246,7 +242,7 @@ main = do
 
 **BRAHMA**  I want to then ask you this - is the APL interpreter not looping inside the primitive operations?
 
-**KRISHNA**  Yes, of course it is... but it is looping in highly optimised C, on dense arrays of booleans and small integers. The fact that we are performing the same computation on evey item of an array provides opportunities to vectorise the operations, or parallelise them on a GPU. 
+**KRISHNA**  Yes, of course it is... but it is looping in highly optimised C, on dense arrays of booleans and small integers. The fact that we are performing the same computation on evey item of an array makes vectorisation or GPU parallelisation simple. Even if the input is not a dense set of integers starting with 1.
 
 **BRAHMA**  I see. Of course, that means you need to fully materialise the arrays, which could consume a lot of memory - right? In our Haskell solution, everything is lazy by default and so is list data-structure, so entire list is never materialized, only the needed element is brought in one at a time in memory and GCed after use.  Though it appears that we are process element-by-element, one cannot tell, theoretically, whether the ```zipWith``` function is splitting into data chunks or whether data is CPU bound or GPU bound.  The how-part is abstracted away - the code is declarative.  But, yes the lambda is applied to every element during zipping is a fact.
 

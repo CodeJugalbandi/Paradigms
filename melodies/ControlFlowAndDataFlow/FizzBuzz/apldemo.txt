@@ -1,0 +1,40 @@
+﻿⍝ Session input for Dyalog Demo
+]box on
+⎕IO←1
+          '' 'Fizz'
+     ¯3↑  '' 'Fizz'
+20⍴  ¯3↑  '' 'Fizz'
+20⍴ (¯3↑ ('' 'Fizz'))
+⍝ "the 20 reshape of the negative three take of '' 'Fizz'
+  20⍴¯5↑'' 'Buzz'
+ (20⍴¯3↑'' 'Fizz') ,¨ (20⍴¯5↑'' 'Buzz')
+{ (⍵⍴¯3↑'' 'Fizz') ,¨  (⍵⍴¯5↑'' 'Buzz')} 20
+⍝ {} encloses a function, ⍵ is the right argument
+⍝ **KRISHNA** Moving on to part 1, we are now supposed to include the underlying number.
+⎕←input←⍳20 
+s. If I don't assign the result to a variable, the default is to print the result:
+3|input 
+3 5 ∘.| input
+0 = 5 3 ∘.| input
+2⊥1 0 1 ⍝ (1*2^2) +(0*2^1) + (1*2^0)
+⎕←case← 2⊥ 0 = 5 3 ∘.| input
+⍸1 0 1 1 0
+⍸case≠0 ⍝ "where case ≠ 0"
+('Fizz' 'Buzz' 'FizzBuzz')[1 1 3 2]
+case~0
+⎕←texts←('Fizz' 'Buzz' 'FizzBuzz')[case~0]
+(texts @ (⍸case≠0)) input
+]load /home/whatever/FizzBuzz
+⎕VR 'FizzBuzz'
+FizzBuzz ⍳20
+FizzBuzz 666 777 888 999 1000 1500
+)copy dfns cmpx
+cmpx 'FizzBuzz ⍳1E6'
+
+⍝ Back to BRAHMA
+
+{0=3 5|⍵} 10
+{0=3 5|⍵}¨ 1 3 5 7 15
+{⍱/0=3 5|⍵}¨1 3 5 7 15
+1 0/'Fizz' 'Buzz'
+{⍱/m←0=3 5|⍵:⍵ ⋄ ∊m/'Fizz' 'Buzz'}¨ ⍳20
