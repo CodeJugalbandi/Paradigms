@@ -6,14 +6,14 @@ function MarsRover(x, y, dirString) {
   let movements = [[0,1], [1,0], [0,-1], [-1,0]];
   let toIndex = directionValue => Math.abs(directionValue % 4)
   
-  this.rove = function(command) {
-    if(command === 'M')
-      point = point.map((value, idx) => value + movements[directionIdx][idx]);
-    else if (command === 'L') 
-      directionIdx--;
-    else if(command === 'R') 
-      directionIdx++;
-    
+  let commands = {
+    'M': (point, directionIdx) => [point.map((value, idx) => value + movements[directionIdx][idx]), directionIdx],
+    'L': (point, directionIdx) => [point, directionIdx - 1],
+    'R': (point, directionIdx) => [point, directionIdx + 1]
+  };
+  
+  this.rove = command => {
+    [point, directionIdx] = commands[command](point, directionIdx);
     return this;
   }
   

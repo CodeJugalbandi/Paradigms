@@ -311,14 +311,14 @@ function MarsRover(x, y, dirString) {
   let movements = [[0,1], [1,0], [0,-1], [-1,0]];
   let toIndex = directionValue => Math.abs(directionValue % 4)
   
-  this.rove = function(command) {
-    if(command === 'M')
-      point = point.map((value, idx) => value + movements[directionIdx][idx]);
-    else if (command === 'L') 
-      directionIdx--;
-    else if(command === 'R') 
-      directionIdx++;
-    
+  let commands = {
+    'M': (point, directionIdx) => [point.map((value, idx) => value + movements[directionIdx][idx]), directionIdx],
+    'L': (point, directionIdx) => [point, directionIdx - 1],
+    'R': (point, directionIdx) => [point, directionIdx + 1]
+  };
+  
+  this.rove = command => {
+    [point, directionIdx] = commands[command](point, directionIdx);
     return this;
   }
   
@@ -354,6 +354,14 @@ Reflections
 **KRISHNA** In the original JavaScript, the abstractions actually lead the programmer away from the simplification that is available through mathematical insight into the problem. Even the Erlang map is problematic from this perspective, as although in both cases "sound" programming principles of abstraction, aimed at reducing code complexity, have been applied. The solutions are more general, but also more complex, both for the human reader and the language engine.
 
 **BRAHMA** So... is it correct to say that - in addition to problems which are highly data parallel, the benefits of AO are most apparent when exploring new data, or faced with a project where significant parts of the requirement are in a state of flux? The freedom offered by arrays and being able to avoid abstraction early in a project will make new insights and the discovery of new algorithms and potential optimisations more likely.
+
+
+**DHAVAL ASKS** Few points:
+
+1. Is it possible to add another Jugalbandi where we can explore this Parallellizing data aspect?  I see a full blown melody for this.
+2. Can this Data parallel point, be somehow worded as a separate conversation - we need to find a place where this can be injected into existing one, rather than the current injection point.  I think it would be good to highlight one thing really well here - that is, discovering the underlying mathematics and how abstractions can dissolve in light of that.
+3. Another melody like Primes and Performance where we explored bringing it down to mathematics, can we say that distilling to mathematics is good for any pipelined processor to process - we can pull in Martin's talk here for reference.
+
 
 **BRAHMA** But isn't there a risk that the lack of abstractions can break down? For example, if our robot needs behaviours that require complex state and interaction with the its environment, it might be hard to find a pure array representation with proper separation of information. At that point, I would expect that an object oriented decomposition of the problem - or other abstractions - to make the code easier to understand and maintain.
 
