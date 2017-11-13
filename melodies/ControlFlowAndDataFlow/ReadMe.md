@@ -1,4 +1,4 @@
-#FizzBuzz
+# FizzBuzz
 
 FizzBuzz is a mathematical game for children (of all ages), where you are required to count, 1, 2, ... but when you get to a number which is divisible by three, you should say "Fizz" instead of the number. Likewise, you should say "Buzz" for any number which is divisible by five. And of course, "FizzBuzz" for a number which is divisible by both three AND five.
 
@@ -26,7 +26,9 @@ The same as Part 1, except now we want to see the numbers displayed for numbers 
 1 2 Fizz 4 Buzz Fizz 7 8 Fizz Buzz 11 Fizz 13 14 FizzBuzz 16 17 Fizz 19 Buzz
 ```
 
-**BRAHMA** Lets look at implementing Fizz Buzz in Haskell.  For simplicity and gradually building the solution in 2 parts as put above:
+**BRAHMA** Lets look at implementing Fizz Buzz in Haskell.  For simplicity and gradually building the solution in 2 parts as put above.  
+
+**BRAHMA** A naive implementation of FizzBuzz for a programmer coming from Imperative Paradigm to Functional Programming Paradigm would probably be like writing a simple function - ```toFizzBuzz``` that produces either ```Fizz```, ```Buzz``` or ```FizzBuzz``` for an input Integer. 
 
 ```haskell
 toFizzBuzz :: Int -> String
@@ -35,7 +37,11 @@ toFizzBuzz n
   | n `mod` 3 == 0 = "Fizz"
   | n `mod` 5 == 0 = "Buzz"
   | otherwise =  ""
+```
 
+**BRAHMA**  Instead of looping as one would in an imperative mode, I'd then apply a mapping function for all values until ```n```:
+
+```haskell
 fizzBuzz :: Int -> [String]
 fizzBuzz n = map toFizzBuzz [1..n]
 
@@ -62,7 +68,7 @@ main = do
   print $ fizzBuzz 20 -- ["1","2","Fizz","4","Buzz","Fizz","7","8","Fizz","Buzz","11","Fizz","13","14","FizzBuzz","16","17","Fizz","19","Buzz"]
 ```
 
-**BRAHMA** So, this was a vanilla implementation of FizzBuzz.  Krishna, how does this look in an array-oriented language like APL?  
+**BRAHMA** So, this was a naive functional programming paradigm rendition of FizzBuzz.  Krishna, how does this look in an array-oriented language like APL?  
 
 **KRISHNA** I can generate a 20-item array which repeats ('' '' 'Fizz') over and over again as follows:
 
@@ -135,6 +141,7 @@ main = do
     ⍸case≠0
 3 5 6 9 10 12 15 18 20
 ```
+**Dhaval asks** how about ```⎕←indices←⍸case≠0```?
 
 **KRISHNA** The above gives me the indices of items to be replaced. I can generate the list of replacement values by indexing an array of 3 strings by the array of non-zero cases as follows. The "without" function ```~``` returns the left argument excluding any elements found in the right:
 
@@ -144,6 +151,8 @@ main = do
 ```
 
 **KRISHNA** I can compute the final result using the ```@``` operator to merge these values into my input at the relevant positions. I would read the expression below as "texts merged with input at positions where case is not zero":
+
+**Dhaval asks** how about ```(texts @ indices) input```?
 
 ```apl
     (texts @ (⍸case≠0)) input
@@ -168,11 +177,11 @@ main = do
  Fizz  22 23  Fizz  Buzz  26  Fizz  28 29  FizzBuzz 
 ```
 
-**KRISHNA** Note that, since many APL primitives map to arrays implicitly, this solution has no loops or conditional statements. The data structure drives the application of functions, and there is no control flow in the code.
+**KRISHNA** Note that, since many APL primitives map to arrays implicitly, this solution has no loops or conditional statements. Another important fact here is that the data structure drives the application of functions, and there is no control flow in the code.
 
 **KRISHNA** Do you want to have a go at producing a data-driven solution?
 
-**BRAHMA** Yes, let me give it a go in Haskell.  We need a ```main``` and I need to call ```fizzBuzz``` for 20 numbers.  So fizzBuzz is a function that consumes an ```Int``` and returns a list of ```String```
+**BRAHMA** Yes, let me give it a go in Haskell.
 
 ```haskell
 fizzBuzz :: Int -> [String]
@@ -304,7 +313,7 @@ Reflections
 
 **KRISHNA** Logic in APL is often most efficiently expressed in a data representation.  It is this representation that is processed using array operations, achieving the end result.  
 
-**BRAHMA** So rather than rendering the source code that embeds the logic in the control flow of the program, in APL the logic is embedded in the data flow.
+**BRAHMA** The second attempt in Haskell focussed on data, so rather than the source code that embeds the logic in the control flow of the program.  In APL the logic is embedded in the data flow.
 
 **BRAHMA** So, essentially this an eye-opening contrast - Control Flow or Data-Flow? Lets move to the next melody in our jugalbandi.
 
