@@ -1,51 +1,50 @@
-function Direction(dirString) {
-  let directions = {
+// function MarsRover(x, y, direction) {
+//   this.rove = (command) => this;
+//   this.toString = () => `${x} ${y} ${direction}`
+// }
+
+
+// function Vector(x, y, direction) {
+//   this.moveForward = () => this;
+//   this.turnLeft = () => this;
+//   this.turnRight = () => this;
+//   this.toString = () => `${x} ${y} ${direction}`;
+// }
+
+
+function Vector(x, y, direction) {
+  var directions = {
     'N' : ['W', 'E', (x,y) => [x, y+1]],
     'E' : ['N', 'S', (x,y) => [x+1, y]],
     'S' : ['E', 'W', (x,y) => [x, y-1]],
     'W' : ['S', 'N', (x,y) => [x-1, y]]
   };
+
+  this.moveForward = () => {
+    var [newX, newY] = directions[direction][2](x, y);
+    return new Vector(newX, newY, direction);
+  };
+
+  this.turnLeft = () => new Vector(x, y, directions[direction][0]);
+  this.turnRight = () => new Vector(x, y, directions[direction][1]);
+  this.toString = () => `${x} ${y} ${direction}`;
+}
+
+function MarsRover(x, y, dirString) {
+  var vector = new Vector(x, y, dirString);
+
+  var commands = {
+    'M': vector => vector.moveForward(),
+    'L': vector => vector.turnLeft(),
+    'R': vector => vector.turnRight()
+  };
   
-  this.moveForward = (x, y) => directions[dirString][2](x, y);
-  this.left = () => new Direction(directions[dirString][0]);
-  this.right = () => new Direction(directions[dirString][1]);
-  this.toString = () => dirString;
-}
-
-class Vector {
-  constructor(x, y, dirString) {
-    this.x = x;
-    this.y = y;
-    this.direction = new Direction(dirString);
-  }
-  moveForward() { 
-    var [newX, newY] = this.direction.moveForward(this.x, this.y);
-    return new Vector(newX, newY, this.direction.toString()); 
-  }
-  turnLeft() { return new Vector(this.x, this.y, this.direction.left().toString()); }
-  turnRight() { return new Vector(this.x, this.y, this.direction.right().toString()); }
-  toString() { return `${this.x} ${this.y} ${this.direction.toString()}`;}
-}
-
-class MarsRover {
-  constructor(x, y, dirString) {
-    this.vector = new Vector(x, y, dirString);
-  }
-    
-  rove(command) {
-    if(command === 'M') 
-      this.vector = this.vector.moveForward();
-    else if(command === 'L') 
-      this.vector = this.vector.turnLeft();
-    else if(command === 'R') 
-      this.vector = this.vector.turnRight();
-
+  this.rove = command => {
+    vector = commands[command](vector);
     return this;
   }
-    
-  toString() {
-    return this.vector.toString();
-  }
+
+  this.toString = () => vector.toString();
 }
 
 var rover = new MarsRover(3, 3, 'E');
