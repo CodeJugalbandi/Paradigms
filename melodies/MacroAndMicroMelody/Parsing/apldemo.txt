@@ -1,0 +1,50 @@
+﻿⍝ Session input for Dyalog Demo
+]box on -fns=on
+⎕IO←0
+input←'[2]'
++/1 2 3 ⍝ plus  reduction
+⊣/1 2 3 ⍝ left  reduction
+⊢/'[2]' ⍝ right reduction
+(⊣/,⊢/) ⍝ (left reduction) catenate (right reduction)
+(⊣/,⊢/)input   ⍝ first and last items of input
+1↓ ¯1↓ input   ⍝ drop first and last items of input
+⎕←inner←1↓ ¯1↓ input ⍝ count number of items
+⎕D             ⍝ array of digits
+inner∊⎕D       ⍝ "isDigit"
+⎕D⍳inner       ⍝ "cast" char digit
+]load /home/mkrom/Paradigms/melodies/MacroAndMicroMelody/Parsing/ParsingAtom -disperse
+ArrayParser
+ArrayParser '[22]'
+ArrayParser¨'[2]' '[c]' '[]'
+⍝ End of Part 1
+
+inner←'२,7,Æ'
+inner=','
+1 0 1 0 1 0 ⊂ ',',inner
+{(⍵=',')⊂⍵} ',',inner
+{1↓¨(⍵=',')⊂⍵} ',',inner
+⎕←items←∊{1↓¨(⍵=',')⊂⍵} ',',inner
+items∊⎕D
+⎕←indices←⍸items∊⎕D
+⎕D⍳'7'
+cast←⎕D∘⍳
+(cast@indices)items
+]load /home/mkrom/Paradigms/melodies/MacroAndMicroMelody/Parsing/ParsingArrayMinimal -disperse
+ArrayParser
+ArrarParser '[',inner,']'
+⍝ end of Part 2
+
+inner←'a,9,[b,[c,4]]'
+{1↓¨(','=⍵)⊂⍵}',',inner
+depth←+\1 ¯1 0['[]'⍳inner]
+↑inner (1 0⍕depth) ⍝ format depth width 1, decimals 0
+here←depth=0
+⎕←items←{1↓¨(1,here∧⍵=',')⊂',',⍵} inner
+leaf←~sub←'['=⊃¨items
+leaf sub
+]load /home/mkrom/Paradigms/melodies/MacroAndMicroMelody/Parsing/ParsingArrayNested -disperse
+LeafParser
+LeafParser@(⍸leaf)⊢items
+ArrayParser
+ArrayParser@(⍸sub)⊢items
+⍝ End of Part 3
