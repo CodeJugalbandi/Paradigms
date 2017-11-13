@@ -28,7 +28,7 @@ The same as Part 1, except now we want to see the numbers displayed for numbers 
 
 **BRAHMA** Lets look at implementing Fizz Buzz in Haskell.  For simplicity and gradually building the solution in 2 parts as put above.  
 
-**BRAHMA** A naive implementation of FizzBuzz for a programmer coming from Imperative Paradigm to Functional Programming Paradigm would probably be like writing a simple function - ```toFizzBuzz``` that produces either ```Fizz```, ```Buzz``` or ```FizzBuzz``` for an input Integer. 
+**BRAHMA** A naive implementation of FizzBuzz for a programmer coming from Imperative Paradigm to Functional Programming Paradigm would be to write a simple function - ```toFizzBuzz``` that produces either ```Fizz```, ```Buzz``` or ```FizzBuzz``` for a given Integer. 
 
 ```haskell
 toFizzBuzz :: Int -> String
@@ -315,5 +315,4 @@ Reflections
 
 **BRAHMA** The second attempt in Haskell focussed on data, so rather than the source code that embeds the logic in the control flow of the program.  In APL the logic is embedded in the data flow.
 
-**BRAHMA** So, essentially this an eye-opening contrast - Control Flow or Data-Flow? Lets move to the next melody in our jugalbandi.
-
+**BRAHMA** So, essentially this an eye-opening contrast - Control Flow or Data-Flow? It is important to take the data-first approach, because it is much easier to deal with changing data than to change program-logic.  Humans are better at visualizing data, rather than reasoning about control-flow.  This applies every where - whether it is functional programming paradigm or array-oriented paradigm or Object-Oriented Paradigm.  Lets move to the next melody in our jugalbandi.
