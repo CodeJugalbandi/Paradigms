@@ -27,10 +27,7 @@ function rove([x,y,d],cmd) {
 }
 
 var p1 = rove([3,3,'E'], 'M');
-console.info(p1);
 var p2 = rove(p1, 'R');
-console.info(p2);
 var p3 = rove(p2, 'M');
-console.info(p3);
 var p4 = rove(p3, 'L');
 console.info(p4);
