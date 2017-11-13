@@ -124,92 +124,110 @@ console.info(rover.rove('M').rove('R').rove('M').rove('L').toString());
 
 **KRISHNA**  Each of the above lines is highly readable, but there are a lot of lines and duplication! The levels of abstraction have my head spinning a bit. 
 
-**BRAHMA**  Yes indeed, I see that too! Let me show you how we can reduce this verbosity in Erlang, using a purely Functional Programming Paradigm.  So i'll begin by creating a module and export the ```rove``` function that takes in current position and a command.  This function will use a ```case``` on ```Cmd``` to do the needful.
+**BRAHMA**  Yes indeed, I see that too! Let me show you how we can reduce this verbosity further, using a purely Functional Programming Paradigm.  I'll now remove the duplication present in the earlier ```Map``` and I'll define a variable ```compass``` which holds directions along with the relevant degrees that one finds on a regular compass as a tuple.  This tuple will be the key and the corresponding value will be the movement transformation in that direction.  In ES6, I can define an array of items containing key and value both as tuples.
 
-```erlang
--module (marsrover).
--export ([rove/2]).
-
-rove(Vec, Cmd) ->
-  case Cmd of
-    'M' -> Vec;
-    'L' -> Vec;
-    'R' -> Vec;
-    _ -> Vec
-  end.
+```javascript
+var compass = new Map([
+    [['N',00], [0,1]],
+    [['E',09], [1,0]],
+    [['S',18], [0,-1]],
+    [['W',27], [-1,0]]
+]);
 ```
 
-**BRAHMA** I'll now remove the duplication present in the earlier ```Map``` that we evolved when coding in JavaScript.  Here I'll define a macro called ```COMPASS``` which holds directions along with the relevant degrees that one finds on a regular compass as a tuple.  This tuple will be the key and the corresponding value will be the movement transformation in that direction.  In fact, this duplication can also be refactored away to optimize the earlier JavaScript code.
+**BRAHMA**  I'll now define ```rove``` function that takes x,y and direction as a tuple along with a command
 
-```erlang
--module (marsrover).
--export ([rove/2]).
--define (COMPASS, #{
-    {'N',0} =>  {0,1},
-    {'E',9} =>  {1,0},
-    {'S',18} => {0,-1},
-    {'W',27} => {-1,0}
-}).
-
-rove(Vec={X,Y,Dir},Cmd) ->
-  Keys = maps:keys(?COMPASS),
-  case lists:keyfind(Dir, 1, Keys) of
-    not_found ->
-      Vec;
-      
-    Key={_,Deg} ->
-      {Dx,Dy} = maps:get(Key, ?COMPASS),
-      {NewX,NewY,NewDeg} = case Cmd of
-        'M' -> 
-          {X+Dx,Y+Dy,Deg};
-        'L' -> 
-          {X,Y,Deg-9};
-        'R' -> 
-          {X,Y,Deg+9};
-        _ -> Vec
-      end,
-      {NewD, _} = lists:keyfind(NewDeg rem 36, 2, Keys),
-      {NewX,NewY,NewD}
-  end.
+```javascript
+function rove([x,y,d], cmd) {
+  var keys = Array.from(compass.keys());
+  var [newPos] = keys.filter(([dir,deg]) => dir === d)
+    .map(key => {
+      var [dx,dy] = compass.get(key);
+      var [dir, deg] = key;
+      return ???(cmd, [x,y,deg],[dx,dy])
+    })
+}
 ```
 
-**BRAHMA** I'll just refactor the above code to shove the ```Cmd``` case inside the ```execute``` function.
+**BRAHMA** In order to apply the command, I'll define another structure ```commands``` with ```command``` as a key and the corresponding transformation functions as the values.
 
-```erlang
--export ([rove/2]).
--define (COMPASS, #{
-    {'N',0} =>  {0,1},
-    {'E',9} =>  {1,0},
-    {'S',18} => {0,-1},
-    {'W',27} => {-1,0}
-}).
+```javascript
+var commands = {
+    'L': ([x,y,deg],[dx,dy]) => [x,y,deg-9],
+    'R': ([x,y,deg],[dx,dy]) => [x,y,deg+9],
+    'M': ([x,y,deg],[dx,dy]) => [x+dx,y+dy,deg]
+};
+```
+**BRAHMA** So now the rove function looks like:
 
-execute(Vec={X,Y,Deg}, {Dx,Dy}, Cmd) ->
-  case Cmd of
-    'M' -> 
-      {X+Dx,Y+Dy,Deg};
-    'L' -> 
-      {X,Y,Deg-9};
-    'R' -> 
-      {X,Y,Deg+9};
-    _ -> Vec
-  end.
-  
-rove(Vec={X,Y,Dir},Cmd) ->
-  Keys = maps:keys(?COMPASS),
-  case lists:keyfind(Dir, 1, Keys) of
-    not_found ->
-      Vec;
-      
-    Key={_,Deg} ->
-      Delta = maps:get(Key, ?COMPASS),
-      {NewX,NewY,NewDeg} = execute({X,Y,Deg},Delta,Cmd),
-      {NewD, _} = lists:keyfind(NewDeg rem 36, 2, Keys),
-      {NewX,NewY,NewD}
-  end.
+```javascript
+function rove([x,y,d], cmd) {
+  var keys = Array.from(compass.keys());
+  var [newPos] = keys.filter(([dir,deg]) => dir === d)
+    .map(key => {
+      var [dx,dy] = compass.get(key);
+      var [dir, deg] = key;
+      return commands[cmd]([x,y,deg],[dx,dy]);
+    })
+}
+```
+**BRAHMA** I further ```map``` this output to convert ```deg```rees back to ```dir```ection.
+
+```javascript
+function rove([x,y,d], cmd) {
+  var keys = Array.from(compass.keys());
+  var [newPos] = keys.filter(([dir,deg]) => dir === d)
+    .map(key => {
+      var [dx,dy] = compass.get(key);
+      var [dir, deg] = key;
+      return commands[cmd]([x,y,deg],[dx,dy]);
+    })
+    .map(([x,y,deg]) => {
+       var [newDir,newDeg] = keys.filter(([kdir,kdeg] => kdeg === deg % 36));
+       return [x,y,newDir];
+    });
+  return newPos;
+}
+```
+**BRAHMA** The whole thing looks like this:
+
+```javascript
+var compass = new Map([
+    [['N',00], [0,1]],
+    [['E',09], [1,0]],
+    [['S',18], [0,-1]],
+    [['W',27], [-1,0]]
+]);
+
+var commands = {
+  'L': ([x,y,deg], [dx,dy]) => [x,y,deg-9],
+  'R': ([x,y,deg], [dx,dy]) => [x,y,deg+9],
+  'M': ([x,y,deg], [dx,dy]) => [x+dx,y+dy,deg]
+};
+
+function rove([x,y,d],cmd) {
+  var keys = Array.from(compass.keys());
+  var [newPos] = keys.filter(([dir,deg]) => dir === d)
+    .map(key => {
+      var [dx,dy] = compass.get(key);
+      var [dir, deg] = key;
+      return commands[cmd]([x,y,deg],[dx,dy]);
+    })
+    .map(([x,y,deg]) => {
+      var [[newDir, newDeg]] = keys.filter(([kdir,kdeg]) => kdeg === deg % 36);
+      return [x,y,newDir];
+    });
+    return newPos;
+}
+
+var p1 = rove([3,3,'E'], 'M');
+var p2 = rove(p1, 'R');
+var p3 = rove(p2, 'M');
+var p4 = rove(p3, 'L');
+console.info(p4);  // [4,2,'E']
 ```
 
-**BRAHMA**  So, here everything is functions, we did not require ```MarsRover``` or ```Vector``` abstractions, the essence has become more transparent and is there for anyone to see.  So Krishna, how does this look in an Array-Oriented Paradigm like APL?
+**BRAHMA**  So, here everything is simply data and function, we did not require ```MarsRover``` or ```Vector``` abstractions, the essence has become more transparent and is there for anyone to see.  So Krishna, how does this look in an Array-Oriented Paradigm like APL?
 
 **KRISHNA** I am going to base my solution on the same fundamental data, tuples of movements for each axis, but rather than "abstract" this into a map, I will just use two simple arrays, a list of four directions and a 2-column matrix with one row per direction, defining the movement along each axis that the direction represents.
 
