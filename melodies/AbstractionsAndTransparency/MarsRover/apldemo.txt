@@ -1,25 +1,40 @@
 ﻿⍝ APL session input for MarsRover
+⍝⍝ Annotations to be removed
 ]box on -fns=on
-⎕IO←0                          ⍝ Index from 0
-directions←'NESW'              ⍝ Clockwise From North
-movement←4 2⍴0 1,1 0,0 ¯1,¯1 0 ⍝ One row per direction (NESW)   
+⎕IO←0
+                               ⍝⍝ In this melody, it is more convenient to index from 0
+                               ⍝⍝ We need the same base data as in JavaScript, but
+                               ⍝⍝ instead of a map, we will use two simple arrays
+directions←'NESW' 
+movement←4 2⍴0 1,  1 0,  0 ¯1,  ¯1 0 
+                               ⍝⍝ One row per direction (NESW)   
 directions,movement
+                               ⍝⍝ Note that directions are in clockwise order, starting with North
 position←3 3  ⍝ intial position
 heading←1     ⍝ initial heading (East)
-commands←'MMRMMLMRML'
+commands←'MMRMMLMRML' ⍝ list of commands
             'LMR'⍳'RMLLLLLL'   ⍝ Indices of commands in 'LMR'
+                               ⍝⍝ "index of" returns the position of the first occurrence
+                               ⍝⍝ in the left argument, of each item in the right argument
          ¯1+'LMR'⍳'RMLLLLLL'   ⍝ ¯1=L, 0=M, 1=R
+                               ⍝⍝ By subtracting one, we can "compute" the rotation caused
+                               ⍝⍝ by each command, as a change of index into our directions
    +\ 3, ¯1+'LMR'⍳'RMLLLLLL'   ⍝ 3=West
+                               ⍝⍝ A "sum scan" allows us to compute the bearing after
+                               ⍝⍝ each command has been executed.
 4| +\ 3, ¯1+'LMR'⍳'RMLLLLLL'
-¯1+'LMR'⍳commands
+                               ⍝⍝ We need "modulus 4" to keep the indices between 0 and 3
 ⎕←bearings←4| +\ heading, ¯1+'LMR'⍳commands
+commands,movement[¯1↓bearings;]
+                               ⍝⍝ Each command, and the deltas required to "move" after it
 ⎕←movements←movement[¯1↓bearings;] ×[0] 'M'=commands
-commands,movements ⍝ catenate commands to matrix of movements
-position⍪movements
-+⍀ position⍪movements
-+⌿ position⍪movements
-¯1↑bearings
-directions[¯1↑bearings]
+commands,movements
+                               ⍝⍝ Each command and deltas that it will cause
+position⍪movements ⍝ Catenate initial position atop movement matrix
++⍀ position⍪movements    ⍝ sum scan on leading axis: position after each command
++⌿ position⍪movements    ⍝ sum reduction: final position
+¯1↑bearings ⍝ last item of bearings
+directions[¯1↑bearings]  ⍝ index direction letters by last bearing
 ]load /users/mkrom/Paradigms/melodies/AbstractionsAndTransparency/MarsRover/marsrover -nolink
 rove
 rove (3 3) 'E' 'MMRMMLMRML'

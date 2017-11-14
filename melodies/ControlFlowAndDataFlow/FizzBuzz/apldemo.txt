@@ -1,40 +1,76 @@
-﻿⍝ Session input for Dyalog Demo
-]box on
+﻿⍝ APL session input for FizzBuzz
+⍝⍝ Annotations to be removed
+]box on -fns=on
 ⎕IO←1
+                      ⍝⍝ APL allows "Index Origin" to be 0 or 1 (the default).
+                      ⍝⍝ for this problem, 1 is fine so we'll leave it at that
           '' 'Fizz'
+                      ⍝⍝ A 2-element array of one empty string and one containing 'Fizz'     
      ¯3↑  '' 'Fizz'
+                      ⍝⍝ Take 3 items, from the right (pad on the left)
 20⍴  ¯3↑  '' 'Fizz'
+⍝ Read: "the 20 reshape of the negative three take of '' 'Fizz'"
+                      ⍝⍝ APL order of execution is as in (f g x) of mathematics
+                      ⍝⍝ Right argument to a function is result of evaluating what remains on the right
+                      ⍝⍝ NB: NO FUNCTION/OPERATOR PRECEDENCE
 20⍴ (¯3↑ ('' 'Fizz'))
-⍝ "the 20 reshape of the negative three take of '' 'Fizz'
+                      ⍝⍝ Repeat '' '' 'Fizz' until we have 20 elements
   20⍴¯5↑'' 'Buzz'
- (20⍴¯3↑'' 'Fizz') ,¨ (20⍴¯5↑'' 'Buzz')
-{ (⍵⍴¯3↑'' 'Fizz') ,¨  (⍵⍴¯5↑'' 'Buzz')} 20
-⍝ {} encloses a function, ⍵ is the right argument
+                      ⍝⍝ The same, producing 'Buzz' in every 5th position
+ (20⍴¯3↑'' 'Fizz') ,¨ (20⍴¯5↑'' 'Buzz')   ⍝ ,¨ is "catenate each"
+10 20 30 {⍺+2×⍵} 1 2 3 
+                      ⍝⍝ In Dyalog APL, {} defines a function, ⍺ is left and ⍵ is the right argument
+                      ⍝⍝ Functions can be named using assignment, but can also be used without naming
+{ (⍵⍴¯3↑'' 'Fizz') ,¨  (⍵⍴¯5↑'' 'Buzz')} 30
 ⍝ End of Part 0
+
 ⍝ In Part 1, we are supposed to include the underlying number.
+                      ⍝⍝ In the AO paradigm, it feels natural to take 
+                      ⍝⍝ an array of integers as the argument
+                      ⍝⍝ and replace selected items
 ⎕←input←⍳20 
-s. If I don't assign the result to a variable, the default is to print the result:
-3|input 
+                      ⍝⍝ If I don't assign the result to a variable, the default is to print the result.
+                      ⍝⍝ But if there is an assignment, I can force output by assigning to ⎕.
+                      ⍝⍝ ⎕ is the screen (or really the printed paper output)
+    3 | input
+    5 | input
 3 5 ∘.| input
+                      ⍝⍝ ∘.f combines every element on left with every element on right
 0 = 5 3 ∘.| input
+                      ⍝⍝ Numbers divisible by 5 or 3
 2⊥1 0 1 ⍝ (1*2^2) +(0*2^1) + (1*2^0)
+                      ⍝⍝ APL invented as a mathematical notation w/focus on matrix algebra
+                      ⍝⍝ "base value" computes value of polynomial
+                      ⍝⍝ coefficients on the right, x on the left
 ⎕←case← 2⊥ 0 = 5 3 ∘.| input
-⍸1 0 1 1 0
-⍸case≠0 ⍝ "where case ≠ 0"
+                      ⍝⍝ Interprete each column as a 2-digit number base 2
+                      ⍝⍝ 1=Fizz, 2=Buzz, 3=FizzBuzz
+⍸ 1 0 1 1 0
+                      ⍝⍝ "where" function returns indices of 1's in a boolean array
+⍸ case≠0 ⍝ "where case≠0"
+                      ⍝⍝ "where case ≠ 0" (= all divisible numbers)
 ('Fizz' 'Buzz' 'FizzBuzz')[1 1 3 2]
-case~0
+                      ⍝⍝ APL allows indexing by an array, returning an array of 
+                      ⍝⍝ the same shape as the array of indices
+case~0 ⍝ "case without 0"
 ⎕←texts←('Fizz' 'Buzz' 'FizzBuzz')[case~0]
+                      ⍝⍝ Desired texts for all divisible numbers
 (texts @ (⍸case≠0)) input
-]load /home/mkrom/Paradigms/melodies/ControlFlowAndDataFlow/FizzBuzz/FizzBuzz
-⎕VR 'FizzBuzz'
+                      ⍝⍝ Replace all divisible numbers by corresponding texts
+]load /users/mkrom/Paradigms/melodies/ControlFlowAndDataFlow/FizzBuzz/FizzBuzz -nolink
+FizzBuzz
 FizzBuzz ⍳20
 FizzBuzz 666 777 888 999 1000 1500
 )copy dfns cmpx
 cmpx 'FizzBuzz ⍳1E6'
 ⍝ End of Part 1
 
-{0=3 5|⍵} 10
-{0=3 5|⍵}¨ 1 3 5 7 15
-{⍱/0=3 5|⍵}¨1 3 5 7 15
-1 0/'Fizz' 'Buzz'
+{0=3 5|⍵} 10            ⍝ Is ⍵ divisible by each of 3 and 5?
+{0=3 5|⍵}¨ 1 3 5 7 15   ⍝ Apply function with each to array
+{⍱/0=3 5|⍵}¨1 3 5 7 15  ⍝ ⍱/ applies NOR
+1 0/'Fizz' 'Buzz'       ⍝ Select using boolean mask
+∊'Fizz' 'Buzz'          ⍝ "enlist" makes a simple list
 {⍱/m←0=3 5|⍵:⍵ ⋄ ∊m/'Fizz' 'Buzz'}¨ ⍳20
+                        ⍝⍝ We store the result of 0=3 5|⍵ in m
+                        ⍝⍝ If NOR divisible by 3 or 5, return ⍵
+                        ⍝⍝ Else use m to select from Fizz Buzz and enlist

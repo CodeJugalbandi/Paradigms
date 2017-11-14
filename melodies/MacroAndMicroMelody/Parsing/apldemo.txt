@@ -6,13 +6,13 @@ input←'[2]'
 ⊣/1 2 3 ⍝ left  reduction
 ⊢/'[2]' ⍝ right reduction
 (⊣/,⊢/) ⍝ (left reduction) catenate (right reduction)
-(⊣/,⊢/)input   ⍝ first and last items of input
+(⊣/,⊢/) input  ⍝ first and last items of input
 1↓ ¯1↓ input   ⍝ drop first and last items of input
 ⎕←inner←1↓ ¯1↓ input ⍝ count number of items
 ⎕D             ⍝ array of digits
 inner∊⎕D       ⍝ "isDigit"
 ⎕D⍳inner       ⍝ "cast" char digit
-]load /home/mkrom/Paradigms/melodies/MacroAndMicroMelody/Parsing/ParsingAtom -disperse
+]load /users/mkrom/Paradigms/melodies/MacroAndMicroMelody/Parsing/ParsingAtom -disperse -nolink
 ArrayParser
 ArrayParser '[22]'
 ArrayParser¨'[2]' '[c]' '[]'
@@ -29,7 +29,7 @@ items∊⎕D
 ⎕D⍳'7'
 cast←⎕D∘⍳
 (cast@indices)items
-]load /home/mkrom/Paradigms/melodies/MacroAndMicroMelody/Parsing/ParsingArrayMinimal -disperse
+]load /users/mkrom/Paradigms/melodies/MacroAndMicroMelody/Parsing/ParsingArrayMinimal -disperse -nolink
 ArrayParser
 ArrarParser '[',inner,']'
 ⍝ end of Part 2
@@ -42,7 +42,7 @@ here←depth=0
 ⎕←items←{1↓¨(1,here∧⍵=',')⊂',',⍵} inner
 leaf←~sub←'['=⊃¨items
 leaf sub
-]load /home/mkrom/Paradigms/melodies/MacroAndMicroMelody/Parsing/ParsingArrayNested -disperse
+]load /users/mkrom/Paradigms/melodies/MacroAndMicroMelody/Parsing/ParsingArrayNested -disperse -nolink
 LeafParser
 LeafParser@(⍸leaf)⊢items
 ArrayParser
