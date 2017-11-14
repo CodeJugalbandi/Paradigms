@@ -20,7 +20,7 @@ function MarsRover(x, y, direction) {
   this.toString = () => `${x} ${y} ${direction}`
 }
 
-var rover = new MarsRover(3, 3, 'E');
+const rover = new MarsRover(3, 3, 'E');
 console.info(rover.rove('M').rove('R').rove('M').rove('L').toString());
 ```
 
@@ -30,7 +30,7 @@ console.info(rover.rove('M').rove('R').rove('M').rove('L').toString());
 function MarsRover(x, y, dirString) {
   var vector = new Vector(x, y, dirString);
 
-  var commands = {
+  const commands = {
     'M': vector => vector.moveForward(),
     'L': vector => vector.turnLeft(),
     'R': vector => vector.turnRight()
@@ -51,7 +51,7 @@ function Vector(x, y, direction) {
   this.toString = () => `${x} ${y} ${direction}`;
 }
 
-var rover = new MarsRover(3, 3, 'E');
+const rover = new MarsRover(3, 3, 'E');
 console.info(rover.rove('M').rove('R').rove('M').rove('L').toString());
 
 ```
@@ -62,7 +62,7 @@ console.info(rover.rove('M').rove('R').rove('M').rove('L').toString());
 
 ```javascript
 function Vector(x, y, direction) {
-  var directions = {
+  const directions = {
     'N' : ['W', 'E', (x,y) => [x, y+1]],
     'E' : ['N', 'S', (x,y) => [x+1, y]],
     'S' : ['E', 'W', (x,y) => [x, y-1]],
@@ -70,7 +70,7 @@ function Vector(x, y, direction) {
   };
   
   this.moveForward = () => {
-    var [newX, newY] = directions[direction][2](x, y);
+    const [newX, newY] = directions[direction][2](x, y);
     return new Vector(newX, newY, direction); 
   };
   
@@ -84,7 +84,7 @@ function Vector(x, y, direction) {
 
 ```javascript
 function Vector(x, y, direction) {
-  var directions = {
+  const directions = {
     'N' : ['W', 'E', (x,y) => [x, y+1]],
     'E' : ['N', 'S', (x,y) => [x+1, y]],
     'S' : ['E', 'W', (x,y) => [x, y-1]],
@@ -92,7 +92,7 @@ function Vector(x, y, direction) {
   };
 
   this.moveForward = () => {
-    var [newX, newY] = directions[direction][2](x, y);
+    const [newX, newY] = directions[direction][2](x, y);
     return new Vector(newX, newY, direction);
   };
 
@@ -104,7 +104,7 @@ function Vector(x, y, direction) {
 function MarsRover(x, y, dirString) {
   var vector = new Vector(x, y, dirString);
 
-  var commands = {
+  const commands = {
     'M': vector => vector.moveForward(),
     'L': vector => vector.turnLeft(),
     'R': vector => vector.turnRight()
@@ -118,7 +118,7 @@ function MarsRover(x, y, dirString) {
   this.toString = () => vector.toString();
 }
 
-var rover = new MarsRover(3, 3, 'E');
+const rover = new MarsRover(3, 3, 'E');
 console.info(rover.rove('M').rove('R').rove('M').rove('L').toString());
 ```
 
@@ -324,11 +324,11 @@ This means that the function will be efficient even when executed by an interpre
 ```javascript
 function MarsRover(x, y, dirString) {
   const directions = ['N', 'E', 'S', 'W'];
-  const directionIdx = Math.max(0, directions.indexOf(dirString));
+  let directionIdx = Math.max(0, directions.indexOf(dirString));
 
   let point = [x, y];
   const movements = [[0,1], [1,0], [0,-1], [-1,0]];
-  let toIndex = directionValue => Math.abs(directionValue % 4)
+  const toIndex = directionValue => Math.abs(directionValue % 4)
   
   let commands = {
     'M': (point, directionIdx) => [point.map((value, idx) => value + movements[directionIdx][idx]), directionIdx],
@@ -344,7 +344,7 @@ function MarsRover(x, y, dirString) {
   this.toString = () => `${point[0]} ${point[1]} ${directions[toIndex(directionIdx)]}`
 }
 
-var rover = new MarsRover(3, 3, 'E');
+const rover = new MarsRover(3, 3, 'E');
 console.info(rover.rove('M').rove('R').rove('M').rove('L').toString());
 ```
 
