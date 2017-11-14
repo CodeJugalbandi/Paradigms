@@ -1,4 +1,4 @@
-#Parsing Text Containing Recursive Structures
+# Parsing Text Containing Recursive Structures
 
 Let us consider the problem of parsing arrays.  Examples could be:
 

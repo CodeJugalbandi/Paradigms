@@ -256,10 +256,10 @@ fizzBuzz n = take n result
     where
         threes = cycle [0, 0, 1]
         fives  = cycle [0, 0, 0, 0, 1]
-        indices = [1..]
+        indices = map show [1..n]
         fizzBuzz = ["", "Fizz", "Buzz", "FizzBuzz"]
         base2 = unDigits 2
-        select = \f t i -> if(base2 [f,t] == 0) then show i else fizzBuzz !! (base2 [f,t])
+        select = \f t i -> if(base2 [f,t] == 0) then i else fizzBuzz !! (base2 [f,t])
         result = zipWith3 select fives threes indices
     
 main :: IO ()
@@ -309,6 +309,6 @@ Reflections
 
 **KRISHNA** Logic in APL is often most efficiently expressed in a data representation.  It is this representation that is processed using array operations, achieving the end result.  
 
-**BRAHMA** The second attempt in Haskell focussed on data, so rather than the source code that embeds the logic in the control flow of the program.  In APL the logic is embedded in the data flow.
+**BRAHMA** The second attempt in Haskell focussed on being data-driven, rather than creating the source code that embeds the logic in the control flow of the program.  In APL the logic is embedded in the data flow.
 
-**BRAHMA** So, essentially this an eye-opening contrast - Control Flow or Data-Flow? It is important to take the data-first approach, because it is much easier to deal with changing the data than to change the program-logic.  Humans are good at looking data visually, rather than reasoning about control-flow.  So it becomes important to move program-logic (flow) away from control-structures into data (flow).  This applies every where - whether it is functional programming paradigm or array-oriented paradigm or Object-Oriented Paradigm.  Lets move to the next melody in our jugalbandi.
+**BRAHMA** So, essentially this an eye-opening contrast - Control Flow or Data-Driven? It is important to take the data-first approach, because it is much easier to deal with changing the data than to change the program-logic.  Humans are good at looking data visually, rather than reasoning about control-flow.  So it becomes important to move program-logic (flow) away from control-structures into data (driven).  This applies every where - whether it is functional programming paradigm or array-oriented paradigm or Object-Oriented Paradigm.  Lets move to the next melody in our jugalbandi.
