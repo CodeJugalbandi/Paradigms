@@ -1,17 +1,17 @@
-﻿⍝ Session input for Dyalog Demo
+﻿⍝ APL session input for MarsRover
 ]box on -fns=on
 ⎕IO←0                          ⍝ Index from 0
 directions←'NESW'              ⍝ Clockwise From North
 movement←4 2⍴0 1,1 0,0 ¯1,¯1 0 ⍝ One row per direction (NESW)   
 directions,movement
 position←3 3  ⍝ intial position
-heading←1     ⍝ index into directions
+heading←1     ⍝ initial heading (East)
 commands←'MMRMMLMRML'
-'LMR'⍳commands
+            'LMR'⍳'RMLLLLLL'   ⍝ Indices of commands in 'LMR'
+         ¯1+'LMR'⍳'RMLLLLLL'   ⍝ ¯1=L, 0=M, 1=R
+   +\ 3, ¯1+'LMR'⍳'RMLLLLLL'   ⍝ 3=West
+4| +\ 3, ¯1+'LMR'⍳'RMLLLLLL'
 ¯1+'LMR'⍳commands
-+\ heading, ¯1+'LMR'⍳commands
-   +\ 3, ¯1+'LMR'⍳'RLLLLLL'
-4| +\ 3, ¯1+'LMR'⍳'RLLLLLL'
 ⎕←bearings←4| +\ heading, ¯1+'LMR'⍳commands
 ⎕←movements←movement[¯1↓bearings;] ×[0] 'M'=commands
 commands,movements ⍝ catenate commands to matrix of movements

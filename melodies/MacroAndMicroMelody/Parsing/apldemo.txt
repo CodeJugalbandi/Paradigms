@@ -1,4 +1,4 @@
-﻿⍝ Session input for Dyalog Demo
+﻿⍝ APL Session input for Parsing
 ]box on -fns=on
 ⎕IO←0
 input←'[2]'
