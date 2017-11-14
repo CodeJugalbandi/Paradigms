@@ -124,7 +124,7 @@ console.info(rover.rove('M').rove('R').rove('M').rove('L').toString());
 
 **KRISHNA**  Each of the above lines is highly readable, but there are a lot of lines and a fair amount of duplication! 
 
-**BRAHMA**  Yes indeed, I see that too! Let me show you how we can reduce this verbosity further, using a purely Functional Programming Paradigm.  I'll now remove the duplication present in the earlier ```Map``` and I'll define a variable ```compass``` which holds directions along with the relevant degrees that one finds on a regular compass as a tuple.  This tuple will be the key and the corresponding value will be the movement transformation in that direction.  In ES6, I can define an array of items containing key and value both as tuples.
+**BRAHMA**  Yes indeed, I see that too! Let me show you how we can reduce this verbosity further, this time using a purely Functional Programming Paradigm.  I'll now remove the duplication present in the earlier ```Map``` and I'll define a constant ```compass``` which holds directions along with the relevant degrees that one finds on a regular compass as a tuple.  This tuple will be the key and the corresponding value will be the movement transformation in that direction.  In ES6, I can define an array of items containing key and value both as tuples.
 
 ```javascript
 const compass = new Map([
@@ -165,8 +165,8 @@ function rove([x,y,d], cmd) {
   const keys = Array.from(compass.keys());
   const [newPos] = keys.filter(([dir,deg]) => dir === d)
     .map(key => {
-      var [dx,dy] = compass.get(key);
-      var [dir, deg] = key;
+      const [dx,dy] = compass.get(key);
+      const [dir, deg] = key;
       return commands[cmd]([x,y,deg],[dx,dy]);
     })
 }
@@ -323,11 +323,11 @@ This means that the function will be efficient even when executed by an interpre
 
 ```javascript
 function MarsRover(x, y, dirString) {
-  let directions = ['N', 'E', 'S', 'W'];
-  let directionIdx = Math.max(0, directions.indexOf(dirString));
+  const directions = ['N', 'E', 'S', 'W'];
+  const directionIdx = Math.max(0, directions.indexOf(dirString));
 
   let point = [x, y];
-  let movements = [[0,1], [1,0], [0,-1], [-1,0]];
+  const movements = [[0,1], [1,0], [0,-1], [-1,0]];
   let toIndex = directionValue => Math.abs(directionValue % 4)
   
   let commands = {
