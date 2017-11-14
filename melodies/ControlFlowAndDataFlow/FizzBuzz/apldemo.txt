@@ -9,7 +9,7 @@
      ¯3↑  '' 'Fizz'
                       ⍝⍝ Take 3 items, from the right (pad on the left)
 20⍴  ¯3↑  '' 'Fizz'
-⍝ THE 20 reshape OF THE negative three take OF ('' 'Fizz')
+⍝ [THE] 20 reshape [OF THE] negative three take [OF] ('' 'Fizz')
                       ⍝⍝ APL order of execution is as in (f g x) of mathematics
                       ⍝⍝ NB: NO FUNCTION/OPERATOR PRECEDENCE
 20⍴ (¯3↑ ('' 'Fizz'))
@@ -26,7 +26,7 @@
                       ⍝⍝ In the AO paradigm, it feels natural to take 
                       ⍝⍝ an array of integers as the argument
                       ⍝⍝ and replace the relevant items
-input←⍳20
+input←1+⍳20
 input
     3 | input
     5 | input
@@ -56,7 +56,7 @@ case~0 ⍝ "case without 0": case values for divisible cases
 ]load /users/mkrom/Paradigms/melodies/ControlFlowAndDataFlow/FizzBuzz/FizzBuzz -nolink
 FizzBuzz
 FizzBuzz ⍳20
-FizzBuzz 666 777 888 999 1000 1500
+FizzBuzz 3 5 35 105 777
 {∊¨(↓⍉((≢⍵)⍴2)⊤⍳2*≢⍵)/¨⊂⍵}'Bleep' 'Buzz' 'Fizz' ⍝ Sorry, no time to explain :-)
 )copy dfns cmpx
 cmpx 'FizzBuzz ⍳1E6'
