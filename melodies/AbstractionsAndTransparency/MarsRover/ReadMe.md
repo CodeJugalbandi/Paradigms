@@ -353,9 +353,11 @@ console.info(rover.rove('M').rove('R').rove('M').rove('L').toString());
 Reflections
 -----------
 
-**BRAHMA** In OO paradigm, we first organize data and related behaviour together, discover or arrive at a suitable data-structure for the problem by the act of continuous refactoring.  If one pays attention to that aspect, then it leads to optimisation of the data-structure for a particular behaviour or a set of behaviours for an object.
+**BRAHMA** In OO paradigm, we first organize data and related behaviour together, subsequently discover or arrive at an optimal data-structure for the problem by the act of continuous refactoring.  If one pays attention to that aspect, then it leads to optimisation of the data-structure for a particular behaviour or a set of behaviours for an object.
 
-**BRAHMA** The FP paradigm embraces transparency of the data-structure but makes the structure immutable, so one need not worry about an inadvertent change to the values.  Again, here as in OO, one has to arrive at the correct data-structure suitable for the problem at hand.
+**BRAHMA** So the two things - data-organization and data-driven are completely orthogonal to each other.  While data-organization is at the core  of OO and data-driven where the data embeds the control-flow of the program may be applied simultaneously.
+
+**BRAHMA** The FP paradigm embraces transparency of the data-structure while  making the structure immutable, so one need not worry about an inadvertent change to the values.  Again, here as in OO, one has to arrive at the correct data-structure and be data-driven for the problem at hand.
 
 **BRAHMA** In the AO paradigm, like APL or J, the data structure is typically designed to make the information easily accessible, rather than being designed to allow a set of predicted behaviours. The choice of data structure may affect the elegance of the code - but APL's array operations like inner/outer product, transpose, reductions and scans along selected dimensions can be easily applied along any axis of arrays of any rank, shape or depth. For very large data volumes, the structure can influence performance and refactoring of the structure (and therefore the code) may become necessary.
 
@@ -370,7 +372,7 @@ Reflections
 
 **KRISHNA** AO encourages you to think about the problem mathematically using numbers and arrays, and select array representations which embed or encode mathematical properties of the data - and where selection is computable rather than the result of a search. For example, this encourages you to realise that the sequence NWSE represents clockwise rotations of π/2, and that the L/R commands simply adjust the index by 1. This does mean that feeling comfortable with basic mathematics is a significant factor for an APL programmer.
 
-**KRISHNA** In the original JavaScript, the abstractions actually lead the programmer away from the simplification that is available through mathematical insight into the problem. Even the map is problematic from this perspective. "Sound" programming principles of abstraction, aimed at reducing code complexity, have been applied. The solutions are more general, but also more complex, both for the human reader and the language engine.
+**KRISHNA** In the OO JavaScript version, the abstractions actually lead the programmer away from the simplification that is available through mathematical insight into the problem.  Even the map data-structure is problematic from this perspective. "Sound" programming principles of abstraction, aimed at reducing code complexity, have been applied. The solutions are more general, but also more complex, both for the human reader and the language engine.
 
 **BRAHMA** So... is it correct to say that, the benefits of AO are most apparent when exploring new data, or faced with a project where significant parts of the requirement are in a state of flux? The freedom offered by arrays and being able to avoid abstraction early in a project will make new insights and the discovery of new algorithms and potential optimisations more likely.
 
