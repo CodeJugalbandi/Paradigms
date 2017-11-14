@@ -127,7 +127,7 @@ console.info(rover.rove('M').rove('R').rove('M').rove('L').toString());
 **BRAHMA**  Yes indeed, I see that too! Let me show you how we can reduce this verbosity further, using a purely Functional Programming Paradigm.  I'll now remove the duplication present in the earlier ```Map``` and I'll define a variable ```compass``` which holds directions along with the relevant degrees that one finds on a regular compass as a tuple.  This tuple will be the key and the corresponding value will be the movement transformation in that direction.  In ES6, I can define an array of items containing key and value both as tuples.
 
 ```javascript
-var compass = new Map([
+const compass = new Map([
     [['N',00], [0,1]],
     [['E',09], [1,0]],
     [['S',18], [0,-1]],
@@ -139,8 +139,8 @@ var compass = new Map([
 
 ```javascript
 function rove([x,y,d], cmd) {
-  var keys = Array.from(compass.keys());
-  var [newPos] = keys.filter(([dir,deg]) => dir === d)
+  const keys = Array.from(compass.keys());
+  const [newPos] = keys.filter(([dir,deg]) => dir === d)
     .map(key => {
       var [dx,dy] = compass.get(key);
       var [dir, deg] = key;
@@ -152,7 +152,7 @@ function rove([x,y,d], cmd) {
 **BRAHMA** In order to apply the command, I'll define another structure ```commands``` with ```command``` as a key and the corresponding transformation functions as the values.
 
 ```javascript
-var commands = {
+const commands = {
     'L': ([x,y,deg],[dx,dy]) => [x,y,deg-9],
     'R': ([x,y,deg],[dx,dy]) => [x,y,deg+9],
     'M': ([x,y,deg],[dx,dy]) => [x+dx,y+dy,deg]
@@ -162,8 +162,8 @@ var commands = {
 
 ```javascript
 function rove([x,y,d], cmd) {
-  var keys = Array.from(compass.keys());
-  var [newPos] = keys.filter(([dir,deg]) => dir === d)
+  const keys = Array.from(compass.keys());
+  const [newPos] = keys.filter(([dir,deg]) => dir === d)
     .map(key => {
       var [dx,dy] = compass.get(key);
       var [dir, deg] = key;
@@ -175,15 +175,15 @@ function rove([x,y,d], cmd) {
 
 ```javascript
 function rove([x,y,d], cmd) {
-  var keys = Array.from(compass.keys());
-  var [newPos] = keys.filter(([dir,deg]) => dir === d)
+  const keys = Array.from(compass.keys());
+  const [newPos] = keys.filter(([dir,deg]) => dir === d)
     .map(key => {
-      var [dx,dy] = compass.get(key);
-      var [dir, deg] = key;
+      const [dx,dy] = compass.get(key);
+      const [dir, deg] = key;
       return commands[cmd]([x,y,deg],[dx,dy]);
     })
     .map(([x,y,deg]) => {
-       var [newDir,newDeg] = keys.filter(([kdir,kdeg] => kdeg === deg % 36));
+       const [newDir,newDeg] = keys.filter(([kdir,kdeg] => kdeg === deg % 36));
        return [x,y,newDir];
     });
   return newPos;
@@ -192,38 +192,38 @@ function rove([x,y,d], cmd) {
 **BRAHMA** The whole thing looks like this:
 
 ```javascript
-var compass = new Map([
+const compass = new Map([
     [['N',00], [0,1]],
     [['E',09], [1,0]],
     [['S',18], [0,-1]],
     [['W',27], [-1,0]]
 ]);
 
-var commands = {
+const commands = {
   'L': ([x,y,deg], [dx,dy]) => [x,y,deg-9],
   'R': ([x,y,deg], [dx,dy]) => [x,y,deg+9],
   'M': ([x,y,deg], [dx,dy]) => [x+dx,y+dy,deg]
 };
 
 function rove([x,y,d],cmd) {
-  var keys = Array.from(compass.keys());
-  var [newPos] = keys.filter(([dir,deg]) => dir === d)
+  const keys = Array.from(compass.keys());
+  const [newPos] = keys.filter(([dir,deg]) => dir === d)
     .map(key => {
-      var [dx,dy] = compass.get(key);
-      var [dir, deg] = key;
+      const [dx,dy] = compass.get(key);
+      const [dir, deg] = key;
       return commands[cmd]([x,y,deg],[dx,dy]);
     })
     .map(([x,y,deg]) => {
-      var [[newDir, newDeg]] = keys.filter(([kdir,kdeg]) => kdeg === deg % 36);
+      const [[newDir, newDeg]] = keys.filter(([kdir,kdeg]) => kdeg === deg % 36);
       return [x,y,newDir];
     });
     return newPos;
 }
 
-var p1 = rove([3,3,'E'], 'M');
-var p2 = rove(p1, 'R');
-var p3 = rove(p2, 'M');
-var p4 = rove(p3, 'L');
+const p1 = rove([3,3,'E'], 'M');
+const p2 = rove(p1, 'R');
+const p3 = rove(p2, 'M');
+const p4 = rove(p3, 'L');
 console.info(p4);  // [4,2,'E']
 ```
 
