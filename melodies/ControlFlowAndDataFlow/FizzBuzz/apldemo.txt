@@ -1,9 +1,9 @@
 ﻿⍝ APL session input for FizzBuzz
 ⍝⍝ Annotations to be removed
 ]box on -fns=on
-⎕IO←1
-                      ⍝⍝ APL allows "Index Origin" to be 0 or 1 (the default).
-                      ⍝⍝ for this problem, 1 is fine so we'll leave it at that
+⎕IO←0
+                      ⍝⍝ APL allows "Index Origin" to be 0 or 1. We will select 0,
+                      ⍝⍝ since most of you are Computer Scientists or Software Enginers,
           '' 'Fizz'
                       ⍝⍝ A 2-element array of one empty string and one containing 'Fizz'     
      ¯3↑  '' 'Fizz'
@@ -49,11 +49,11 @@
                       ⍝⍝ "where" function returns indices of 1's in a boolean array
 ⍸ case≠0 ⍝ "where case≠0"
                       ⍝⍝ "where case ≠ 0" (= all divisible numbers)
-('Fizz' 'Buzz' 'FizzBuzz')[1 1 3 2]
+('' 'Fizz' 'Buzz' 'FizzBuzz')[1 1 3 2]
                       ⍝⍝ APL allows indexing by an array, returning an array of 
                       ⍝⍝ the same shape as the array of indices
 case~0 ⍝ "case without 0"
-⎕←texts←('Fizz' 'Buzz' 'FizzBuzz')[case~0]
+⎕←texts←('' 'Fizz' 'Buzz' 'FizzBuzz')[case~0]
                       ⍝⍝ Desired texts for all divisible numbers
 (texts @ (⍸case≠0)) input
                       ⍝⍝ Replace all divisible numbers by corresponding texts
