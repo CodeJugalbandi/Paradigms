@@ -1,9 +1,16 @@
 ﻿⍝ APL session input for FizzBuzz
 ⍝⍝ Annotations to be removed
-]box on -fns=on
+                      ⍝⍝ I think I can solve part 0 of this problem by creating two
+                      ⍝⍝ arrays - one containing Fizzes and the other Buzzes, and 
+                      ⍝⍝ then doing an item-by-item catenation.
+                      ⍝⍝ A couple of practical details.
 ⎕IO←0
                       ⍝⍝ APL allows "Index Origin" to be 0 or 1. We will select 0,
-                      ⍝⍝ since most of you are Computer Scientists or Software Enginers,
+                      ⍝⍝ since most of you are Computer Scientists or Software Enginers
+          1 3 5 7 9
+          '' 'Fizz'
+                      ⍝⍝ By default, APL does not draw any separators between array items
+]box on -fns=on
           '' 'Fizz'
                       ⍝⍝ A 2-element array of one empty string and one containing 'Fizz'     
      ¯3↑  '' 'Fizz'
@@ -11,27 +18,26 @@
 20⍴  ¯3↑  '' 'Fizz'
 ⍝ Read: "the 20 reshape of the negative three take of '' 'Fizz'"
                       ⍝⍝ APL order of execution is as in (f g x) of mathematics
-                      ⍝⍝ Right argument to a function is result of evaluating what remains on the right
+                      ⍝⍝ Right argument to a function is result of what remains on the right
                       ⍝⍝ NB: NO FUNCTION/OPERATOR PRECEDENCE
 20⍴ (¯3↑ ('' 'Fizz'))
                       ⍝⍝ Repeat '' '' 'Fizz' until we have 20 elements
   20⍴¯5↑'' 'Buzz'
                       ⍝⍝ The same, producing 'Buzz' in every 5th position
  (20⍴¯3↑'' 'Fizz') ,¨ (20⍴¯5↑'' 'Buzz')   ⍝ ,¨ is "catenate each"
+                      ⍝⍝ Now we would like to write a function to do that...
 10 20 30 {⍺+2×⍵} 1 2 3 
-                      ⍝⍝ In Dyalog APL, {} defines a function, ⍺ is left and ⍵ is the right argument
+                      ⍝⍝ In Dyalog APL, {} defines a function, ⍺ is the left and ⍵ the right argument
                       ⍝⍝ Functions can be named using assignment, but can also be used without naming
 { (⍵⍴¯3↑'' 'Fizz') ,¨  (⍵⍴¯5↑'' 'Buzz')} 30
 ⍝ End of Part 0
 
-⍝ In Part 1, we are supposed to include the underlying number.
+⍝⍝ In Part 1, we are supposed to produce the underlying number, if it is not divisible by 3 or 5.
                       ⍝⍝ In the AO paradigm, it feels natural to take 
                       ⍝⍝ an array of integers as the argument
-                      ⍝⍝ and replace selected items
-⎕←input←⍳20 
-                      ⍝⍝ If I don't assign the result to a variable, the default is to print the result.
-                      ⍝⍝ But if there is an assignment, I can force output by assigning to ⎕.
-                      ⍝⍝ ⎕ is the screen (or really the printed paper output)
+                      ⍝⍝ and replace the relevant items
+input←⍳20
+input
     3 | input
     5 | input
 3 5 ∘.| input
@@ -45,6 +51,11 @@
 ⎕←case← 2⊥ 0 = 5 3 ∘.| input
                       ⍝⍝ Interprete each column as a 2-digit number base 2
                       ⍝⍝ 1=Fizz, 2=Buzz, 3=FizzBuzz
+
+                      ⍝⍝ If I assign the result to a variable, no output is produced.
+                      ⍝⍝ I can force output by assigning to ⎕.
+                      ⍝⍝ ⎕ is the screen (or really the printed paper output)
+
 ⍸ 1 0 1 1 0
                       ⍝⍝ "where" function returns indices of 1's in a boolean array
 ⍸ case≠0 ⍝ "where case≠0"
