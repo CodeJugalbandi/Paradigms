@@ -122,7 +122,7 @@ var rover = new MarsRover(3, 3, 'E');
 console.info(rover.rove('M').rove('R').rove('M').rove('L').toString());
 ```
 
-**KRISHNA**  Each of the above lines is highly readable, but there are a lot of lines and duplication! The levels of abstraction have my head spinning a bit. 
+**KRISHNA**  Each of the above lines is highly readable, but there are a lot of lines and a fair amount of duplication! 
 
 **BRAHMA**  Yes indeed, I see that too! Let me show you how we can reduce this verbosity further, using a purely Functional Programming Paradigm.  I'll now remove the duplication present in the earlier ```Map``` and I'll define a variable ```compass``` which holds directions along with the relevant degrees that one finds on a regular compass as a tuple.  This tuple will be the key and the corresponding value will be the movement transformation in that direction.  In ES6, I can define an array of items containing key and value both as tuples.
 
@@ -229,7 +229,7 @@ console.info(p4);  // [4,2,'E']
 
 **BRAHMA**  So, here everything is simply data and function, we did not require ```MarsRover``` or ```Vector``` abstractions, the essence has become more transparent and is there for anyone to see.  So Krishna, how does this look in an Array-Oriented Paradigm like APL?
 
-**KRISHNA** I am going to base my solution on the same fundamental data, tuples of movements for each axis, but rather than "abstract" this into a map, I will just use two simple arrays, a list of four directions and a 2-column matrix with one row per direction, defining the movement along each axis that the direction represents.
+**KRISHNA**  I am going to base my solution on the same fundamental data, tuples of movements for each axis, but rather than "abstract" this into a map, I will just use two simple arrays, a list of four directions and a 2-column matrix with one row per direction, defining the movement along each axis that the direction represents.
 
 ```apl
   ⎕IO←0    ⍝ Default index origin in APL is 1; we prefer 0
@@ -245,7 +245,7 @@ console.info(p4);  // [4,2,'E']
   commands←'MMRMMLMRML'
 ```
 
-**KRISHNA** I chose to to represent the current direction as an index into the "direction" array. The directions are in order if you rotate left, which means that our three possible commands L, M and R will result in a change in the direction index of ¯1, 0 and 1, respectively. We can compute the change in direction using the ```⍳``` function to produces the indices into 'LMR' of our command stream, from which we then subtract 1, giving ¯1 for L, 0 for M and 1 or R:
+**KRISHNA** I chose to to represent the current direction as an index into the "direction" array. The directions are in order if you rotate right (clockwise), which means that our three possible commands L, M and R will result in a change in the direction index of ¯1, 0 and 1, respectively. We can compute the change in direction using the ```⍳``` function to produces the indices into 'LMR' of our command stream, from which we then subtract 1, giving ¯1 for L, 0 for M and 1 or R:
 
 ```apl
   ¯1+'LMR'⍳commands
@@ -262,7 +262,7 @@ console.info(p4);  // [4,2,'E']
 **KRISHNA** The ```4|``` gives us the result modulus 4, ensuring that we wrap around nicely from W to N or vice versa and that ```bearings``` is now an array of integers between 0 and 3. If we now index the ```movement``` array by the bearings and mask this out by *multiplying* each row by 1 where the command is M and 0 elsewhere, we get a list of movements made by the robot.
 
 ```apl
-  movements←movement[¯1↓bearings;] ×[0] 'M'=commands
+  movements←movement[¯1↓bearings;] ×[0] commands='M'
   commands,movements ⍝ catenate commands to matrix of movements
 M 1  0
 M 1  0
@@ -275,7 +275,7 @@ R 0  0
 M 0 ¯1
 L 0  0
 ```
-**KRISHNA** ```×[0]``` (multiply on leading axis) multiplies each row (pair of movements) on the left by each element of the Boolean vector on the right. The right argument which contains 1 for each M and 0 for all other commands. Finally, we can compute the final position by doing a plus reduction on the starting position followed by the list of movements:
+**KRISHNA** ```×[0]``` (multiply on leading axis) multiplies each row (pair of movements) on the left by each element of the Boolean vector on the right. The right argument to multiplication contains 1 for each M and 0 for all other commands, and as a result each R or L has resulted in a movement of (0 0) above. Now, I can compute the final position by doing a plus reduction on the starting position followed by the list of movements:
 
 ```apl
   +⌿ position⍪movements
@@ -293,12 +293,13 @@ E
 **KRISHNA** If we were to collect the above into a function in APL, it might look like this:
 
 ```apl
-   rove←{⎕IO←0 ⋄ directions←'NESW'
+   rove←{⎕IO←0 
+         directions←'NESW'                    ⍝ Clockwise from N
          movement←4 2⍴0 1,1 0,0 ¯1,¯1 0       ⍝ One row per direction (NESW)    
          (position heading commands)←⍵        ⍝ Deconstruct right argument
          direction←directions⍳heading          ⍝ Direction index
          bearings←4|+\direction,¯1+'LMR'⍳commands   ⍝ Bearing after each command
-         moves←movement[¯1↓bearings;](×⍤1 0)'M'=commands ⍝ Movement resulting from each command
+         moves←movement[¯1↓bearings;] ×[0] commands='M' ⍝ Movement resulting from each command
          (+⌿position⍪moves),directions[¯1↑bearings] ⍝ Return final position and bearing
         }
 
@@ -367,22 +368,14 @@ Reflections
 2 5
 ```
 
-**KRISHNA** AO encourages you to think about the problem mathematically using numbers and arrays, and select array representations which embed or encode mathematical properties of the data (such as realising that the sequence NWSE represents anti-clockwise rotations of π/2. and therefore simple indexing can be used to access the correct item of data). This does mean that feeling comfortable with basic mathematics is a significant factor for an APL programmer.
+**KRISHNA** AO encourages you to think about the problem mathematically using numbers and arrays, and select array representations which embed or encode mathematical properties of the data - and where selection is computable rather than the result of a search. For example, this encourages you to realise that the sequence NWSE represents clockwise rotations of π/2, and that the L/R commands simply adjust the index by 1. This does mean that feeling comfortable with basic mathematics is a significant factor for an APL programmer.
 
-**KRISHNA** In the original JavaScript, the abstractions actually lead the programmer away from the simplification that is available through mathematical insight into the problem. Even the Erlang map is problematic from this perspective, as although in both cases "sound" programming principles of abstraction, aimed at reducing code complexity, have been applied. The solutions are more general, but also more complex, both for the human reader and the language engine.
+**KRISHNA** In the original JavaScript, the abstractions actually lead the programmer away from the simplification that is available through mathematical insight into the problem. Even the map is problematic from this perspective. "Sound" programming principles of abstraction, aimed at reducing code complexity, have been applied. The solutions are more general, but also more complex, both for the human reader and the language engine.
 
-**BRAHMA** So... is it correct to say that - in addition to problems which are highly data parallel, the benefits of AO are most apparent when exploring new data, or faced with a project where significant parts of the requirement are in a state of flux? The freedom offered by arrays and being able to avoid abstraction early in a project will make new insights and the discovery of new algorithms and potential optimisations more likely.
-
-
-**DHAVAL ASKS** Few points:
-
-1. Is it possible to add another Jugalbandi where we can explore this Parallellizing data aspect?  I see a full blown melody for this.
-2. Can this Data parallel point, be somehow worded as a separate conversation - we need to find a place where this can be injected into existing one, rather than the current injection point.  I think it would be good to highlight one thing really well here - that is, discovering the underlying mathematics and how abstractions can dissolve in light of that.
-3. Another melody like Primes and Performance where we explored bringing it down to mathematics, can we say that distilling to mathematics is good for any pipelined processor to process - we can pull in Martin's talk here for reference.
-
+**BRAHMA** So... is it correct to say that, the benefits of AO are most apparent when exploring new data, or faced with a project where significant parts of the requirement are in a state of flux? The freedom offered by arrays and being able to avoid abstraction early in a project will make new insights and the discovery of new algorithms and potential optimisations more likely.
 
 **BRAHMA** But isn't there a risk that the lack of abstractions can break down? For example, if our robot needs behaviours that require complex state and interaction with the its environment, it might be hard to find a pure array representation with proper separation of information. At that point, I would expect that an object oriented decomposition of the problem - or other abstractions - to make the code easier to understand and maintain.
 
-**KRISHNA** I think you are right... As complexity increases, it is important to realise where to draw the line and introduce abstractions - or of course use them immediately if that information is available at the start of a project.
+**KRISHNA** I think you are right... As complexity increases, it is important to realise where to draw the line and introduce abstractions. In fact, some people use APL as a design tool to explore the problem space, before locking things down in another language which is used for deployment - or as a tool to write tests in, to verify production application code is computing things correctly.
 
 **BRAHMA** The final melody of our Jugalbandi should offer some further insight into this contrast - the choice between Transparency or Abstraction, and Concision or Verbosity?  Lets move on.

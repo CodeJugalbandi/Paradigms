@@ -1,7 +1,7 @@
 ﻿⍝ Session input for Dyalog Demo
 ]box on -fns=on
-⎕IO←0
-directions←'NESW'              ⍝ Clockwise
+⎕IO←0                          ⍝ Index from 0
+directions←'NESW'              ⍝ Clockwise From North
 movement←4 2⍴0 1,1 0,0 ¯1,¯1 0 ⍝ One row per direction (NESW)   
 directions,movement
 position←3 3  ⍝ intial position
@@ -16,11 +16,11 @@ commands←'MMRMMLMRML'
 ⎕←movements←movement[¯1↓bearings;] ×[0] 'M'=commands
 commands,movements ⍝ catenate commands to matrix of movements
 position⍪movements
-+⍀ position⍪movements
++⍀ position⍪movements
 +⌿ position⍪movements
 ¯1↑bearings
 directions[¯1↑bearings]
-]load /home/mkrom/Paradigms/melodies/AbstractionsAndTransparency/MarsRover/marsrover
+]load /users/mkrom/Paradigms/melodies/AbstractionsAndTransparency/MarsRover/marsrover -nolink
 rove
 rove (3 3) 'E' 'MMRMMLMRML'
 ⍝ No loops, no conditionals. "Switches" are data driven:
@@ -28,5 +28,6 @@ rove (3 3) 'E' 'MMRMMLMRML'
 movement[bearings;]         ⍝ look up movements using computed bearings
 movements ×[0] commands='M' ⍝ only move when the command is 'M'
 ⎕DR movements
+⍝ 8=bits 3=integer
 ⍝ --- back to BRAHMA ---
 {⍺,≢⍵}⌸bearings             ⍝ distinct bearings and counts
