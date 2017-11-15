@@ -446,12 +446,13 @@ println(ParseArray("[a,1,[ब,२]]")) // Some((List(a,1,List(ब,२)),)
 
 Reflections
 -----------
-<!--TODO-->
 
-**KRISHNA** 
+**BRAHMA** So, here you broke down the problem of parsing into many small functions, such that each function could stand on it own feet.  At the same time  they could be combined together for any possible permutations to fulfill the requirement.  The focus was in doing small and avoid over-complicated monolith code.
 
-**KRISHNA** 
+**KRISHNA** Yes, smaller functions provide the simplicity of understanding the code in chunks and help to build a big picture.  This stems from the premise that this clarity helps comprehension and it becomes relatively easy facilitate local changes when the need be.
 
-**BRAHMA** 
+**BRAHMA** In APL, we tend to take a macro view of the problem. 
+//TODO: Morten to fill in...
+ 
 
 **BRAHMA** 
