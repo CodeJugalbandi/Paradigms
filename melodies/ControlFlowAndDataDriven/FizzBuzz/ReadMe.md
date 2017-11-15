@@ -4,7 +4,7 @@ FizzBuzz is a mathematical game for children (of all ages), where you are requir
 
 We will attempt to write some code capable of playing FizzBuzz. First, without displaying the numbers - only the words:
 
-Part 0
+Part 1
 ------
 Write code that for a contiguous range of numbers prints out the following:
 
@@ -18,7 +18,7 @@ e.g. Running over a range from 1-20 should give the following output:
 "" "" Fizz "" Buzz Fizz "" "" Fizz Buzz "" Fizz "" "" FizzBuzz "" "" Fizz "" Buzz
 ```
 
-Part 1
+Part 2
 ------
 The same as Part 1, except now we want to see the numbers displayed for numbers which are not divisible by either 3 or 5:
 
