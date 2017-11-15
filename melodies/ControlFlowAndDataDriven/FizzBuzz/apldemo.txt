@@ -20,9 +20,8 @@
  (20⍴¯3↑'' 'Fizz') ,¨ (20⍴¯5↑'' 'Buzz')   ⍝ ,¨ is "catenate each"
 { (⍵⍴¯3↑'' 'Fizz') ,¨  (⍵⍴¯5↑'' 'Buzz')} 30
                       ⍝⍝ DHaval asks how to read that if necessary
-⍝ End of Part 0
 
-⍝⍝ In Part 1, we are supposed to produce the underlying number, if it is not divisible by 3 or 5.
+⍝ Part 2, produce the number, if it is not divisible by 3 or 5.
                       ⍝⍝ In the AO paradigm, it feels natural to take 
                       ⍝⍝ an array of integers as the argument
                       ⍝⍝ and replace the relevant items
@@ -30,38 +29,38 @@ input←1+⍳20
 input
     3 | input
     5 | input
-3 5 ∘.| input
+3 5 ∘.| input         ⍝ ∘.× would be "outer product"
                       ⍝⍝ ∘.f combines every element on left with every element on right
 0 = 5 3 ∘.| input     ⍝ Outer Residue
                       ⍝⍝ Dhaval asks: is that equivalent to the Outer Product in mathematics?
                       ⍝⍝ Numbers divisible by 5 or 3
 2⊥1 0 1 
-⍝ Digits 1 0 1. base 2. 
-⍝ Or value of polynomial with coeffients (1 0 1) for x=2
+⍝     The base 2 number 1 0 1
+⍝ Or: Value of polynomial with coeffients (1 0 1) for x=2
 ⎕←case← 2⊥ 0 = 5 3 ∘.| input
                       ⍝⍝ Interpret each column as a 2-digit number base 2
                       ⍝⍝ 1=Fizz, 2=Buzz, 3=FizzBuzz
                       ⍝⍝ Dhaval: What is that square doing?
-⍸ 1 0 1  ⍝ "where": Indices of true values
+⍸ 0 1 1 0  ⍝ "where": Indices of true values
 ⍸ case≠0 ⍝ "where case≠0": Indicies of divisible numbers
-
+  case~0 ⍝ "case without 0": case values for divisible cases
 ('' 'Fizz' 'Buzz' 'FizzBuzz')[1 1 3 2]
                       ⍝⍝ APL allows indexing by an array, returning an array of 
                       ⍝⍝ the same shape as the array of indices
-case~0 ⍝ "case without 0": case values for divisible cases
 ⎕←texts←('' 'Fizz' 'Buzz' 'FizzBuzz')[case~0]
                       ⍝⍝ Desired texts for all divisible numbers
 (texts @ (⍸case≠0)) input
                       ⍝⍝ Replace all divisible numbers by corresponding texts
 ]load /users/mkrom/Paradigms/melodies/ControlFlowAndDataFlow/FizzBuzz/FizzBuzz -nolink
 FizzBuzz
-FizzBuzz ⍳20
+FizzBuzz 1+⍳20
 FizzBuzz 3 5 35 105 777
-{∊¨(↓⍉((≢⍵)⍴2)⊤⍳2*≢⍵)/¨⊂⍵}'Bleep' 'Buzz' 'Fizz' ⍝ Sorry, no time to explain :-)
+combinations←{(∊⌽)¨(↓⍉((≢⍵)⍴2)⊤⍳2*≢⍵)/¨⊂⌽⍵} ⍝ Sorry, no time to explain :-) ⍝ Sorry, no time to explain :-)
+combinations 'Fizz' 'Buzz' 'Bleep'
+combinations 1 2 3 4
 )copy dfns cmpx
 cmpx 'FizzBuzz ⍳1E6'
-⍝ End of Part 1
-
+⍝ End of Part 2
 {⍱/divisible←0=3 5|⍵: ⍵  ⋄  ∊divisible/'Fizz' 'Buzz'}¨ ⍳20
                         ⍝⍝ If ⍵ neither divisible by 3 or 5, return ⍵
                         ⍝⍝ Else select from Fizz Buzz using mask and enlist
