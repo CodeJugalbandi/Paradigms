@@ -1,4 +1,4 @@
-﻿⍝ APL session input for FizzBuzz
+﻿⍝⍝ APL session input for FizzBuzz
 ⍝⍝ Annotations to be removed
 ⍝⍝ Remember ]box on -fns=on and ⎕IO←0
                       ⍝⍝ I think I can solve part 0 of this problem by creating two
@@ -27,18 +27,17 @@
                       ⍝⍝ and replace the relevant items
 input←1+⍳20
 input
-    3 | input
-    5 | input
+    3 | input         ⍝ "3 residue [OF] input"
+    5 | input         ⍝ "5 residue input"
 3 5 ∘.| input         ⍝ ∘.× would be "outer product"
                       ⍝⍝ ∘.f combines every element on left with every element on right
-0 = 5 3 ∘.| input     ⍝ Outer Residue
+0 = 5 3 ∘.| input     ⍝ "0 equals 5 3 Outer Residue input"
                       ⍝⍝ Dhaval asks: is that equivalent to the Outer Product in mathematics?
                       ⍝⍝ Numbers divisible by 5 or 3
-2⊥1 0 1 
-⍝     The base 2 number 1 0 1
+2⊥1 0 1               ⍝ "2 base value 1 0 1"
+⍝     The digits (1 0 1) interpreted as a base 2 number
 ⍝ Or: Value of polynomial with coeffients (1 0 1) for x=2
-⎕←case← 2⊥ 0 = 5 3 ∘.| input
-                      ⍝⍝ Interpret each column as a 2-digit number base 2
+⎕←case← 2⊥ 0 = 5 3 ∘.| input ⍝ "base 2 value of each column of ... (above)"
                       ⍝⍝ 1=Fizz, 2=Buzz, 3=FizzBuzz
                       ⍝⍝ Dhaval: What is that square doing?
 ⍸ 0 1 1 0  ⍝ "where": Indices of true values
@@ -49,15 +48,15 @@ input
                       ⍝⍝ the same shape as the array of indices
 ⎕←texts←('' 'Fizz' 'Buzz' 'FizzBuzz')[case~0]
                       ⍝⍝ Desired texts for all divisible numbers
-(texts @ (⍸case≠0)) input
+(texts @ (⍸case≠0)) input ⍝ "insert texts at where case ≠0 [merged with] input"
                       ⍝⍝ Replace all divisible numbers by corresponding texts
 ]load /users/mkrom/Paradigms/melodies/ControlFlowAndDataFlow/FizzBuzz/FizzBuzz -nolink
 FizzBuzz
 FizzBuzz 1+⍳20
 FizzBuzz 3 5 35 105 777
-combinations←{(∊⌽)¨(↓⍉((≢⍵)⍴2)⊤⍳2*≢⍵)/¨⊂⌽⍵} ⍝ Sorry, no time to explain :-) ⍝ Sorry, no time to explain :-)
-combinations 'Fizz' 'Buzz' 'Bleep'
-combinations 1 2 3 4
+comb←{∊¨(⌽¨,⍳(≢⍵)/2)/¨⊂⍵} ⍝ Sorry, no time to explain :-)
+comb 'Fizz' 'Buzz' 'Bleep'
+comb 1 2 3 4
 )copy dfns cmpx
 cmpx 'FizzBuzz ⍳1E6'
 ⍝ End of Part 2

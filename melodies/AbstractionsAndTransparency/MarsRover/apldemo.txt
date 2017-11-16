@@ -1,17 +1,13 @@
-﻿⍝ APL session input for MarsRover
+﻿⍝⍝ APL session input for MarsRover
 ⍝⍝ Annotations to be removed
-]box on -fns=on
-⎕IO←0
-                               ⍝⍝ In this melody, it is more convenient to index from 0
-                               ⍝⍝ We need the same base data as in JavaScript, but
-                               ⍝⍝ instead of a map, we will use two simple arrays
 directions←'NESW' 
 movement←4 2⍴0 1,  1 0,  0 ¯1,  ¯1 0 
                                ⍝⍝ One row per direction (NESW)   
 directions,movement
                                ⍝⍝ Note that directions are in clockwise order, starting with North
 position←3 3  ⍝ intial position
-heading←1     ⍝ initial heading (East)
+heading←1     ⍝ initial heading
+directions[heading] 
 commands←'MMRMMLMRML' ⍝ list of commands
             'LMR'⍳'RMLLLLLL'   ⍝ Indices of commands in 'LMR'
                                ⍝⍝ "index of" returns the position of the first occurrence
@@ -27,22 +23,25 @@ commands←'MMRMMLMRML' ⍝ list of commands
 ⎕←bearings←4| +\ heading, ¯1+'LMR'⍳commands
 commands,movement[¯1↓bearings;]
                                ⍝⍝ Each command, and the deltas required to "move" after it
-⎕←movements←movement[¯1↓bearings;] ×[0] 'M'=commands
+movements←movement[¯1↓bearings;] ×[0] 'M'=commands
+                               ⍝⍝ ×[0] means multiply, aligning dimension 0
 commands,movements
                                ⍝⍝ Each command and deltas that it will cause
 position⍪movements ⍝ Catenate initial position atop movement matrix
 +⍀ position⍪movements    ⍝ sum scan on leading axis: position after each command
-+⌿ position⍪movements    ⍝ sum reduction: final position
-¯1↑bearings ⍝ last item of bearings
+  ('*' @ (+⍀position⍪movements)) 10 10⍴'┼'
+⊖⍉('*' @ (+⍀position⍪movements)) 10 10⍴'┼' ⍝ x → and y ↑
+{directions[⍺],≢⍵}⌸ bearings   ⍝ (directions[key], tally items) key by bearings
++⌿ position⍪movements    ⍝ sum reduction = final position
+¯1↑bearings              ⍝ last item of bearings
 directions[¯1↑bearings]  ⍝ index direction letters by last bearing
 ]load /users/mkrom/Paradigms/melodies/AbstractionsAndTransparency/MarsRover/marsrover -nolink
 rove
+                               ⍝⍝ Note deconstruction of the right argument ⍵
 rove (3 3) 'E' 'MMRMMLMRML'
 ⍝ No loops, no conditionals. "Switches" are data driven:
-¯1+'LMR'⍳'RLLLLLL'          ⍝ direction of rotation
-movement[bearings;]         ⍝ look up movements using computed bearings
-movements ×[0] commands='M' ⍝ only move when the command is 'M'
-⎕DR movements
-⍝ 8=bits 3=integer
-⍝ --- back to BRAHMA ---
-{⍺,≢⍵}⌸bearings             ⍝ distinct bearings and counts
+⍝ ¯1+'LMR'⍳'RMLLM'            ⍝ direction of rotation
+⍝ movement[bearings;]         ⍝ look up movements using computed bearings
+⍝ movements ×[0] commands='M' ⍝ only move when the command is 'M'
+⎕DR movements ⍝ internal datype of movements matrix
+                              ⍝⍝ 8=bits 3=integer
