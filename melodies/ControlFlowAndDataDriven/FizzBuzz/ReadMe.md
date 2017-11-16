@@ -135,41 +135,37 @@ main = do
 
 **KRISHNA** In the above vector, a 1 means the number was divisible by 3 (Fizz), a 2 means divisible by 5 (Buzz), and 3 means both 3 and 5 (FizzBuzz). I reversed the order of 3 and 5 to put the 5 in the top row, which will be the most significant digit of the polynomial - in order for 1 to be 3 and 2 to be 5. This doesn't really matter, of course - just feels a bit more natural.
 
-**KRISHNA** I'm nearly done; all I need to do now is to replace elements of input corresponding to non-zero elements of ```case```, with a text selected by the same element. I can find the indices of the non-zero elements using ```where``` (⍸):
+**KRISHNA** I'm nearly done; all I need to do now is to replace elements of input corresponding to non-zero elements of ```case```, with a text selected by the same element. I can generate the list of replacement values by indexing an array of 3 strings by the array of non-zero cases as follows. The "without" function ```~``` returns the left argument excluding any elements found in the right:
 
 ```apl
-    ⎕←indices←⍸case≠0
-3 5 6 9 10 12 15 18 20
-```
-**KRISHNA** The above gives me the indices of items to be replaced. I can generate the list of replacement values by indexing an array of 3 strings by the array of non-zero cases as follows. The "without" function ```~``` returns the left argument excluding any elements found in the right:
-
-```apl
+      case~0
+1 2 1 1 2 1 3 1 2
       ⎕←texts←('Fizz' 'Buzz' 'FizzBuzz')[case~0]
  Fizz  Buzz  Fizz  Fizz  Buzz  Fizz  FizzBuzz  Fizz  Buzz 
 ```
 
-**KRISHNA** I can compute the final result using the ```@``` operator to merge these values into my input at the relevant positions. I would read the expression below as "texts merged with input at positions where case is not zero":
+**KRISHNA** I can compute the final result using the ```@``` operator to merge these values into my input at the relevant positions. I would read the expression below as "texts where case is not zero in input":
 
 ```apl
-    (texts @ indices) input
+    texts @ {case≠0} input
 1 2  Fizz  4  Buzz  Fizz  7 8  Fizz  Buzz  11  Fizz  13 14  FizzBuzz  16 17  Fizz  19  Buzz 
 ```
 
-**KRISHNA** Having experimented a bit interactively, I can now define a function which brings it all together. The code within curly braces below is a function, which I have named FizzBuzz. In this function, I use ```reverse first``` (⊖) to reverse the order of the primes - rather than having the constant in the wrong order, as I did while experimenting. I also did not bother to name the temporary results of ```messages[case~0]``` and ```(⍸case≠0)```, as I feel this would actually reduce the readability of the solution:
+**KRISHNA** Having experimented a bit interactively, I can now define a function which brings it all together. The code within curly braces below is a function, which I have named FizzBuzz. In this function, I use ```reverse first``` (⊖) to reverse the order of the primes - rather than having the constant in the wrong order, as I did while experimenting. I also did not bother to name the temporary results of ```words[case~0]``` and as I feel this would actually reduce the readability of the solution:
 
 ```apl
     FizzBuzz←{                                                                            
       primes←3 5                                                                        
-      texts←'Fizz' 'Buzz' 'FizzBuzz'                                                     
-      case←2⊥⊖0=primes∘.|⍵ ⍝ 0=nothing, 1=Fizz, 2=Buzz, 3=FizzBuzz                      
-      (texts[case~0]@(⍳case≠0)) ⍵ ⍝ merge texts where case is non-zero                                            
+      words←'' 'Fizz' 'Buzz' 'FizzBuzz'                                                     
+      case←2⊥⊖0=primes∘.|⍵                       
+      words[case~0]@{case≠0} ⍵ ⍝ merge texts where case is non-zero                                            
     }
 ```
 
 **KRISHNA** And now I can compute the result on any array of integers - not just the integers from 1 to n. To illustrate, here is the result of FizzBuss on the numbers from 21-30: 
       
 ```apl
-      FizzBuzz 20+⍳10
+      FizzBuzz 21+⍳10
  Fizz  22 23  Fizz  Buzz  26  Fizz  28 29  FizzBuzz 
 ```
 
@@ -305,10 +301,19 @@ main = do
 Reflections
 -----------
 
-**KRISHNA** Most programming languages emphasize the use of control flow for managing programming logic...like the initial attempt in Haskell, the logic is present in the ```toFizzBuzz``` function.   
-
-**KRISHNA** Logic in APL is often most efficiently expressed in a data representation.  It is this representation that is processed using array operations, achieving the end result.  
+**BRAHMA** Most programming languages emphasize the use of control flow for managing programming logic...like the initial attempt in Haskell, the logic is present in the ```toFizzBuzz``` function.   
 
 **BRAHMA** The second attempt in Haskell focussed on being data-driven, rather than creating the source code that embeds the logic in the control flow of the program.  In APL the logic is embedded in the data flow.
+
+**KRISHNA** Yes, APL encourages the expression of logic through data structure. Not only does our APL code have no loops or conditionals, we can even extend the list of prime numbers used in the game, without making ANY change to the code other than extending the variables containing the list of primes and corresponding words:
+
+```apl
+ FizzBuzz←{
+     primes←3 5 7
+     words←'' 'Fizz' 'Buzz' 'FizzBuzz' 'Bleep' 'FizzBleep' 'BuzzBleep' 'FizzBuzzBleep'
+     case←2⊥⊖0=primes∘.|⍵
+     words[case~0]@{case≠0} ⍵
+ } 
+```
 
 **BRAHMA** So, essentially this an eye-opening contrast - Control Flow or Data-Driven? It is important to take the data-first approach, because it is much easier to deal with changing the data than to change the program-logic.  Humans are good at looking data visually, rather than reasoning about control-flow.  So it becomes important to move program-logic (flow) away from control-structures into data (driven).  This applies every where - whether it is functional programming paradigm or array-oriented paradigm or Object-Oriented Paradigm.  Lets move to the next melody in our jugalbandi.
