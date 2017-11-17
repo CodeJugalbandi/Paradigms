@@ -31,8 +31,8 @@ function MarsRover(x, y, dirString) {
   var vector = new Vector(x, y, dirString);
 
   const commands = {
-    'M': vector => vector.moveForward(),
     'L': vector => vector.turnLeft(),
+    'M': vector => vector.moveForward(),
     'R': vector => vector.turnRight()
   };
   
@@ -45,8 +45,8 @@ function MarsRover(x, y, dirString) {
 }
 
 function Vector(x, y, direction) {
-  this.moveForward = () => this;
   this.turnLeft = () => this; 
+  this.moveForward = () => this;
   this.turnRight = () => this; 
   this.toString = () => `${x} ${y} ${direction}`;
 }
@@ -63,10 +63,10 @@ console.info(rover.rove('M').rove('R').rove('M').rove('L').toString());
 ```javascript
 function Vector(x, y, direction) {
   const directions = {
-    'N' : ['W', 'E', (x,y) => [x, y+1]],
-    'E' : ['N', 'S', (x,y) => [x+1, y]],
-    'S' : ['E', 'W', (x,y) => [x, y-1]],
-    'W' : ['S', 'N', (x,y) => [x-1, y]]
+    'N' : ['W', (x,y) => [x, y+1], 'E'], 
+    'E' : ['N', (x,y) => [x+1, y], 'S'], 
+    'S' : ['E', (x,y) => [x, y-1], 'W'], 
+    'W' : ['S', (x,y) => [x-1, y], 'N'] 
   };
   
   this.moveForward = () => {
@@ -83,39 +83,41 @@ function Vector(x, y, direction) {
 **BRAHMA**  In other words, using ```Vector``` and ```MarsRover``` abstractions,  I've organised data and related behavior together.  So, below is the whole code together:
 
 ```javascript
-function Vector(x, y, direction) {
-  const directions = {
-    'N' : ['W', 'E', (x,y) => [x, y+1]],
-    'E' : ['N', 'S', (x,y) => [x+1, y]],
-    'S' : ['E', 'W', (x,y) => [x, y-1]],
-    'W' : ['S', 'N', (x,y) => [x-1, y]]
-  };
-
-  this.moveForward = () => {
-    const [newX, newY] = directions[direction][2](x, y);
-    return new Vector(newX, newY, direction);
-  };
-
-  this.turnLeft = () => new Vector(x, y, directions[direction][0]);
-  this.turnRight = () => new Vector(x, y, directions[direction][1]);
-  this.toString = () => `${x} ${y} ${direction}`;
-}
-
 function MarsRover(x, y, dirString) {
   var vector = new Vector(x, y, dirString);
 
   const commands = {
-    'M': vector => vector.moveForward(),
     'L': vector => vector.turnLeft(),
+    'M': vector => vector.moveForward(),
     'R': vector => vector.turnRight()
   };
   
-  this.rove = command => {
-    vector = commands[command](vector);
+  this.rove = cmd => {
+    vector = commands[cmd](vector);
     return this;
   }
 
   this.toString = () => vector.toString();
+}
+
+function Vector(x, y, direction) {
+  const directions = {
+    'N' : ['W', (x,y) => [x, y+1], 'E'], 
+    'E' : ['N', (x,y) => [x+1, y], 'S'], 
+    'S' : ['E', (x,y) => [x, y-1], 'W'], 
+    'W' : ['S', (x,y) => [x-1, y], 'N'] 
+  };
+
+  this.turnLeft = () => new Vector(x, y, directions[direction][0]);
+  
+  this.moveForward = () => {
+    const [newX, newY] = directions[direction][1](x, y);
+    return new Vector(newX, newY, direction);
+  };
+  
+  this.turnRight = () => new Vector(x, y, directions[direction][2]);
+  
+  this.toString = () => `${x} ${y} ${direction}`;
 }
 
 const rover = new MarsRover(3, 3, 'E');
@@ -144,7 +146,7 @@ function rove([x,y,d], cmd) {
     .map(key => {
       var [dx,dy] = compass.get(key);
       var [dir, deg] = key;
-      return ???(cmd, [x,y,deg],[dx,dy])
+      return ???;
     })
 }
 ```
@@ -152,12 +154,13 @@ function rove([x,y,d], cmd) {
 **BRAHMA** In order to apply the command, I'll define another structure ```commands``` with ```command``` as a key and the corresponding transformation functions as the values.
 
 ```javascript
-const commands = {
-    'L': ([x,y,deg],[dx,dy]) => [x,y,deg-9],
-    'R': ([x,y,deg],[dx,dy]) => [x,y,deg+9],
-    'M': ([x,y,deg],[dx,dy]) => [x+dx,y+dy,deg]
-};
+const commands = new Map([
+  ['L', (dx,dy) => [0,0,-9]],
+  ['R', (dx,dy) => [0,0,9]],
+  ['M', (dx,dy) => [dx,dy,0]]
+]);
 ```
+
 **BRAHMA** So now the rove function looks like:
 
 ```javascript
@@ -167,26 +170,29 @@ function rove([x,y,d], cmd) {
     .map(key => {
       const [dx,dy] = compass.get(key);
       const [dir, deg] = key;
-      return commands[cmd]([x,y,deg],[dx,dy]);
+      const [newDx, newDy,newDeg] = commands.get(cmd)(dx,dy);
+      return [x+newDx, y+newDy, deg+newDeg];
     })
 }
 ```
-**BRAHMA** I further ```map``` this output to convert ```deg```rees back to ```dir```ection.
+
+**BRAHMA** I further ```map``` this output to convert ```deg```rees back to ```dir```ection by applying modulo 36, so that I can get appropriate direction back.
 
 ```javascript
-function rove([x,y,d], cmd) {
+function rove([x,y,d],cmd) {
   const keys = Array.from(compass.keys());
   const [newPos] = keys.filter(([dir,deg]) => dir === d)
     .map(key => {
       const [dx,dy] = compass.get(key);
       const [dir, deg] = key;
-      return commands[cmd]([x,y,deg],[dx,dy]);
+      const [newDx, newDy,newDeg] = commands.get(cmd)(dx,dy);
+      return [x+newDx, y+newDy, deg+newDeg];
     })
     .map(([x,y,deg]) => {
-       const [newDir,newDeg] = keys.filter(([kdir,kdeg] => kdeg === deg % 36));
-       return [x,y,newDir];
+      const [[newDir, newDeg]] = keys.filter(([kdir,kdeg]) => kdeg === deg % 36);
+      return [x,y,newDir];
     });
-  return newPos;
+    return newPos;
 }
 ```
 **BRAHMA** The whole thing looks like this:
@@ -199,11 +205,11 @@ const compass = new Map([
     [['W',27], [-1,0]]
 ]);
 
-const commands = {
-  'L': ([x,y,deg], [dx,dy]) => [x,y,deg-9],
-  'R': ([x,y,deg], [dx,dy]) => [x,y,deg+9],
-  'M': ([x,y,deg], [dx,dy]) => [x+dx,y+dy,deg]
-};
+const commands = new Map([
+  ['L', (dx,dy) => [0,0,-9]],
+  ['R', (dx,dy) => [0,0,9]],
+  ['M', (dx,dy) => [dx,dy,0]]
+]);
 
 function rove([x,y,d],cmd) {
   const keys = Array.from(compass.keys());
@@ -211,7 +217,8 @@ function rove([x,y,d],cmd) {
     .map(key => {
       const [dx,dy] = compass.get(key);
       const [dir, deg] = key;
-      return commands[cmd]([x,y,deg],[dx,dy]);
+      const [newDx, newDy,newDeg] = commands.get(cmd)(dx,dy);
+      return [x+newDx, y+newDy, deg+newDeg];
     })
     .map(([x,y,deg]) => {
       const [[newDir, newDeg]] = keys.filter(([kdir,kdeg]) => kdeg === deg % 36);
@@ -220,11 +227,9 @@ function rove([x,y,d],cmd) {
     return newPos;
 }
 
-const p1 = rove([3,3,'E'], 'M');
-const p2 = rove(p1, 'R');
-const p3 = rove(p2, 'M');
-const p4 = rove(p3, 'L');
-console.info(p4);  // [4,2,'E']
+const initialBearing = [3,3,'E'];
+const initialBearing = [3,3,'E'];
+console.info(['M','M','R','M','M','L','M','R','M', 'L'].reduce((bearing, cmd) => rove(bearing, cmd), initialBearing)); // [6, 0, 'E']
 ```
 
 **BRAHMA**  So, here everything is simply data and function, we did not require ```MarsRover``` or ```Vector``` abstractions, the essence has become more transparent and is there for anyone to see.  So Krishna, how does this look in an Array-Oriented Paradigm like APL?
@@ -368,7 +373,7 @@ Reflections
 2 5
 ```
 
-**BRAHMA** It is important to recognise that data-organization and data-driven are completely orthogonal concepts.  While data-organization is at the core of OO, being data-driven means that data embeds the control-flow of the program. The two principles may be applied simultaneously.
+**BRAHMA** It is important to recognise that data-organization and data-driven are completely orthogonal concepts.  While data-organization is at the core of OO, being data-driven means that data embeds the control-flow of the program. The two can be applied simultaneously.
 
 **KRISHNA** AO also encourages you to think about the problem mathematically using numbers and arrays, and select array representations which embed or encode mathematical properties of the data - and where selection is computable rather than the result of a search. For example, this encourages you to realise that the sequence NWSE represents clockwise rotations of π/2, and that the L/R commands simply adjust the "direction index" by 1. This does mean that feeling comfortable with basic mathematics is a significant factor for an APL programmer.
 

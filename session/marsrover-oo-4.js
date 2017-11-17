@@ -2,8 +2,8 @@ function MarsRover(x, y, dirString) {
   var vector = new Vector(x, y, dirString);
 
   const commands = {
-    'M': vector => vector.moveForward(),
     'L': vector => vector.turnLeft(),
+    'M': vector => vector.moveForward(),
     'R': vector => vector.turnRight()
   };
   

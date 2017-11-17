@@ -28,4 +28,4 @@ function rove([x,y,d],cmd) {
 }
 
 const initialBearing = [3,3,'E'];
-console.info(['M','M','R','M','M','L','R','R','M'].reduce((bearing, cmd) => rove(bearing, cmd), initialBearing));
+console.info(['M','M','R','M','M','L','M','R','M', 'L'].reduce((bearing, cmd) => rove(bearing, cmd), initialBearing));

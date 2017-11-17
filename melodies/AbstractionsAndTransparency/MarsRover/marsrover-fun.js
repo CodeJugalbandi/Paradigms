@@ -5,11 +5,11 @@ const compass = new Map([
     [['W',27], [-1,0]]
 ]);
 
-const commands = {
-  'L': ([x,y,deg], [dx,dy]) => [x,y,deg-9],
-  'R': ([x,y,deg], [dx,dy]) => [x,y,deg+9],
-  'M': ([x,y,deg], [dx,dy]) => [x+dx,y+dy,deg]
-};
+const commands = new Map([
+  ['L', (dx,dy) => [0,0,-9]],
+  ['R', (dx,dy) => [0,0,9]],
+  ['M', (dx,dy) => [dx,dy,0]]
+]);
 
 function rove([x,y,d],cmd) {
   const keys = Array.from(compass.keys());
@@ -17,7 +17,8 @@ function rove([x,y,d],cmd) {
     .map(key => {
       const [dx,dy] = compass.get(key);
       const [dir, deg] = key;
-      return commands[cmd]([x,y,deg],[dx,dy]);
+      const [newDx, newDy,newDeg] = commands.get(cmd)(dx,dy);
+      return [x+newDx, y+newDy, deg+newDeg];
     })
     .map(([x,y,deg]) => {
       const [[newDir, newDeg]] = keys.filter(([kdir,kdeg]) => kdeg === deg % 36);
@@ -26,8 +27,5 @@ function rove([x,y,d],cmd) {
     return newPos;
 }
 
-const p1 = rove([3,3,'E'], 'M');
-const p2 = rove(p1, 'R');
-const p3 = rove(p2, 'M');
-const p4 = rove(p3, 'L');
-console.info(p4);
+const initialBearing = [3,3,'E'];
+console.info(['M','M','R','M','M','L','R','R','M'].reduce((bearing, cmd) => rove(bearing, cmd), initialBearing));
