@@ -31,19 +31,20 @@ input
 0 = 5 3 ∘.| input     ⍝ "0 equals 5 3 Outer Residue input"
                       ⍝⍝ Dhaval asks: is that equivalent to the Outer Product in mathematics?
                       ⍝⍝ Numbers divisible by 5 or 3
-2⊥1 0 1               ⍝ "2 base value 1 0 1"
-⍝     The digits (1 0 1) interpreted as a base 2 number
-⍝ Or: Value of polynomial with coeffients (1 0 1) for x=2
+2⊥1 1 0               ⍝ "2 base value 1 1 0"
+⍝ The value of polynomial with coeffients (1 1 0) for x=2
+⍝ Or: digits (1 1 0) interpreted as a base 2 number
 ⎕←case← 2⊥ 0 = 5 3 ∘.| input ⍝ "base 2 value of each column of ... (above)"
                       ⍝⍝ 1=Fizz, 2=Buzz, 3=FizzBuzz
                       ⍝⍝ Dhaval: What is that square doing?
   case~0 ⍝ "case without 0": case values for divisible cases
-('' 'Fizz' 'Buzz' 'FizzBuzz')[1 1 3 2]
+words←'' 'Fizz' 'Buzz' 'FizzBuzz'
+words[1 1 3 2]
                       ⍝⍝ APL allows indexing by an array, returning an array of 
                       ⍝⍝ the same shape as the array of indices
-⎕←texts←('' 'Fizz' 'Buzz' 'FizzBuzz')[case~0]
+words[case~0]
                       ⍝⍝ Desired texts for all divisible numbers
-texts@{case≠0} input  ⍝ "texts where case≠0 in input"
+words[case~0]@{case≠0} input  ⍝ "words where case≠0 in input"
                       ⍝⍝ Replace all divisible numbers by corresponding texts
 ]load ./ControlFlowAndDataDriven/FizzBuzz/FizzBuzz -nolink
 FizzBuzz

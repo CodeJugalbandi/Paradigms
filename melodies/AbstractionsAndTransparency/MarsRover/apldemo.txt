@@ -1,6 +1,6 @@
 ﻿⍝⍝ APL session input for MarsRover
 ⍝⍝ Annotations to be removed
-⍳20 0
+⍳20 0 ⍝ a 20×0 matrix ("clear screen" in APL)
 directions←'NESW' 
 movement←4 2⍴0 1,  1 0,  0 ¯1,  ¯1 0 
                                ⍝⍝ One row per direction (NESW)   
@@ -31,7 +31,7 @@ movements←movement[¯1↓bearings;] ×[0] commands='M'
 commands,movements
                                ⍝⍝ Each command and deltas that it will cause
 position⍪movements ⍝ Catenate initial position atop movement matrix
-+⍀ position⍪movements    ⍝ sum scan on leading axis: position after each command
+('*',commands),+⍀ position⍪movements  ⍝ sum scan on leading axis: position after each command
 +⌿ position⍪movements    ⍝ sum reduction = final position
 ¯1↑bearings              ⍝ last item of bearings
 directions[¯1↑bearings]  ⍝ index direction letters by last bearing
@@ -39,7 +39,7 @@ directions[¯1↑bearings]  ⍝ index direction letters by last bearing
 rove
                                ⍝⍝ Note deconstruction of the right argument ⍵
 rove (3 3) 'E' 'MMRMMLMRML'
-⍝ No abstractions: Only transparent arrays
+⍝ No abstractions were required: Only transparent arrays
   ('*' @ (↓+⍀position⍪movements)) 10 10⍴'┼'
 ⊖⍉('*' @ (↓+⍀position⍪movements)) 10 10⍴'┼' ⍝ x → and y ↑
   (⍳4)∘.=bearings
