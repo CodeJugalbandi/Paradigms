@@ -1,4 +1,4 @@
-﻿rove←{(position heading commands)←⍵             ⍝ Deconstruct right argument
+rove←{(position heading commands)←⍵ ⍝ Deconstruct right argument
       directions←'NESW'                         ⍝ Clockwise from N
       movement←4 2⍴0 1,1 0,0 ¯1,¯1 0            ⍝ One row per direction
       direction←directions⍳heading              ⍝ index from heading char
