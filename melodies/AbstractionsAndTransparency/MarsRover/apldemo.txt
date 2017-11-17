@@ -1,5 +1,6 @@
 ﻿⍝⍝ APL session input for MarsRover
 ⍝⍝ Annotations to be removed
+⍳20 0
 directions←'NESW' 
 movement←4 2⍴0 1,  1 0,  0 ¯1,  ¯1 0 
                                ⍝⍝ One row per direction (NESW)   
@@ -26,7 +27,7 @@ commands←'MMRMMLMRML' ⍝ list of commands
 commands,movement[¯1↓bearings;]
                                ⍝⍝ Each command, and the deltas required to "move" after it
 movements←movement[¯1↓bearings;] ×[0] commands='M'
-                               ⍝⍝ ×[0] means multiply, aligning dimension 0
+                               ⍝⍝ ×[0] means multiply, aligning leading dimension (0)
 commands,movements
                                ⍝⍝ Each command and deltas that it will cause
 position⍪movements ⍝ Catenate initial position atop movement matrix
@@ -34,12 +35,12 @@ position⍪movements ⍝ Catenate initial position atop movement matrix
 +⌿ position⍪movements    ⍝ sum reduction = final position
 ¯1↑bearings              ⍝ last item of bearings
 directions[¯1↑bearings]  ⍝ index direction letters by last bearing
-]load /users/mkrom/Paradigms/melodies/AbstractionsAndTransparency/MarsRover/marsrover -nolink
+]load ./AbstractionsAndTransparency/MarsRover/marsrover -nolink
 rove
                                ⍝⍝ Note deconstruction of the right argument ⍵
 rove (3 3) 'E' 'MMRMMLMRML'
 ⍝ No abstractions: Only transparent arrays
   ('*' @ (↓+⍀position⍪movements)) 10 10⍴'┼'
 ⊖⍉('*' @ (↓+⍀position⍪movements)) 10 10⍴'┼' ⍝ x → and y ↑
-  bearings∘.=directions
-+/bearings∘.=directions
+  (⍳4)∘.=bearings
++/(⍳4)∘.=bearings

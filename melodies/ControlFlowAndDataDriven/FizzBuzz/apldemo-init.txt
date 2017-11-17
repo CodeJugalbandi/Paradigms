@@ -1,0 +1,5 @@
+﻿⍝ Initialise APL Demos
+]box on -fns=on
+⎕IO←0
+'qcd' ⎕NA 'I /usr/lib/libc.dylib|chdir <0T[]'
+qcd '/users/dhavald/Documents/workspace/CodeJugalbandi/Paradigms/melodies/'
