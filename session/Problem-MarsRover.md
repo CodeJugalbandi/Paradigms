@@ -11,9 +11,9 @@ Our task is to write a function which takes as input a starting position and a s
 For example, for a starting position of (3,3,E) and a command sequence "MMRMMLMRML", the resultr should be (6,0,E).
 
 ```shell
-'L' ==> Turn Left
-'M' ==> Move Forward
-'R' ==> Turn Right
+'L' ==> Turn Left at a position.
+'M' ==> Move Forward maintaining the same heading.
+'R' ==> Turn Right at a position.
 ```
 <center>
 <object data="MarsRover.m4v" width="335" height="250"> <param name="src" value="MarsRover.m4v" /> </object>

@@ -1,10 +1,10 @@
-function MarsRover(x, y, direction) {
-  var vector = new Vector(x, y, direction);
+function MarsRover(x, y, dirString) {
+  var vector = new Vector(x, y, dirString);
 
   const commands = {
-    'L': vec => vec.turnLeft(),
-    'M': vec => vec.moveForward(),
-    'R': vec => vec.turnRight()
+    'L': vector => vector.turnLeft(),
+    'M': vector => vector.moveForward(),
+    'R': vec => vec
   };
   
   this.rove = cmd => {
@@ -16,9 +16,21 @@ function MarsRover(x, y, direction) {
 }
 
 function Vector(x, y, direction) {
-  this.turnLeft = () => this; 
-  this.moveForward = () => this;
-  this.turnRight = () => this; 
+  const directions = {
+    'N' : ['W', (x,y) => [x, y+1]],
+    'E' : ['N', (x,y) => [x+1, y]],
+    'S' : ['E', (x,y) => [x, y-1]],
+    'W' : ['S', (x,y) => [x-1, y]]
+  };
+
+  this.moveForward = () => {
+    const [newX, newY] = directions[direction][1](x, y);
+    return new Vector(newX, newY, direction);
+  };
+
+  this.turnLeft = () => new Vector(x, y, directions[direction][0]);
+  
+  this.turnRight = () => this;
   this.toString = () => `${x} ${y} ${direction}`;
 }
 

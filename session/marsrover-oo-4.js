@@ -17,21 +17,27 @@ function MarsRover(x, y, dirString) {
 
 function Vector(x, y, direction) {
   const directions = {
-    'N' : 'W',
-    'E' : 'N',
-    'S' : 'E',
-    'W' : 'S'
+    'N' : ['W', (x,y) => [x, y+1], 'E'], 
+    'E' : ['N', (x,y) => [x+1, y], 'S'], 
+    'S' : ['E', (x,y) => [x, y-1], 'W'], 
+    'W' : ['S', (x,y) => [x-1, y], 'N'] 
   };
 
-  this.turnLeft = () => new Vector(x, y, directions[direction]);
-  this.moveForward = () => this;
-  this.turnRight = () => this;
+  this.turnRight = () => new Vector(x, y, directions[direction][2]);
+  
+  this.moveForward = () => {
+    const [newX, newY] = directions[direction][1](x, y);
+    return new Vector(newX, newY, direction);
+  };
+
+  this.turnLeft = () => new Vector(x, y, directions[direction][0]);
+  
   this.toString = () => `${x} ${y} ${direction}`;
 }
 
 const rover = new MarsRover(3, 3, 'E');
 console.info(rover.rove('M')
-                .rove('R')
-                .rove('M')
-                .rove('L')
-                .toString());
+              .rove('R')
+              .rove('M')
+              .rove('L')
+              .toString());
