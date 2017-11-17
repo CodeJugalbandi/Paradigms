@@ -1,6 +1,4 @@
 ﻿⍝⍝ APL session input for FizzBuzz
-⍝⍝ Annotations to be removed
-⍝⍝ Remember ]box on -fns=on and ⎕IO←0
                       ⍝⍝ I think I can solve part 0 of this problem by creating two
                       ⍝⍝ arrays - one containing Fizzes and the other Buzzes, and 
                       ⍝⍝ then doing an item-by-item catenation.
@@ -47,14 +45,14 @@ input
                       ⍝⍝ Desired texts for all divisible numbers
 texts@{case≠0} input  ⍝ "texts where case≠0 in input"
                       ⍝⍝ Replace all divisible numbers by corresponding texts
-]load /users/mkrom/Paradigms/melodies/ControlFlowAndDataDriven/FizzBuzz/FizzBuzz -nolink
+]load ./ControlFlowAndDataDriven/FizzBuzz/FizzBuzz -nolink
 FizzBuzz
 FizzBuzz 1+⍳20
 FizzBuzz 1 2 3 4 5 35 105 777
 ⍝ No loops, no control flow: shape of input data drives all function applications
 ⍝ End of Part 2
 
-]load /users/mkrom/Paradigms/melodies/ControlFlowAndDataDriven/FizzBuzz/FizzBuzz3 -nolink
+]load ./ControlFlowAndDataDriven/FizzBuzz/FizzBuzz3 -nolink
 FizzBuzz3
 {∊¨(⌽¨,⍳(≢⍵)/2)/¨⊂⍵} 'Fizz' 'Buzz' 'Bleep'
 
