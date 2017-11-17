@@ -5,10 +5,8 @@ toFizzBuzz n
   | n `mod` 5 == 0 = "Buzz"
   | otherwise = ""
   
-  
-fizzbuzz n = map toFizzBuzz [1..n]
 
 main :: IO ()
 main = do
-  print $ fizzbuzz 20
+  print $ toFizzBuzz 3
   

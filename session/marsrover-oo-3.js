@@ -1,14 +1,14 @@
-function MarsRover(x, y, dirString) {
-  var vector = new Vector(x, y, dirString);
+function MarsRover(x, y, direction) {
+  var vector = new Vector(x, y, direction);
 
   const commands = {
-    'M': vector => vector.moveForward(),
-    'L': vector => vector.turnLeft(),
-    'R': vector => vector.turnRight()
+    'L': vec => vec.turnLeft(),
+    'M': vec => vec.moveForward(),
+    'R': vec => vec.turnRight()
   };
   
-  this.rove = command => {
-    vector = commands[command](vector);
+  this.rove = cmd => {
+    vector = commands[cmd](vector);
     return this;
   }
 
@@ -16,8 +16,8 @@ function MarsRover(x, y, dirString) {
 }
 
 function Vector(x, y, direction) {
-  this.moveForward = () => this;
   this.turnLeft = () => this; 
+  this.moveForward = () => this;
   this.turnRight = () => this; 
   this.toString = () => `${x} ${y} ${direction}`;
 }
