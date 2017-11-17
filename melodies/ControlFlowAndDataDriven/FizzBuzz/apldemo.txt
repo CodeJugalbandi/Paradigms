@@ -14,12 +14,11 @@
                       ⍝⍝ NB: NO FUNCTION/OPERATOR PRECEDENCE
 20⍴ (¯3↑ ('' 'Fizz'))
                       ⍝⍝ Repeat '' '' 'Fizz' until we have 20 elements
-  20⍴¯5↑'' 'Buzz'
+20⍴  ¯5↑ '' 'Buzz'
                       ⍝⍝ The same, producing 'Buzz' in every 5th position
                       ⍝⍝ So now we need to join each element of those lists
  (20⍴¯3↑'' 'Fizz') ,¨ (20⍴¯5↑'' 'Buzz')   ⍝ ,¨ is "catenate each"
 { (⍵⍴¯3↑'' 'Fizz') ,¨  (⍵⍴¯5↑'' 'Buzz')} 30
-                      ⍝⍝ DHaval asks how to read that if necessary
 
 ⍝ Part 2, produce the number, if it is not divisible by 3 or 5.
                       ⍝⍝ In the AO paradigm, it feels natural to take 
@@ -52,10 +51,12 @@ texts@{case≠0} input  ⍝ "texts where case≠0 in input"
 FizzBuzz
 FizzBuzz 1+⍳20
 FizzBuzz 1 2 3 4 5 35 105 777
+⍝ No loops, no control flow: shape of input data drives all function applications
 ⍝ End of Part 2
+
 ]load /users/mkrom/Paradigms/melodies/ControlFlowAndDataDriven/FizzBuzz/FizzBuzz3 -nolink
-allcombs←{∊¨(⌽¨,⍳(≢⍵)/2)/¨⊂⍵} ⍝ All combinations of items of ⍵
-allcombs 'Fizz' 'Buzz' 'Bleep'
+FizzBuzz3
+{∊¨(⌽¨,⍳(≢⍵)/2)/¨⊂⍵} 'Fizz' 'Buzz' 'Bleep'
 
 {⍱/divisible←0=3 5|⍵: ⍵  ⋄  ∊divisible/'Fizz' 'Buzz'}¨ ⍳20
                         ⍝⍝ If ⍵ neither divisible by 3 or 5, return ⍵
