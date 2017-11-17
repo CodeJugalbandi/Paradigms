@@ -25,7 +25,7 @@ commands←'MMRMMLMRML' ⍝ list of commands
 ⎕←bearings←4| +\ heading, ¯1+'LMR'⍳commands
 commands,movement[¯1↓bearings;]
                                ⍝⍝ Each command, and the deltas required to "move" after it
-movements←movement[¯1↓bearings;] ×[0] 'commands='M'
+movements←movement[¯1↓bearings;] ×[0] commands='M'
                                ⍝⍝ ×[0] means multiply, aligning dimension 0
 commands,movements
                                ⍝⍝ Each command and deltas that it will cause
