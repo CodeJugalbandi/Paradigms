@@ -10,7 +10,6 @@
 ⍝ [THE] 20 reshape [OF THE] negative three take [OF] ('' 'Fizz')
                       ⍝⍝ APL order of execution is as in (f g x) of mathematics
                       ⍝⍝ NB: NO FUNCTION/OPERATOR PRECEDENCE
-20⍴ (¯3↑ ('' 'Fizz'))
                       ⍝⍝ Repeat '' '' 'Fizz' until we have 20 elements
 20⍴  ¯5↑ '' 'Buzz'
                       ⍝⍝ The same, producing 'Buzz' in every 5th position
@@ -51,12 +50,7 @@ FizzBuzz
 FizzBuzz 1+⍳20
 FizzBuzz 1 2 3 4 5 35 105 777
 ⍝ No loops, no control flow: shape of input data drives all function applications
-⍝ End of Part 2
 
 ]load ./ControlFlowAndDataDriven/FizzBuzz/FizzBuzz3 -nolink
 FizzBuzz3
 {∊¨(⌽¨,⍳(≢⍵)/2)/¨⊂⍵} 'Fizz' 'Buzz' 'Bleep'
-
-{⍱/divisible←0=3 5|⍵: ⍵  ⋄  ∊divisible/'Fizz' 'Buzz'}¨ ⍳20
-                        ⍝⍝ If ⍵ neither divisible by 3 or 5, return ⍵
-                        ⍝⍝ Else select from Fizz Buzz using mask and enlist
