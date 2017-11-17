@@ -8,5 +8,5 @@ toFizzBuzz n
 
 main :: IO ()
 main = do
-  print $ toFizzBuzz 3
+  print $ toFizzBuzz 5
   

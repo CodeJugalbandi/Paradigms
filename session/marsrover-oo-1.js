@@ -4,4 +4,8 @@ function MarsRover(x, y, direction) {
 }
 
 const rover = new MarsRover(3, 3, 'E');
-console.info(rover.rove('M').rove('R').rove('M').rove('L').toString());
+console.info(rover.rove('M')
+                .rove('R')
+                .rove('M')
+                .rove('L')
+                .toString());

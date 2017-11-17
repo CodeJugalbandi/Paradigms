@@ -13,13 +13,14 @@ const commands = new Map([
 
 function rove([x,y,d],cmd) {
   const keys = Array.from(compass.keys());
-  return keys.filter(([dir,deg]) => dir === d)
+  const [newPos] = keys.filter(([dir,deg]) => dir === d)
             .map(key => {
               const [dx,dy] = compass.get(key);
               const [dir, deg] = key;
               const [newDx, newDy,newDeg] = commands.get(cmd)(dx,dy);
               return [x+newDx, y+newDy, deg+newDeg];
             });
+  return newPos;
 }
 
 const p1 = rove([3,3,'E'], 'M');

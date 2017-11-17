@@ -27,5 +27,6 @@ function rove([x,y,d],cmd) {
     return newPos;
 }
 
-const p1 = rove([3,3,'E'], 'M');
-console.info(p1);
+const bearing = [3,3,'E'];
+console.info(['M','M','R','M','M','L','M','R','M', 'L']
+  .reduce((b, c) => rove(b, c), bearing));

@@ -23,16 +23,20 @@ function Vector(x, y, direction) {
     'W' : ['S', (x,y) => [x-1, y]]
   };
 
-  this.turnLeft = () => new Vector(x, y, directions[direction][0]);
-  
   this.moveForward = () => {
     const [newX, newY] = directions[direction][1](x, y);
     return new Vector(newX, newY, direction);
   };
+
+  this.turnLeft = () => new Vector(x, y, directions[direction][0]);
   
   this.turnRight = () => this;
   this.toString = () => `${x} ${y} ${direction}`;
 }
 
 const rover = new MarsRover(3, 3, 'E');
-console.info(rover.rove('M').rove('R').rove('M').rove('L').toString());
+console.info(rover.rove('M')
+                .rove('R')
+                .rove('M')
+                .rove('L')
+                .toString());
