@@ -8,7 +8,7 @@ directions,movement
 position←3 3  ⍝ intial position
 heading←1     ⍝ initial heading
 directions[heading] 
-commands←'MMRMMLMRML' ⍝ list of commands
+
             'LMR'⍳'RMLLLLLL'   ⍝ Indices of commands in 'LMR'
                                ⍝⍝ "index of" returns the position of the first occurrence
                                ⍝⍝ in the left argument, of each item in the right argument
@@ -20,18 +20,17 @@ commands←'MMRMMLMRML' ⍝ list of commands
                                ⍝⍝ each command has been executed.
 4| +\ 3, ¯1+'LMR'⍳'RMLLLLLL'
                                ⍝⍝ We need "modulus 4" to keep the indices between 0 and 3
+
+commands←'MMRMMLMRML' ⍝ list of commands
 ⎕←bearings←4| +\ heading, ¯1+'LMR'⍳commands
 commands,movement[¯1↓bearings;]
                                ⍝⍝ Each command, and the deltas required to "move" after it
-movements←movement[¯1↓bearings;] ×[0] 'M'=commands
+movements←movement[¯1↓bearings;] ×[0] 'commands='M'
                                ⍝⍝ ×[0] means multiply, aligning dimension 0
 commands,movements
                                ⍝⍝ Each command and deltas that it will cause
 position⍪movements ⍝ Catenate initial position atop movement matrix
 +⍀ position⍪movements    ⍝ sum scan on leading axis: position after each command
-  ('*' @ (+⍀position⍪movements)) 10 10⍴'┼'
-⊖⍉('*' @ (+⍀position⍪movements)) 10 10⍴'┼' ⍝ x → and y ↑
-{directions[⍺],≢⍵}⌸ bearings   ⍝ (directions[key], tally items) key by bearings
 +⌿ position⍪movements    ⍝ sum reduction = final position
 ¯1↑bearings              ⍝ last item of bearings
 directions[¯1↑bearings]  ⍝ index direction letters by last bearing
@@ -39,9 +38,8 @@ directions[¯1↑bearings]  ⍝ index direction letters by last bearing
 rove
                                ⍝⍝ Note deconstruction of the right argument ⍵
 rove (3 3) 'E' 'MMRMMLMRML'
-⍝ No loops, no conditionals. "Switches" are data driven:
-⍝ ¯1+'LMR'⍳'RMLLM'            ⍝ direction of rotation
-⍝ movement[bearings;]         ⍝ look up movements using computed bearings
-⍝ movements ×[0] commands='M' ⍝ only move when the command is 'M'
-⎕DR movements ⍝ internal datype of movements matrix
-                              ⍝⍝ 8=bits 3=integer
+⍝ No abstractions: Only transparent arrays
+  ('*' @ (↓+⍀position⍪movements)) 10 10⍴'┼'
+⊖⍉('*' @ (↓+⍀position⍪movements)) 10 10⍴'┼' ⍝ x → and y ↑
+  bearings∘.=directions
++/bearings∘.=directions
