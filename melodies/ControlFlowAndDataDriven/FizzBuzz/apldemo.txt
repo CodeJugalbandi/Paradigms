@@ -15,7 +15,7 @@
                       ⍝⍝ The same, producing 'Buzz' in every 5th position
                       ⍝⍝ So now we need to join each element of those lists
  (20⍴¯3↑'' 'Fizz') ,¨ (20⍴¯5↑'' 'Buzz')   ⍝ ,¨ is "catenate each"
-{ (⍵⍴¯3↑'' 'Fizz') ,¨  (⍵⍴¯5↑'' 'Buzz')} 30
+{ (⍵⍴¯3↑'' 'Fizz') ,¨  (⍵⍴¯5↑'' 'Buzz')} 20
 
 ⍝ Part 2, produce the number, if it is not divisible by 3 or 5.
                       ⍝⍝ In the AO paradigm, it feels natural to take 
@@ -38,7 +38,6 @@ input
                       ⍝⍝ Dhaval: What is that square doing?
   case~0 ⍝ "case without 0": case values for divisible cases
 words←'' 'Fizz' 'Buzz' 'FizzBuzz'
-words[1 1 3 2]
                       ⍝⍝ APL allows indexing by an array, returning an array of 
                       ⍝⍝ the same shape as the array of indices
 words[case~0]

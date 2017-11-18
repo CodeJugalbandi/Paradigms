@@ -39,7 +39,8 @@ directions[¯1↑bearings]  ⍝ index direction letters by last bearing
 rove
                                ⍝⍝ Note deconstruction of the right argument ⍵
 rove (3 3) 'E' 'MMRMMLMRML'
-⍝ No abstractions were required: Only transparent arrays
+⍝ No sausages (abstractions)
+⍝ Only transparent arrays, mostly sequential access
   ('*' @ (↓+⍀position⍪movements)) 10 10⍴'┼'
 ⊖⍉('*' @ (↓+⍀position⍪movements)) 10 10⍴'┼' ⍝ x → and y ↑
   (⍳4)∘.=bearings
