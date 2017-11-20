@@ -1,4 +1,6 @@
-# FizzBuzz
+# Control Flow and Data-Driven Melody
+
+## FizzBuzz Example
 
 FizzBuzz is a mathematical game for children (of all ages), where you are required to count, 1, 2, ... but when you get to a number which is divisible by three, you should say "Fizz" instead of the number. Likewise, you should say "Buzz" for any number which is divisible by five. And of course, "FizzBuzz" for a number which is divisible by both three AND five.
 

@@ -6,6 +6,12 @@ A rover's position and location is represented by a combination of x and y co-or
 
 In order to control the rover, NASA sends a simple string of letters. The possible letters are 'L', 'R' and 'M'. 'L' and 'R' makes the rover spin 90 degrees left or right respectively, without moving from its current spot. 'M' means move forward one grid point, and maintain the same heading.
 
+<center>
+<object data="MarsRover.m4v" width="335" height="250"> <param name="src" value="MarsRover.m4v" /> </object>
+</center>
+
+## The Task
+
 Our task is to write a function which takes as input a starting position and a string containing command letters, and returns the resulting position and orientation of the rover.
 
 For example, for a starting position of (3,3,E) and a command sequence "MMRMMLMRML", the resultr should be (6,0,E).
@@ -324,6 +330,46 @@ E
 
 This means that the function will be efficient even when executed by an interpreter, and also that it can be compiled for highly data parallel execution if suitable hardware is available.
 
+**KRISHNA** Because, the array-structure is transparent, I can now project that very easily on the screen to trace rover movements.  All, I've to do it write this line in APL:
+
+```apl
+  ('*' @ (↓+⍀position⍪movements)) 10 10⍴'┼'
+  
+┼┼┼┼┼┼┼┼┼┼
+┼┼┼┼┼┼┼┼┼┼
+┼┼┼┼┼┼┼┼┼┼
+┼┼┼*┼┼┼┼┼┼
+┼┼┼*┼┼┼┼┼┼
+┼***┼┼┼┼┼┼
+**┼┼┼┼┼┼┼┼
+┼┼┼┼┼┼┼┼┼┼
+┼┼┼┼┼┼┼┼┼┼
+┼┼┼┼┼┼┼┼┼┼
+
+⍝ x ← and y ↓
+```
+
+**KRISHNA** This produced the grid with 0, 0, at the top-left, X-axis progressing vertically downwards south and Y-axis progressing horizontally west.    So, I'll need to flip rendition on X and Y-axes both.
+
+**KRISHNA** So I will now apply a transpose and a reverse on the matrix such that I get X-axis horizontally increasing Eastwards and Y-axis increasing Northwards as required for visualization.
+
+```apl
+    ⊖⍉('*' @ (↓+⍀position⍪movements)) 10 10⍴'┼' ⍝ x → and y ↑
+    
+┼┼┼┼┼┼┼┼┼┼
+┼┼┼┼┼┼┼┼┼┼
+┼┼┼┼┼┼┼┼┼┼
+┼┼┼┼┼┼┼┼┼┼
+┼┼┼┼┼┼┼┼┼┼
+┼┼┼┼┼┼┼┼┼┼
+┼┼┼***┼┼┼┼
+┼┼┼┼┼*┼┼┼┼
+┼┼┼┼┼**┼┼┼
+┼┼┼┼┼┼*┼┼┼
+```
+
+**BRAHMA** Wow! Indeed.  In OO paradigm, one will need to create a view object that will be the projection of the model.  This gives rise to the Model-View patterns that are very prevalent in the OO world.  While, in FP paradigm, because the data is transparent, one can map on it element-by-element and render  it. 
+
 **BRAHMA** Let me re-write this in JavaScript again.  So, I don't need ```Vector``` or ```Direction``` abstractions this time, a simple Array holding the movement tuples would do.  The indices of the array represent directions ```1``` for ```N```, ```2``` for ```E```, ```3``` for ```S``` and ```4``` for ```W```.
 
 ```javascript
@@ -353,7 +399,7 @@ const rover = new MarsRover(3, 3, 'E');
 console.info(rover.rove('M').rove('R').rove('M').rove('L').toString());
 ```
 
-**BRAHMA**  So, thats it.  Lets reflect on what we did...
+**BRAHMA**  So, thats it.  I won't try to draw it now, instead lets reflect on what we did...
 
 Reflections
 -----------

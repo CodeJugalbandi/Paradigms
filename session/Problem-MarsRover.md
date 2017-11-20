@@ -1,4 +1,6 @@
-# Mars Rover
+# Abstraction and Transparency Melody 
+
+## Mars Rover Example
 
 A robotic rover is to to be landed by NASA on a plateau on Mars. This plateau, which is curiously rectangular, must be navigated by the rover.
 

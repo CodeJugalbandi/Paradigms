@@ -1,4 +1,6 @@
-# Parsing Text Containing Recursive Structures
+# Macro and Micro Melody
+
+## Parsing Text Containing Recursive Structures Example
 
 Let us consider the problem of parsing arrays.  Examples could be:
 
