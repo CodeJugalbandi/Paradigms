@@ -449,13 +449,10 @@ Reflections
 
 **BRAHMA** In this task, you broke down the problem of parsing into many independent functions,  each capable of performing a small parsing operation. You defined a number of infix or suffix combinators, which allowed the writing of very EBNF-like statements, and then used this to define an array parser - but you could also have defined other syntaxes. Each parser was quite simple but the combination was powerful.
 
-**KRISHNA** Yes, smaller functions make it possible to understand the code in chunks and help to build a big picture.  This stems from the premise that this clarity helps comprehension and it becomes relatively easy facilitate local changes when the need be.
+**KRISHNA** Yes, smaller (micro view) functions make it possible to understand the code in chunks and help to build a big picture.  This stems from the premise that this clarity helps comprehension and it becomes relatively easy facilitate local changes when the need be.
 
-**BRAHMA** In APL, my instinct is to take a macro view of the problem and solve the problem with array operations which deal with the entire input array at once. To begin with, the strategy works reasonably well, but it is clear that significant code changes are required towards the end of this melody. The porject also contains a file "ParsingJson.dyalog", which shows a more or less complete JSON parser in APL, and we can see the code has more than doubled in size to reach that point. It seems clear that, as we extend the syntax definition, the divide-and-conquer approach is going to be easier to enhance.
+**BRAHMA** In APL, my instinct is to take a macro view of the problem and solve the problem with array operations which deal with the entire input array at once. To begin with, the strategy works reasonably well, but it is clear that significant code changes are required towards the end of this melody. The melody folder also contains a file ```ParsingJson.dyalog```, which shows a more or less complete JSON parser in APL, and we can see the code has more than doubled in size to reach that point. It seems clear that, as we extend the syntax definition, the divide-and-conquer approach is going to be easier to enhance.
 
 **BRAHMA** As we have seen in other melodies, it WOULD be possible to rewrite the APL code in a similar style to the Scala -  but it wouldn't feel like a natural choice for most APL developers.
 
-
- 
-
-**BRAHMA** 
+**KRISHNA**  I think it is important to recognize the strengths of each paradigms and play on it.  When solving a problem, knowing the strengths and weakness of each paradigm gives the necessary power of discernment to choosing the correct paradigm to solve it or to solve a part of the problem.  It is quite clear to me now that just being polyglot is not enough, being ```polyparadigm``` - if I were to coin that word is essential.  This is because on any given project, all these paradigms have their place and all help to reduce friction during heavy-lifting.
