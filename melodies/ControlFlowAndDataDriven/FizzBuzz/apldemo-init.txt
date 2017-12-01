@@ -2,5 +2,4 @@
 ]box on -fns=on
 ⎕IO←0
 'qcd' ⎕NA 'I /usr/lib/libc.dylib|chdir <0T1[]'
-⍝qcd ⊂'/Users/mkrom/Paradigms/melodies/'
-qcd ⊂'/users/dhavald/Documents/workspace/CodeJugalbandi/Paradigms/melodies/'
+qcd ⊂'/path/to/Paradigms/melodies/'
